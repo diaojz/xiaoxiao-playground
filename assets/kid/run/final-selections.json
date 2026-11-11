@@ -1,0 +1,73 @@
+{
+  "engine": "Codex native image_gen__imagegen",
+  "billingOrQuotaErrorsObserved": false,
+  "finalPrompt": "精确编辑参考图2的跑步精灵表。保留2行4列共8帧布局，人物、服装细节、头型和视角由参考图1定义。前3列的6个姿势保持原样！只改每行最右侧第4格（帧3、帧7）的腿部：改为自然跑步的收膝腾空，一条腿向前、一条腿屈膝踢向后，两只鞋都抬起。两脚在图像横向上的最大跨度不能超过肩宽，不能向左右劈叉，不能像开合跳；脚要在身体下方附近，靠前后深度和鞋底显露来表现奔跑，而非横向展开。上排第4格与下排第4格的前后腿互换，匹配各自同排前3格的跑步半周期。原来最右列的手臂姿势、头、躯干和服装不改。所有8个人头的大小、身体比例一致，不要缩小角色、不要改变前3列，不改变固定略俯视3/4背影镜头。精美Pixar 3D，纯#FF00FF品红背景，无阴影无字，完整角色，留足格间空隙。",
+  "selections": [
+    {
+      "number": 1,
+      "selected": "sources/kid_run_1_source.png",
+      "original": "/Users/diaoye/.codex/generated_images/01a1c95a-2c18-7722-a1c3-e2f8430eea59/exec-c0d723c8-a46f-46e9-971c-80a960454206.png",
+      "references": [
+        "../kid_run_1.png",
+        "sources/kid_run_1_a.png",
+        "sources/kid_run_1_b.png"
+      ],
+      "layout": "2 rows x 4 columns"
+    },
+    {
+      "number": 2,
+      "selected": "sources/kid_run_2_source.png",
+      "original": "/Users/diaoye/.codex/generated_images/01a1c95a-2c18-7722-a1c3-e2f8430eea59/exec-714433b1-c266-41dd-ac1a-0940144a6f92.png",
+      "references": [
+        "../kid_run_2.png",
+        "sources/kid_run_2_a.png",
+        "sources/kid_run_2_b.png"
+      ],
+      "layout": "2 rows x 4 columns"
+    },
+    {
+      "number": 3,
+      "selected": "sources/kid_run_3_source.png",
+      "original": "/Users/diaoye/.codex/generated_images/01a1c95a-2c18-7722-a1c3-e2f8430eea59/exec-6bab20c5-da0b-4b29-aae2-b221d010fdb5.png",
+      "references": [
+        "../kid_run_3.png",
+        "sources/kid_run_3_a.png",
+        "sources/kid_run_3_b.png"
+      ],
+      "layout": "2 rows x 4 columns"
+    },
+    {
+      "number": 4,
+      "selected": "sources/kid_run_4_source.png",
+      "original": "/Users/diaoye/.codex/generated_images/01a1c95a-2c18-7722-a1c3-e2f8430eea59/exec-eee2ccf2-4d5e-4620-ab09-0cf19b729c60.png",
+      "references": [
+        "../kid_run_4.png",
+        "sources/kid_run_4_a.png",
+        "sources/kid_run_4_b.png"
+      ],
+      "layout": "2 rows x 4 columns"
+    },
+    {
+      "number": 5,
+      "selected": "sources/kid_run_5_source.png",
+      "original": "/Users/diaoye/.codex/generated_images/01a1c95a-2c18-7722-a1c3-e2f8430eea59/exec-ab288be2-7eae-4bde-9121-7bfa08556de8.png",
+      "references": [
+        "../kid_run_5.png",
+        "sources/kid_run_5_a.png",
+        "sources/kid_run_5_b.png"
+      ],
+      "layout": "2 rows x 4 columns"
+    },
+    {
+      "number": 6,
+      "selected": "sources/kid_run_6_source.png",
+      "original": "/Users/diaoye/.codex/generated_images/01a1c95a-2c18-7722-a1c3-e2f8430eea59/exec-1fb1266d-1361-460d-9056-1388e9163632.png",
+      "references": [
+        "../kid_run_6.png",
+        "sources/kid_run_6_a.png",
+        "sources/kid_run_6_b.png"
+      ],
+      "layout": "2 rows x 4 columns"
+    }
+  ]
+}

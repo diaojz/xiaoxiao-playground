@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#bdeaff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:,">
+<title>滚球闯关 · 小小游乐园</title>
+<style>
+/* 界面随竖屏画布缩放，横屏保持竖版比例；所有素材均从游戏目录读取。 */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none}body{display:grid;place-items:center;background:#d7edf4;color:#34506d;font-family:ui-rounded,"Arial Rounded MT Bold","PingFang SC",sans-serif;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}button,a{font:inherit;touch-action:none}button{cursor:pointer;border:0;color:inherit}a{text-decoration:none;color:inherit}button:focus-visible,a:focus-visible{outline:4px solid #6750dd;outline-offset:2px}[hidden]{display:none!important}img{object-fit:contain;pointer-events:none}#stage{position:relative;overflow:hidden;isolation:isolate;width:var(--w,100vw);height:var(--h,100dvh);background:#bdeaff;box-shadow:0 0 80px #548dab30;font-size:clamp(12px,2vw,18px)}canvas{display:block;width:100%;height:100%;touch-action:none}.back{position:absolute;left:2.5%;top:2%;z-index:20;padding:12px 10px;border:2px solid white;border-radius:25px;background:#fffdf1e8;font-size:12px;font-weight:900;min-height:46px;display:grid;place-items:center}.top-controls{position:absolute;right:2.5%;top:2%;z-index:19;display:flex;gap:8px}.round{position:relative;height:48px;width:48px;border:2px solid white;border-radius:18px;background:#fffdf1e8;font-size:24px;box-shadow:0 3px 0 #8ab2c533;display:grid;place-items:center}.round img{width:38px;height:38px;position:relative;z-index:1}#pause::before{content:"Ⅱ";position:absolute}#mute::before{content:"♫";position:absolute}.mute[aria-pressed=true]{opacity:.6}.hud{position:absolute;top:2%;left:20%;right:20%;z-index:3;pointer-events:none;text-align:center}.hud strong{font-size:1.4em;font-weight:1000;display:block}.hud small{font-size:.75em;font-weight:900}.progress{height:9px;margin:9px auto 0;background:#ffffffb0;border:2px solid #fff;border-radius:20px;overflow:hidden}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#52cbdf,#ac8ff7)}.coin-pill{display:flex;align-items:center;gap:7px;border:2px solid white;background:#fffdf1eb;border-radius:25px;padding:6px 13px;font-weight:1000}.coin-pill img{width:28px;height:28px}#resources{position:absolute;top:11%;left:3%;right:3%;display:flex;justify-content:space-between;z-index:3;pointer-events:none}#status{font-size:.78em}.hint{position:absolute;bottom:3%;left:0;right:0;text-align:center;z-index:2;pointer-events:none}.hint span{display:inline-block;background:#fffdf2ed;border:2px solid white;border-radius:26px;padding:12px 22px;font-weight:900;box-shadow:0 4px 0 #639caa22}.screen{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;padding:4%;background:#c4e7f255;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}#home{align-items:flex-end;background:#c5edff url('assets/hero.png') center/cover no-repeat;backdrop-filter:none}.title{position:absolute;top:11%;left:0;right:0;text-align:center}.title p{font-size:.72em;letter-spacing:5px;font-weight:1000;margin:0 0 9px;color:#57819b}.title h1{font-size:clamp(36px,8vw,66px);color:#ffb839;margin:0;letter-spacing:4px;font-weight:1000;-webkit-text-stroke:7px white;paint-order:stroke fill;text-shadow:0 5px 0 #df963d}.subtitle{display:inline-block;margin-top:12px;background:#ffffffde;border-radius:22px;padding:7px 18px;font-weight:900;font-size:.8em}.home-bank{position:absolute;top:8%;right:3%}.home-panel{width:100%;max-width:620px;border:3px solid white;border-radius:30px;background:#fffdf3f5;box-shadow:0 7px 0 #7facc733;padding:16px;text-align:center}.section-label{display:flex;justify-content:space-between;font-size:.82em;font-weight:900}.section-label small{color:#98a1af;font-size:.8em}.skins{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin:12px 0 7px}.skin{border-radius:14px;background:#edf3f9;border:2px solid transparent;min-width:0;padding:4px 0 6px}.skin img{width:100%;height:48px;display:block}.skin small{font-size:9px;white-space:nowrap;font-weight:900;display:block}.skin[data-locked=true] img{filter:grayscale(.8);opacity:.55}.skin[aria-pressed=true]{border-color:#5bcce0;background:#dcf9fa;box-shadow:0 3px 0 #8cdbe7}#skinNote{min-height:18px;font-size:.72em;color:#7b8fa5;margin:7px 0 10px}.primary,.secondary{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:62px;border:3px solid white;border-radius:23px;font-size:1.35em;font-weight:1000;background:linear-gradient(#ffda72,#ffbc50);color:#815321;box-shadow:0 6px 0 #dca444}.primary img{width:42px;height:42px}.primary:active,.secondary:active{transform:translateY(3px)}button:disabled{opacity:.6}.secondary{font-size:1em;background:#e8f3fc;box-shadow:0 4px 0 #c5dce8;color:#61849e;min-height:48px;margin-top:13px}.note{font-size:.59em;letter-spacing:3px;color:#91a0ad;margin:14px 0 0}.panel{position:relative;width:min(100%,440px);border:4px solid white;border-radius:36px;background:#fffdf3;padding:24px;text-align:center;box-shadow:0 8px 0 #6f9eb52b}.panel h2{font-size:2em;margin:7px 0}.panel p{font-size:.9em;line-height:1.6;color:#8495a8;font-weight:800}.result-kid{width:140px;height:177px;display:block;margin:4px auto}.stars{display:flex;justify-content:center;gap:8px}.stars img{width:54px;height:54px;filter:grayscale(1);opacity:.2}.stars img.earned{filter:none;opacity:1;animation:pop .5s both}.stars img:nth-child(2){width:68px;height:68px;margin-top:-8px}.stats{background:#fff0cc;border-radius:20px;padding:12px;font-weight:1000;color:#bc8628;margin:16px 0}.loading{z-index:30;flex-direction:column;background:#d4f4ff;text-align:center}.loading img{width:100px;height:130px;animation:bob .8s infinite alternate}.loadbar{width:65%;max-width:300px;height:17px;border:3px solid white;border-radius:25px;background:#b1dbe9;overflow:hidden}.loadbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffcf59,#ffa49b)}#loadCopy{font-weight:900}#assetNote{font-size:10px;color:#97849b;margin:5px 0 0}.toast{position:absolute;top:20%;left:0;right:0;text-align:center;font-size:1.4em;font-weight:1000;color:#eea02c;text-shadow:0 2px white,2px 0 white,-2px 0 white,0 -2px white;z-index:4;pointer-events:none;opacity:0;transition:opacity .2s}.toast.show{opacity:1}@keyframes bob{to{transform:translateY(-9px)}}@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@media(max-width:430px){.round{width:42px;height:44px;border-radius:15px}.round img{width:32px;height:32px}.top-controls{gap:4px}.back{padding:11px 7px;font-size:11px}.hud{left:22%;right:26%}.hud strong{font-size:16px}.home-panel{padding:11px}.skins{grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0 5px}.skin img{height:34px}.skin small{font-size:9px}.skin{padding:2px}.title{top:12%}.title h1{-webkit-text-stroke-width:5px}.primary{min-height:54px}.note{margin-top:11px}.section-label{font-size:11px}.result-kid{height:130px}.panel{padding:20px}.stars img{width:42px;height:42px}.stars img:nth-child(2){width:52px;height:52px}}
+@media(max-height:650px){.home-panel{padding:8px}.skins{grid-template-columns:repeat(9,1fr)}.skin img{height:26px}.skin small{font-size:8px}.note{display:none}.title{top:13%}.title h1{font-size:35px}.subtitle{margin-top:4px}.primary{min-height:45px}.primary img{height:32px}.result-kid{height:80px;width:80px}.panel{padding:14px;max-width:360px}.panel h2{font-size:24px}.panel p{margin:5px}.stars img{width:35px;height:35px}.stars img:nth-child(2){width:43px;height:43px}.stats{margin:9px 0}.secondary{margin-top:9px;min-height:40px}}
+</style>
+<link rel="stylesheet" href="../app-compat.css"><script defer src="../app-compat.js"></script></head>
+<body>
+<main id="stage">
+<a class="back" href="../index.html" aria-label="返回合集首页">‹ 合集</a>
+<canvas id="canvas" aria-label="左右拖动糖果球，越过桥梁，收集金币到终点"></canvas>
+<div class="top-controls"><button id="mute" class="round mute" aria-label="关闭声音" aria-pressed="false"><img src="assets/sound.png" alt=""></button><button id="pause" class="round" aria-label="暂停" hidden><img src="assets/pause.png" alt=""></button></div>
+<div class="hud" id="hud" hidden><strong id="levelLabel">第 1 关</strong><small id="themeLabel">糖果平原</small><div class="progress" role="progressbar" aria-label="关卡进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="progress"></i></div></div>
+<div id="resources" hidden><span class="coin-pill"><img src="assets/coin.png" alt="金币"><b id="coins">0</b></span><span class="coin-pill" id="status">出发啦</span></div>
+<div id="hint" class="hint" hidden><span>← 按住左右拖，带球去终点 →</span></div><div id="toast" class="toast" aria-live="polite"></div>
+<section id="home" class="screen"><div class="home-bank coin-pill"><img src="assets/coin.png" alt="金币"><b id="bank">0</b></div><div class="title"><p>小小的你，大大的冒险</p><h1>滚球闯关</h1><span class="subtitle" id="homeLevel">糖果平原 · 第 1 关</span></div><div class="home-panel"><div class="section-label"><span>选一颗你的糖果球</span><small>捡金币，收集新球</small></div><div id="skins" class="skins" aria-label="球皮肤"></div><p id="skinNote" aria-live="polite">左右拖一拖，快乐向前滚</p><button class="primary" id="start" disabled><img src="assets/play.png" alt=""><span>一起出发</span></button><p class="note">无广告 · 不用联网 · 随时重来</p><p id="assetNote"></p></div></section>
+<section id="paused" class="screen" hidden><div class="panel"><img src="assets/kid_front.png" width="95" height="120" alt="等你一起玩的孩子"><h2>休息一下</h2><p>小球停好啦，随时接着玩</p><button id="resume" class="primary">继续滚</button><button id="pauseHome" class="secondary">回到出发页</button></div></section>
+<section id="result" class="screen" hidden aria-live="polite"><div class="panel"><div id="stars" class="stars"><img src="assets/star.png" alt="第一颗星"><img src="assets/star.png" alt="第二颗星"><img src="assets/star.png" alt="第三颗星"></div><img id="resultKid" class="result-kid" src="assets/kid_cheer.png" alt="开心的你"><h2 id="resultTitle">你真棒！</h2><p id="resultCopy"></p><div class="stats" id="resultStats"></div><button id="again" class="primary">下一关</button><button id="resultHome" class="secondary">换一颗球</button></div></section>
+<section id="loading" class="screen loading"><img src="assets/kid_run_front.png" alt=""><p id="loadCopy">糖果桥准备中… 0%</p><div class="loadbar" role="progressbar" aria-label="加载素材" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="loadFill"></i></div></section>
+</main>
+<script>
+(() => {
+'use strict';
+// 世界单位用米，所有碰撞、物体位置与透视绘制共用同一份桥面几何。
+const RADIUS=.13, GRAVITY=16, PRICES=[0,30,50,70,90,110,140,180,220];
+const NAMES=['彩虹糖','我的头像','星星球','西瓜球','月亮球','足球','橘子球','冰晶球','草莓球'];
+const BALLS=['ball_rainbow','ball_kid','ball_star','ball_watermelon','ball_moon','ball_soccer','ball_orange','ball_ice','ball_berry'];
+const THEMES=['糖果平原','彩虹云桥','冰淇淋山','棉花糖天空','饼干城堡'];
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const levelNumber=n=>clamp(Math.floor(Number(n)||1),1,1000000);
+const integer=(n,max=9999999)=>clamp(Math.floor(Number(n)||0),0,max);
+// 前十二关的安排手工固定，之后用有种子的模块拼接；每关始终有完整可达的终点。
+const PLANS=[
+ ['wide','coins','narrow','checkpoint','ramp','block'],
+ ['coins','narrow','boost','gap','checkpoint','block','spring'],
+ ['block','ramp','checkpoint','hammer','coins','narrow','gap'],
+ ['narrow','spring','checkpoint','boulder','gap','boost','coins'],
+ ['block','hammer','checkpoint','gap','narrow','spring','boulder'],
+ ['boost','gap','checkpoint','hammer','spring','narrow','boulder','coins'],
+ ['ramp','block','narrow','checkpoint','boulder','gap','hammer','spring'],
+ ['spring','gap','checkpoint','block','hammer','narrow','boost','boulder'],
+ ['narrow','boulder','checkpoint','gap','spring','hammer','block','boost'],
+ ['boost','gap','narrow','checkpoint','hammer','spring','boulder','gap'],
+ ['block','narrow','gap','checkpoint','hammer','boost','boulder','spring','gap'],
+ ['hammer','gap','narrow','checkpoint','boulder','spring','block','gap','boost','hammer']
+];
+function makeLevel(number){
+ const n=levelNumber(number), easy=n<=10, tier=Math.min(8,Math.floor((n-1)/12));let seed=(n*7919)>>>0;
+ const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+ const choices=['narrow','gap','hammer','boulder','block','boost','spring','ramp','coins'];
+ const plan=n<=12?PLANS[n-1]:Array.from({length:10+tier},(_,i)=>i%4===3?'checkpoint':choices[Math.floor(rand()*choices.length)]);
+ const spans=[],items=[],gaps=[];let z=0;
+ const span=(length,half=1.12,rise=0)=>{spans.push({z,end:z+length,half,center:0,rise});z+=length;};
+ span(16);
+ plan.forEach((type,i)=>{
+   const start=z,side=i%2===0?-1:1;
+   if(type==='gap'){
+     span(10);const startGap=z, length=easy?5.6:6.5+Math.min(1,tier*.1);
+     items.push({type:'jump',z:startGap-1.8,x:0,half:.9,impulse:10});
+     gaps.push({z:startGap,end:startGap+length});span(length,0);span(13);
+   }else if(type==='narrow'){span(8,.92);span(15,easy?.64:.48);span(8,.92);}
+   else if(type==='ramp'){span(7,1.12,.35);items.push({type:'jump',z:z-1,x:0,half:.9,impulse:8});span(20);}
+   else {span(27);if(type==='block'||type==='hammer'||type==='boulder')items.push({type,z:start+14,x:side*(easy?.73:.55),half:type==='boulder'?.22:.24,phase:i*.9,moving:type!=='boulder'||n>4});
+     if(type==='boost'||type==='spring')items.push({type,z:start+9,x:0,half:.9,impulse:12});
+     if(type==='checkpoint')items.push({type,z:start+12,x:0,half:.8});}
+   // 金币串总在实体桥面内，缺口的金币仅在跳跃轨迹上，不产生不可达奖励。
+   for(let k=0;k<5;k++){const cz=start+3+k*2.1;if(!gaps.some(g=>cz>=g.z&&cz<=g.end))items.push({type:'coin',z:cz,x:0,half:.1});}
+ });
+ span(22);items.sort((a,b)=>a.z-b.z);items.forEach((o,i)=>o.id=i);
+ return {number:n,theme:(n-1)%5,speed:8+Math.min(2,(n-1)*.12),easy,spans,items,gaps,finish:z-5,totalCoins:items.filter(o=>o.type==='coin').length};
+}
+function roadAt(level,z){return level.spans.find(s=>z>=s.z&&z<s.end)||level.spans[level.spans.length-1];}
+function groundAt(level,z){const s=roadAt(level,z);return s.rise?Math.sin(clamp((z-s.z)/(s.end-s.z),0,1)*Math.PI/2)*s.rise:0;}
+function clampBall(level,z,x){const s=roadAt(level,z),half=Math.max(.27,s.half);return clamp(Number.isFinite(x)?x:0,s.center-half+RADIUS,s.center+half-RADIUS);}
+function obstacleHalf(item,time){const angle=item.type==='hammer'?Math.sin(time*2+item.phase)*.35:0;return item.half*(Math.abs(Math.cos(angle))+(item.type==='hammer'?1.05:0)*Math.abs(Math.sin(angle)));}
+function obstacleX(item,level,time){const s=roadAt(level,item.z),motion=item.moving?Math.sin(time*(item.type==='hammer'?1.7:1.1)+item.phase)*(level.easy?.10:.48):0;const half=obstacleHalf(item,time);return clamp(item.x+motion,-s.half+half,s.half-half);}
+function project(x,z,height,view,camZ=0,speed=8){const fov=24+clamp(speed-8,0,6)*.45,scale=fov/(fov+Math.max(-5,z-camZ));return{x:view.w/2+x*view.w*.34*scale,y:view.h*.32+view.h*.47*scale-height*view.w*.34*scale,scale};}
+// 从每个真实桥段的端点切片，不能用一条全局步长跨过宽窄交界，漏出假的断桥。
+function roadSlices(level,from,to){const slices=[];for(const span of level.spans){if(span.half<=0)continue;const end=Math.min(to,span.end);for(let z=Math.max(from,span.z);z<end;){const next=Math.min(end,z+1.5,(Math.floor(z/8)+1)*8);slices.push({z,end:next,half:span.half});z=next;}}return slices;}
+// 相机跟随高跳，让球、悬浮头像和全部桥面共用同一次高度平移。
+function cameraHeight(y){return Math.max(0,y-1.5);}
+// 素材本身已经是球面正视图；绕水平轴反投影，零角度保留原来的脸部比例。
+function sphereSample(x,y,roll,cos=Math.cos(roll),sin=Math.sin(roll)){const z=Math.sqrt(Math.max(0,1-x*x-y*y));return{x,y:y*cos+z*sin,front:z*cos-y*sin>=0};}
+function createRun(n){return {level:makeLevel(n),phase:'running',z:2,x:0,target:0,vx:0,y:0,vy:0,speed:8,time:0,boost:0,invincible:0,checkpoint:2,collected:[],triggered:[],coins:0,combo:0,falls:0,roll:0,events:[],rewarded:false};}
+function steer(r,x){r.target=clampBall(r.level,r.z,x);}
+function lose(r,reason){if(r.phase!=='running')return;r.phase='lost';r.falls++;r.combo=0;r.events.push({type:'lost',reason});}
+function respawn(r){r.z=r.checkpoint;r.x=r.target=0;r.vx=r.vy=0;r.y=groundAt(r.level,r.z);r.boost=0;r.invincible=2;r.speed=r.level.speed;r.phase='running';r.triggered=r.triggered.filter(id=>r.level.items[id].z<=r.z);r.events.push({type:'respawn'});}
+function starsFor(coins,total){const ratio=coins/Math.max(1,total);return ratio>=.8?3:ratio>=.45?2:1;}
+function buySkin(coins,owned,index){coins=integer(coins);if(!Number.isInteger(index)||index<0||index>=PRICES.length)return {ok:false,coins,owned};if(owned.includes(index))return {ok:true,coins,owned:[...owned],selected:index};if(coins<PRICES[index])return {ok:false,coins,owned};return {ok:true,coins:coins-PRICES[index],owned:[...owned,index],selected:index};}
+function normalizeSave(raw){const p=raw&&typeof raw==='object'?raw:{},owned=[...new Set([0,...(Array.isArray(p.owned)?p.owned:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<9)])];return {level:levelNumber(p.level),coins:integer(p.coins),owned,skin:owned.includes(p.skin)?p.skin:0,muted:p.muted===true,stars:p.stars&&typeof p.stars==='object'?Object.fromEntries(Object.entries(p.stars).filter(([k,v])=>/^\d+$/.test(k)&&k<=1000000&&v>=1&&v<=3).map(([k,v])=>[k,integer(v,3)])):{}};}
+// 固定小步积分避免低帧率穿透；暂停不推进、金币和事件各有独立的一次性记录。
+function tick(r,dt){
+ if(r.phase!=='running')return;dt=clamp(dt,0,.05);r.time+=dt;r.boost=Math.max(0,r.boost-dt);r.invincible=Math.max(0,r.invincible-dt);
+ const desired=r.level.speed*(r.boost>0?1.48:1);r.speed+=(desired-r.speed)*Math.min(1,dt*4);
+ r.vx+=((r.target-r.x)*35-r.vx*10)*dt;r.x=clampBall(r.level,r.z,r.x+r.vx*dt);r.target=clampBall(r.level,r.z,r.target);
+ const oldZ=r.z;r.z=Math.min(r.level.finish,r.z+r.speed*dt);r.roll+=(r.z-oldZ)/RADIUS;
+ // 前进可能恰好跨入更窄的桥段，必须在本帧碰撞和绘制之前再次约束整颗球。
+ r.x=clampBall(r.level,r.z,r.x);r.target=clampBall(r.level,r.z,r.target);
+ r.vy-=GRAVITY*dt;r.y+=r.vy*dt;
+ const surface=roadAt(r.level,r.z),floor=groundAt(r.level,r.z);
+ if(surface.half>0&&r.y<=floor){r.y=floor;r.vy=0;}
+ if(surface.half===0&&r.y<-.35){lose(r,'gap');return;}
+ for(const item of r.level.items){
+   const iz=item.type==='boulder'?item.z+Math.sin(r.time*.8+item.phase)*1.5:item.z;
+   const near=Math.abs(r.z-iz)<.55+r.speed*dt, x=item.type==='coin'?item.x:obstacleX(item,r.level,r.time),touch=Math.abs(r.x-x)<(['block','hammer','boulder'].includes(item.type)?obstacleHalf(item,r.time):item.half)+RADIUS;
+   if(item.type==='coin'&&near&&touch&&r.y<1.6&&!r.collected.includes(item.id)){r.collected.push(item.id);r.coins++;r.combo++;r.events.push({type:'coin',combo:r.combo});}
+   if(['checkpoint','boost','spring','jump'].includes(item.type)&&oldZ<item.z&&r.z>=item.z&&!r.triggered.includes(item.id)){
+     if(item.type==='checkpoint'){r.checkpoint=item.z+1;r.events.push({type:'checkpoint'});r.triggered.push(item.id);}
+     else if(touch&&r.y<.6){r.triggered.push(item.id);if(item.type==='boost')r.boost=3;else r.vy=item.impulse;r.events.push({type:item.type});}
+   }
+   if(['block','hammer','boulder'].includes(item.type)&&near&&touch&&r.y<.48&&r.invincible<=0){lose(r,item.type);return;}
+ }
+ if(r.z>=r.level.finish){r.phase='won';r.events.push({type:'won'});}
+}
+function advance(r,seconds){let left=clamp(seconds,0,120);while(left>1e-8&&r.phase==='running'){const dt=Math.min(1/120,left);tick(r,dt);left-=dt;}}
+globalThis.__test=Object.freeze({RADIUS,GRAVITY,PRICES,PLANS,THEMES,clamp,makeLevel,roadAt,groundAt,clampBall,obstacleHalf,obstacleX,project,roadSlices,cameraHeight,sphereSample,createRun,steer,lose,respawn,starsFor,buySkin,normalizeSave,tick,advance});
+if(typeof document==='undefined')return;
+const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d',{alpha:false}),stage=$('stage');
+const memory={};let save;try{save=normalizeSave(JSON.parse(localStorage.getItem('ballRollSave')||'{}'));}catch(_){save=normalizeSave({});}
+function persist(){memory.save=save;try{localStorage.setItem('ballRollSave',JSON.stringify(save));}catch(_){}}
+let run=createRun(save.level);run.phase='ready';let W=744,H=1133,loaded=false,pointer=null,last=0,accumulator=0,clock=0,particles=[],floats=[],shake=0,toastLife=0,images={},clips={},audio=null,bgmBuffer=null,bgmSource=null,bgmOffset=0,bgmStarted=0,fallbackMusic=null;
+const ASSETS=[...BALLS,'sky','mid','road','rail','arch','block','hammer','boulder','spring','coin','star','pause','play','sound','flag','boost','spark','hero','kid_front','kid_avatar','kid_cheer','kid_sad','kid_run_front'];
+const SFX=['coin','jump','boost','checkpoint','hit','win','click','unlock','bgm'];
+// 图片和WAV一起预加载；每项有超时，坏图片不阻塞开始，坏音效由振荡器接管。
+async function preload(){let done=0,failures=0;const total=ASSETS.length+SFX.length;const progress=()=>{const p=Math.round(++done/total*100);$('loadFill').style.width=p+'%';$('loadCopy').textContent='糖果桥准备中… '+p+'%';$('loadFill').parentElement.setAttribute('aria-valuenow',p);};
+ await Promise.all([...ASSETS.map(name=>new Promise(resolve=>{const img=new Image();let settled=false;const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);images[name]=ok?img:null;if(!ok)failures++;progress();resolve();};const timer=setTimeout(()=>finish(false),7000);img.onload=()=>finish(true);img.onerror=()=>finish(false);img.src='assets/'+name+'.png';})),...SFX.map(name=>new Promise(resolve=>{const clip=new Audio();clip.preload='auto';let settled=false;const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);if(ok)clips[name]=clip;else failures++;progress();resolve();};const timer=setTimeout(()=>finish(false),7000);clip.addEventListener('canplaythrough',()=>finish(true),{once:true});clip.addEventListener('error',()=>finish(false),{once:true});clip.src='assets/sfx/'+name+'.m4a';clip.load();}))]);
+ loaded=true;$('loading').hidden=true;$('start').disabled=false;$('assetNote').textContent=failures?failures+' 项素材未加载，已启用回退':'';renderSkins();}
+// 音乐用同一个AudioBuffer循环；解码后不再依赖媒体元素循环间隙，暂停保留播放位置。
+function unlockAudio(){try{if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume().catch(()=>{});if(location.protocol!=='file:'&&!bgmBuffer&&clips.bgm&&!clips.bgm._decoding){clips.bgm._decoding=true;const xhr=new XMLHttpRequest();xhr.open('GET','assets/sfx/bgm.m4a');xhr.responseType='arraybuffer';xhr.onload=()=>{if(xhr.response)audio.decodeAudioData(xhr.response).then(b=>{bgmBuffer=b;stopMusic();startMusic();}).catch(()=>{});};xhr.onerror=()=>{};xhr.send();}}catch(_){}}
+function tone(freq=784,duration=.15){if(save.muted||!audio||audio.state!=='running')return;const o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime;o.type='triangle';o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(freq*1.4,t+duration);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.045,t+.008);g.gain.exponentialRampToValueAtTime(.001,t+duration);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+duration+.02);}
+function sound(name){if(save.muted)return;const c=clips[name];if(c){const p=c.cloneNode();p.volume=.42;p.play().catch(()=>tone(name==='hit'?180:880));}else tone(name==='hit'?180:name==='coin'?1200:784);}
+function startMusic(){if(save.muted||run.phase!=='running'||!audio)return;if(bgmBuffer&&!bgmSource){bgmSource=audio.createBufferSource();bgmSource.buffer=bgmBuffer;bgmSource.loop=true;const gain=audio.createGain();gain.gain.value=.25;bgmSource.connect(gain);gain.connect(audio.destination);bgmStarted=audio.currentTime;bgmSource.start(0,bgmOffset%bgmBuffer.duration);}else if(!bgmBuffer&&clips.bgm){clips.bgm.loop=true;clips.bgm.volume=.18;clips.bgm.play().catch(()=>startFallbackMusic());}else if(!bgmBuffer)startFallbackMusic();}
+function startFallbackMusic(){if(fallbackMusic||save.muted||run.phase!=='running')return;let i=0;fallbackMusic=setInterval(()=>{if(run.phase==='running')tone([523,659,784,659,440,523,659,523][i++%8],.23);},500);}
+function stopMusic(){if(bgmSource){bgmOffset+=(audio.currentTime-bgmStarted);try{bgmSource.stop();}catch(_){}bgmSource=null;}if(clips.bgm)clips.bgm.pause();if(fallbackMusic){clearInterval(fallbackMusic);fallbackMusic=null;}}
+function resize(){const v=visualViewport,css=getComputedStyle(document.body),vw=(v?v.width:innerWidth)-parseFloat(css.paddingLeft)-parseFloat(css.paddingRight),vh=(v?v.height:innerHeight)-parseFloat(css.paddingTop)-parseFloat(css.paddingBottom);const width=Math.min(vw,760,vh*.72);W=744;H=vh/width*W;stage.style.setProperty('--w',width+'px');stage.style.setProperty('--h',vh+'px');const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(vh*dpr);ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);}
+function clearPointer(){if(pointer&&canvas.hasPointerCapture(pointer.id))canvas.releasePointerCapture(pointer.id);pointer=null;}
+function hideScreens(){['home','paused','result'].forEach(id=>$(id).hidden=true);}
+function start(){if(!loaded)return;unlockAudio();clearPointer();hideScreens();run=createRun(save.level);particles=[];floats=[];shake=0;toastLife=0;$('toast').classList.remove('show');accumulator=0;last=performance.now();$('hud').hidden=$('resources').hidden=$('pause').hidden=$('hint').hidden=false;startMusic();sound('click');updateHud();}
+function home(){clearPointer();stopMusic();hideScreens();run.phase='ready';$('hud').hidden=$('resources').hidden=$('pause').hidden=$('hint').hidden=true;$('home').hidden=false;renderSkins();}
+function pause(){if(run.phase!=='running')return;run.phase='paused';clearPointer();stopMusic();$('paused').hidden=false;}
+function resume(){if(run.phase!=='paused')return;run.phase='running';$('paused').hidden=true;last=performance.now();accumulator=0;unlockAudio();startMusic();}
+function notify(text){$('toast').textContent=text;toastLife=1.8;$('toast').classList.add('show');}
+function renderSkins(){const box=$('skins');box.replaceChildren();$('bank').textContent=save.coins;$('homeLevel').textContent=THEMES[makeLevel(save.level).theme]+' · 第 '+save.level+' 关';BALLS.forEach((name,i)=>{const b=document.createElement('button'),locked=!save.owned.includes(i);b.className='skin';b.dataset.locked=locked;b.setAttribute('aria-pressed',String(save.skin===i));b.setAttribute('aria-label',locked?NAMES[i]+'，'+PRICES[i]+'金币解锁':'选择'+NAMES[i]);const img=document.createElement('img');img.src='assets/'+name+'.png';img.alt=NAMES[i];img.onerror=()=>{img.style.visibility='hidden';};const label=document.createElement('small');label.textContent=locked?PRICES[i]+'金币':save.skin===i?'已选择':NAMES[i];b.append(img,label);b.onclick=()=>{unlockAudio();const p=buySkin(save.coins,save.owned,i);if(!p.ok){$('skinNote').textContent='还差 '+(PRICES[i]-save.coins)+' 金币，再玩一关吧！';sound('click');return;}const fresh=!save.owned.includes(i);save.coins=p.coins;save.owned=p.owned;save.skin=i;persist();renderSkins();$('skinNote').textContent=(fresh?'解锁啦！':'选好啦！')+NAMES[i];sound(fresh?'unlock':'click');};box.append(b);});}
+function finish(won){stopMusic();clearPointer();$('hint').hidden=true;$('pause').hidden=true;$('stars').hidden=!won;$('resultKid').src='assets/kid_'+(won?'cheer':'sad')+'.png';$('resultKid').alt=won?'开心庆祝的你':'给自己加油的你';$('resultTitle').textContent=won?'你真棒！':'再试一次！';$('resultCopy').textContent=won?'第 '+run.level.number+' 关完成，下一座糖果桥在等你':'小球回旗帜那里，收过的金币都还在';$('again').textContent=won?'下一关 · 继续滚':'从旗帜出发';
+ if(won&&!run.rewarded){run.rewarded=true;const stars=starsFor(run.coins,run.level.totalCoins),reward=15+stars*5;save.coins=integer(save.coins+reward);save.stars[run.level.number]=Math.max(save.stars[run.level.number]||0,stars);save.level=levelNumber(run.level.number+1);persist();[...$('stars').children].forEach((s,i)=>s.classList.toggle('earned',i<stars));$('resultStats').textContent='收集 '+run.coins+' / '+run.level.totalCoins+' 金币 · 奖励 +'+reward;burst(W*.25,H*.35,55);burst(W*.75,H*.35,55);sound('win');}
+ else if(!won){$('resultStats').textContent='已收集 '+run.coins+' 金币 · 最近旗帜 '+Math.round(run.checkpoint/run.level.finish*100)+'%';sound('hit');}
+ $('result').hidden=false;updateHud();}
+$('start').onclick=start;$('pause').onclick=pause;$('resume').onclick=resume;$('pauseHome').onclick=home;$('resultHome').onclick=home;$('again').onclick=()=>{if(run.phase==='won')start();else{unlockAudio();$('result').hidden=true;$('pause').hidden=false;$('hint').hidden=false;particles=[];floats=[];shake=0;respawn(run);last=performance.now();accumulator=0;startMusic();events();}};
+$('mute').onclick=()=>{save.muted=!save.muted;persist();syncMute();if(save.muted)stopMusic();else{unlockAudio();startMusic();sound('click');}};
+function syncMute(){$('mute').setAttribute('aria-pressed',String(save.muted));$('mute').setAttribute('aria-label',save.muted?'打开声音':'关闭声音');$('mute').style.filter=save.muted?'grayscale(1)':'none';}
+canvas.addEventListener('pointerdown',e=>{if(run.phase!=='running'||pointer||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0))return;e.preventDefault();unlockAudio();pointer={id:e.pointerId,start:e.clientX,x:run.target};canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!pointer||e.pointerId!==pointer.id||run.phase!=='running')return;e.preventDefault();const delta=(e.clientX-pointer.start)/canvas.getBoundingClientRect().width;steer(run,pointer.x+delta*3.1);if(Math.abs(delta)>.02)$('hint').hidden=true;});
+['pointerup','pointercancel','lostpointercapture'].forEach(type=>canvas.addEventListener(type,e=>{if(pointer&&e.pointerId===pointer.id)pointer=null;}));
+addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Escape',' '].includes(e.key))e.preventDefault();if(e.key==='Escape'||e.key===' '){if(run.phase==='paused')resume();else pause();}if(run.phase==='running'&&e.key.startsWith('Arrow'))steer(run,run.target+(e.key==='ArrowLeft'?-.3:e.key==='ArrowRight'?.3:0));});
+addEventListener('resize',resize);if(visualViewport)visualViewport.addEventListener('resize',resize);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});addEventListener('blur',pause);addEventListener('pagehide',pause);document.addEventListener('contextmenu',e=>e.preventDefault());
+// 球面像素按真实球轴旋转，外层高光固定；孩子头像的背面用冰晶材质，避免重复长出一张脸。
+const ballCache=document.createElement('canvas');ballCache.width=ballCache.height=128;const ballCtx=ballCache.getContext('2d'),ballSources={};let lastBallFrame=-1,lastBallSkin=-1;
+function ballSource(name){if(!images[name])return null;if(!ballSources[name]){const source=document.createElement('canvas');source.width=source.height=128;const c=source.getContext('2d',{willReadFrequently:true});c.drawImage(images[name],0,0,128,128);ballSources[name]=c.getImageData(0,0,128,128).data;}return ballSources[name];}
+function buildBall(){const frame=Math.floor(run.roll*12);if(frame===lastBallFrame&&save.skin===lastBallSkin)return;lastBallFrame=frame;lastBallSkin=save.skin;const source=ballSource(BALLS[save.skin]),back=save.skin===1?ballSource('ball_ice'):source,pixels=ballCtx.createImageData(128,128),cos=Math.cos(run.roll),sin=Math.sin(run.roll);
+ for(let y=0;y<128;y++)for(let x=0;x<128;x++){const nx=(x-63.5)/63,ny=(y-63.5)/63;if(nx*nx+ny*ny>1)continue;const p=sphereSample(nx,ny,run.roll,cos,sin),sample=save.skin===1&&!p.front?back:source,i=(y*128+x)*4,sx=clamp(Math.round((p.x*.96+1)*63.5),0,127),sy=clamp(Math.round((p.y*.96+1)*63.5),0,127),j=(sy*128+sx)*4,valid=sample&&sample[j+3]>200;pixels.data[i]=valid?sample[j]:185;pixels.data[i+1]=valid?sample[j+1]:224;pixels.data[i+2]=valid?sample[j+2]:245;pixels.data[i+3]=255;}
+ ballCtx.putImageData(pixels,0,0);ballCtx.save();ballCtx.beginPath();ballCtx.arc(64,64,63,0,Math.PI*2);ballCtx.clip();const g=ballCtx.createRadialGradient(42,30,4,67,65,69);g.addColorStop(0,'#ffffff33');g.addColorStop(.4,'#ffffff00');g.addColorStop(.8,'#28296010');g.addColorStop(1,'#20256077');ballCtx.fillStyle=g;ballCtx.fillRect(0,0,128,128);ballCtx.restore();}
+function sprite(name,x,y,w,h=w,angle=0){const img=images[name];ctx.save();ctx.translate(x,y);ctx.rotate(angle);if(img)ctx.drawImage(img,-w/2,-h/2,w,h);else{const g=ctx.createLinearGradient(-w/2,-h/2,w/2,h/2);g.addColorStop(0,'#fff2aa');g.addColorStop(1,name==='coin'?'#edb33d':'#6fd3e2');ctx.fillStyle=g;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,Math.min(w,h)*.3);ctx.fill();ctx.stroke();}ctx.restore();}
+function text(s,x,y,size=24,color='#6083a1'){ctx.font='1000 '+size+'px ui-rounded,"PingFang SC",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=5;ctx.strokeStyle='#fff';ctx.strokeText(s,x,y);ctx.fillStyle=color;ctx.fillText(s,x,y);}
+function poly(points,fill){ctx.fillStyle=fill;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();}
+function proj(x,z,y=0){return project(x,z,y-cameraHeight(run.y),{w:W,h:H},run.z,run.speed);}
+function drawSky(){ctx.fillStyle=['#beeaff','#cae6ff','#d1eff6','#e2d9f7','#fae5cc'][run.level.theme];ctx.fillRect(0,0,W,H);const img=images.sky;if(img){ctx.save();ctx.filter='hue-rotate('+[0,12,-12,27,-22][run.level.theme]+'deg)';ctx.globalAlpha=.95;const shift=Math.sin(run.z/90)*14;ctx.drawImage(img,-35+shift,0,W+70,H);ctx.restore();}const mid=images.mid;if(mid){const dx=Math.sin(run.z/40)*26;ctx.drawImage(mid,-50+dx,H*.17,W+100,H*.72);}const mist=ctx.createLinearGradient(0,H*.5,0,H);mist.addColorStop(0,'#ffffff00');mist.addColorStop(1,'#cdeeffaa');ctx.fillStyle=mist;ctx.fillRect(0,H*.5,W,H*.5);}
+// 每片桥面按四个投影顶点铺纹理；侧面、护栏和物体均使用同一个截面宽度。
+function drawRoad(){const first=Math.max(0,run.z-5),end=Math.min(run.level.finish+5,run.z+180),img=images.road,slices=roadSlices(run.level,first,end);
+ for(const s of slices.reverse()){const z=s.z,z2=s.end,h0=groundAt(run.level,z),h1=groundAt(run.level,z2-1e-7),a=proj(-s.half,z,h0),b=proj(s.half,z,h0),c=proj(s.half,z2,h1),d=proj(-s.half,z2,h1);if(a.y<H*.32||d.y>H+60)continue;
+ const edge=['#daaa82','#b9b0e5','#95cdda','#cbaad7','#ba966f'][run.level.theme];for(const [p,q] of [[a,d],[b,c]])poly([p,q,{x:q.x,y:q.y+18*q.scale},{x:p.x,y:p.y+18*p.scale}],edge);
+ poly([a,b,c,d],'#ffe3a3');ctx.save();ctx.beginPath();[a,b,c,d].forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.clip();if(img){const sy=(8-(z2%8||8))/8*img.height;ctx.drawImage(img,img.width*.18,sy,img.width*.64,(z2-z)/8*img.height,a.x,Math.min(a.y,d.y),b.x-a.x,Math.abs(a.y-d.y)+.6);}ctx.restore();
+ // 护栏独立沿同一投影边线绘制，桥面纹理只取中央饼干，避免把立柱反复压成横条。
+ for(const side of [-1,1]){const p=side<0?a:b,q=side<0?d:c;ctx.strokeStyle=side<0?'#7ad9d8':'#f7b4ca';ctx.lineWidth=Math.max(2,8*p.scale);ctx.beginPath();ctx.moveTo(p.x,p.y-7*p.scale);ctx.lineTo(q.x,q.y-7*q.scale);ctx.stroke();if(Math.floor(z/6)!==Math.floor(z2/6)){ctx.strokeStyle='#fff';ctx.lineWidth=Math.max(2,4*p.scale);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,p.y-18*p.scale);ctx.stroke();}}
+ if(z===0||roadAt(run.level,z-1e-5).half===0)poly([a,b,{x:b.x,y:b.y+18*b.scale},{x:a.x,y:a.y+18*a.scale}],edge);
+ }
+}
+function drawItem(o){let z=o.type==='boulder'?o.z+Math.sin(run.time*.8+o.phase)*1.5:o.z;if(z<run.z-1.4||z>run.z+160)return;if(o.type==='coin'&&run.collected.includes(o.id))return;const x=o.type==='coin'?o.x:obstacleX(o,run.level,run.time),ground=groundAt(run.level,z),p=proj(x,z,ground);if(p.y<H*.33)return;const s=p.scale;
+ if(o.type==='coin'){sprite('coin',p.x,p.y-23*s,25*s*(.75+.25*Math.abs(Math.sin(clock*3+o.id))),28*s);}
+ else if(o.type==='checkpoint'){const road=roadAt(run.level,z);for(const side of [-1,1]){const q=proj(side*(road.half-.12),z,ground);sprite('flag',q.x,q.y-38*s,36*s,76*s);}ctx.strokeStyle='#fff';ctx.lineWidth=5*s;ctx.setLineDash([10*s,8*s]);ctx.beginPath();ctx.moveTo(proj(-road.half,z,ground).x,p.y);ctx.lineTo(proj(road.half,z,ground).x,p.y);ctx.stroke();ctx.setLineDash([]);}
+ else if(['boost','jump','spring'].includes(o.type)){const name=o.type==='spring'?'spring':'boost';if(o.type==='spring')sprite(name,p.x,p.y-14*s,78*s,44*s);else{sprite(name,p.x,p.y-6*s,130*s,36*s);if(z-run.z<30)text(o.type==='jump'?'起飞 ↑':'加速 ↑',p.x,p.y-35*s,Math.max(12,20*s),o.type==='jump'?'#b68ce3':'#dba327');}}
+ else {const width=o.half*2*W*.34*s,height=o.type==='hammer'?width*1.05:o.type==='boulder'?width:width*.72;ctx.save();const surface=roadAt(run.level,z),l=proj(-surface.half,z),r=proj(surface.half,z);ctx.beginPath();ctx.rect(l.x,p.y-height*1.5,r.x-l.x,height*1.6);ctx.clip();sprite(o.type,p.x,p.y-height*.5,width,height,o.type==='hammer'?Math.sin(run.time*2+o.phase)*.35:o.type==='boulder'?run.time:0);ctx.restore();}
+}
+function drawFinish(){const z=run.level.finish;if(z>run.z+160)return;const road=roadAt(run.level,z),p=proj(0,z),left=proj(-road.half,z),right=proj(road.half,z);const w=right.x-left.x;for(let i=0;i<12;i++){ctx.fillStyle=i%2?'#7c86ad':'white';ctx.fillRect(left.x+i*w/12,p.y,w/12+1,9*p.scale);}sprite('arch',p.x,p.y-w*.35,w*.98,w*.72);}
+function playerPoint(){return proj(run.x,run.z,Math.max(-.5,run.y));}
+function drawPlayer(){const p=playerPoint(),ground=proj(run.x,run.z,groundAt(run.level,run.z)),r=RADIUS*W*.34;ctx.save();
+ // 低于桥面的落球应被身后的近端桥沿遮住，不能盖在饼干桥面上。
+ const gap=run.level.gaps.find(g=>run.z>=g.z&&run.z<g.end);if(gap&&run.y<0){const edge=proj(0,gap.z);ctx.beginPath();ctx.rect(0,0,W,Math.max(0,edge.y));ctx.clip();}
+ if(roadAt(run.level,run.z).half>0){ctx.fillStyle='#46718c35';ctx.beginPath();ctx.ellipse(ground.x,ground.y+5,r*(1.05+Math.max(0,run.y)*.18),r*.3,0,0,Math.PI*2);ctx.fill();}buildBall();if(run.invincible>0){ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.shadowColor='#7de6ff';ctx.shadowBlur=20;ctx.beginPath();ctx.arc(p.x,p.y-r,r+7,0,Math.PI*2);ctx.stroke();}ctx.translate(p.x,p.y-r);ctx.rotate(-run.vx*.08);ctx.drawImage(ballCache,-r,-r,r*2,r*2);ctx.restore();
+ // 小头像固定朝向并悬浮在球上方；头像皮肤本身则随球面滚动。
+ const kidY=p.y-r*2-43;const avatarSize=Math.max(48,28*W/stage.clientWidth);sprite('kid_avatar',p.x,kidY,avatarSize,avatarSize);if(run.boost>0){ctx.strokeStyle='#fff9';ctx.lineWidth=3;for(let i=0;i<8;i++){const a=i*.79,q=80+(clock*220+i*17)%180;ctx.beginPath();ctx.moveTo(p.x+Math.cos(a)*q,p.y+Math.sin(a)*q*.5);ctx.lineTo(p.x+Math.cos(a)*(q+25),p.y+Math.sin(a)*(q+25)*.5);ctx.stroke();}}}
+function burst(x,y,n=16){for(let i=0;i<n&&particles.length<160;i++){const a=Math.random()*Math.PI*2,s=50+Math.random()*200;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-100,life:.6+Math.random()*.7,size:9+Math.random()*12});}}
+function float(s){const p=playerPoint(),avatarSize=Math.max(48,28*W/stage.clientWidth);floats.push({s,x:p.x,y:p.y-RADIUS*W*.68-43-avatarSize/2-28,life:1});}
+function events(){for(const e of run.events){if(e.type==='coin'){save.coins=integer(save.coins+1);persist();sound('coin');const p=playerPoint();burst(p.x,p.y-45,6);if(e.combo%5===0){float('连收 ×'+e.combo);sound('unlock');}}if(e.type==='checkpoint'){sound('checkpoint');notify('旗帜点亮啦！');float('检查点 ✓');}if(['jump','spring','boost'].includes(e.type)){sound(e.type==='boost'?'boost':'jump');float(e.type==='boost'?'加速啦！':'飞起来啦！');const p=playerPoint();burst(p.x,p.y,22);}if(e.type==='respawn'){notify('接着出发！');sound('checkpoint');}if(e.type==='lost'){shake=.4;finish(false);}if(e.type==='won')finish(true);}run.events=[];}
+function drawEffects(dt){particles=particles.filter(p=>p.life>0);for(const p of particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=200*dt;ctx.save();ctx.globalAlpha=clamp(p.life/.3,0,1);sprite('spark',p.x,p.y,p.size,p.size,clock*2);ctx.restore();}floats=floats.filter(p=>p.life>0);for(const p of floats){p.life-=dt;p.y-=45*dt;ctx.save();ctx.globalAlpha=clamp(p.life/.3,0,1);text(p.s,p.x,p.y,27,'#e1a036');ctx.restore();}}
+function updateHud(){$('levelLabel').textContent='第 '+run.level.number+' 关';$('themeLabel').textContent=THEMES[run.level.theme];$('coins').textContent=save.coins;const pc=Math.floor(run.z/run.level.finish*100);$('progress').style.width=pc+'%';$('progress').parentElement.setAttribute('aria-valuenow',pc);$('status').textContent=run.boost>0?'加速中 ↑':run.y>.4?'飞起来啦':run.checkpoint>2?'已点亮旗帜':'收金币，向前滚';}
+function draw(dt=0){ctx.save();if(shake>0){ctx.translate(Math.sin(clock*85)*shake*8,Math.cos(clock*71)*shake*5);shake=Math.max(0,shake-dt);}drawSky();drawRoad();drawFinish();const objects=run.level.items.filter(o=>o.z>run.z-3&&o.z<run.z+160).sort((a,b)=>b.z-a.z);objects.forEach(drawItem);drawPlayer();drawEffects(dt);ctx.restore();}
+function frame(now){const dt=Math.min(.06,Math.max(0,(now-(last||now))/1000));last=now;if(!document.hidden&&run.phase!=='paused'){clock+=dt;if(run.phase==='running'){accumulator+=dt;while(accumulator>=1/120){tick(run,1/120);accumulator-=1/120;events();}updateHud();}toastLife-=dt;if(toastLife<=0)$('toast').classList.remove('show');if(loaded&&run.phase!=='ready')draw(dt);}requestAnimationFrame(frame);}
+// 只有显式本地验收参数开放状态快进；正常入口没有选关和作弊按钮。
+if(new URLSearchParams(location.search).has('qa'))globalThis.__ballQA={get state(){return run;},get save(){return save;},get assets(){return {loaded,missing:ASSETS.filter(n=>!images[n]),audio:SFX.filter(n=>!clips[n])};},get metrics(){const p=playerPoint(),road=roadAt(run.level,run.z);return {w:W,h:H,ballPixels:RADIUS*2*W*.34*stage.clientWidth/W,left:run.x-RADIUS,right:run.x+RADIUS,roadHalf:road.half,player:p,dpr:canvas.width/stage.clientWidth};},start,home,pause,resume,step(seconds){advance(run,seconds);events();updateHud();draw();},scene(level=1,z=2){start();run=createRun(level);run.z=z;run.y=groundAt(run.level,z);updateHud();draw();},freeze(){pause();$('paused').hidden=true;draw();},lose(){lose(run,'qa');events();draw();}};
+document.querySelectorAll('img').forEach(img=>img.onerror=()=>{img.style.visibility='hidden';});resize();syncMute();renderSkins();preload();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

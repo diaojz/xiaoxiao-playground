@@ -1,0 +1,7 @@
+/* 构建时注入副本，不更改 games。保留首页纵向滚动，关闭橡皮筋与误触菜单。 */
+html{overscroll-behavior:none;-webkit-text-size-adjust:100%;background:#fff8ec}
+*{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+a,button{touch-action:manipulation}
+body{overscroll-behavior:none}
+/* 原首页的手机媒体查询覆盖了安全区，这里只补回边缘留白。 */
+body:has(nav.games) main{padding-top:max(24px,env(safe-area-inset-top));padding-bottom:max(27px,env(safe-area-inset-bottom));padding-left:max(17px,env(safe-area-inset-left));padding-right:max(17px,env(safe-area-inset-right))}
