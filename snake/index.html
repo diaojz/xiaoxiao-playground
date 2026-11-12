@@ -36,7 +36,7 @@
     padding: 10px 14px 10px 26px;
     border-radius: 999px;
     border: 1px solid rgba(255,255,255,.9);
-    backdrop-filter: blur(10px);
+    
     box-shadow: 0 8px 26px rgba(46,107,65,.16);
     z-index: 5;
   }
@@ -62,7 +62,7 @@
     min-width: 176px;
     background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.62));
     border: 1px solid rgba(255,255,255,.9);
-    backdrop-filter: blur(10px);
+    
     border-radius: 18px;
     padding: 13px 16px;
     box-shadow: 0 8px 26px rgba(46,107,65,.16);
@@ -106,7 +106,7 @@
     border: 1px solid rgba(255,255,255,.8);
     padding: 9px 20px;
     border-radius: 999px;
-    backdrop-filter: blur(10px);
+    
     box-shadow: 0 6px 18px rgba(46,107,65,.12);
     z-index: 5;
     white-space: nowrap;
@@ -135,7 +135,7 @@
   .fire-btn[aria-disabled="true"] { cursor:not-allowed; filter:grayscale(.9); opacity:.58; box-shadow:0 5px 0 #9a7c89; }
   .fire-btn.empty-shake { animation:empty-shake .36s ease; }
   /* 技能卡靠着弹药仓排开：大图标给小朋友认，细环只负责告诉他还要等多久。 */
-  .skill-belt{position:fixed;left:50%;bottom:224px;transform:translateX(-50%);z-index:8;display:flex;gap:7px;padding:6px 9px;border:3px solid #fff;border-radius:22px;background:#fff2f9dc;box-shadow:0 5px 0 #df8db7,0 10px 22px #9d537344;backdrop-filter:blur(8px)}
+  .skill-belt{position:fixed;left:50%;bottom:224px;transform:translateX(-50%);z-index:8;display:flex;gap:7px;padding:6px 9px;border:3px solid #fff;border-radius:22px;background:#fff2f9dc;box-shadow:0 5px 0 #df8db7,0 10px 22px #9d537344;}
   .skill-btn{position:relative;width:51px;height:51px;border:3px solid #fff;border-radius:17px;background:linear-gradient(145deg,#fff8a9,#ff9dce);box-shadow:0 3px 0 #cf6096;color:#7d3568;font-size:25px;cursor:pointer;touch-action:manipulation}.skill-btn small{position:absolute;right:-5px;bottom:-7px;padding:1px 4px;border-radius:8px;background:#7d4ac3;color:#fff;font:900 10px -apple-system,sans-serif}.skill-btn i{position:absolute;inset:-3px;border-radius:17px;background:conic-gradient(#fff 0deg,var(--cool,#6c4bd2) var(--deg,0deg),transparent var(--deg,0deg));mask:radial-gradient(transparent 61%,#000 64%);pointer-events:none}.skill-btn.ready{animation:skill-ready .75s ease-in-out infinite alternate}.skill-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #cf6096}@keyframes skill-ready{to{filter:brightness(1.16);box-shadow:0 3px 0 #cf6096,0 0 14px #fff36e}}
   .game-tools{position:fixed;left:16px;top:18px;z-index:12;display:flex;gap:7px}.game-tools button{border:3px solid #fff;border-radius:14px;background:#ffe5f2;color:#8d3d73;box-shadow:0 3px 0 #da7bac;padding:7px 9px;font-weight:900;cursor:pointer}
   .candy-toast{position:fixed;z-index:30;top:18px;left:50%;transform:translateX(-50%);padding:10px 18px;border:3px solid #fff;border-radius:999px;background:linear-gradient(135deg,#fff7a8,#ffc6eb);box-shadow:0 5px 0 #df78ad;color:#8c3d73;font-size:16px;font-weight:900;animation:toast-in .2s both}.candy-toast small{margin-left:7px;font-size:13px}@keyframes toast-in{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -157,7 +157,7 @@
     padding: 10px 18px;
     border-radius: 999px;
     cursor: pointer;
-    backdrop-filter: blur(8px);
+    
     box-shadow: 0 6px 18px rgba(46,107,65,.14);
     transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
   }
@@ -256,7 +256,7 @@
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at 50% 30%, rgba(30,70,45,.55), rgba(15,35,22,.72));
-    backdrop-filter: blur(4px);
+    
     color: #fff;
     gap: 18px;
     z-index: 10;
@@ -320,7 +320,7 @@
   .corner-btn, .dex-panel button { background: linear-gradient(#73dafa,#43b9e4); color: #184b70; border: 3px solid #fff; font-size: 19px; padding: 12px 24px; box-shadow: 0 5px 0 #288eb6; }
   .corner-btn:nth-child(2) { background: linear-gradient(#ffc3df,#fa8bb9); color: #863d66; box-shadow: 0 5px 0 #d46d9c; }
   .controls-bar { background: #fff9e6eb; color: #626d85; bottom: 12px; max-width: 58vw; }
-  .dex { background: #5b83ac88; backdrop-filter: blur(8px); }
+  .dex { background: #5b83ac88;  }
   .dex-panel { background: linear-gradient(145deg,#fff9e9,#e5faff); border: 5px solid #fff; border-radius: 36px; color: #52617e; }
   .dex-panel h2 { color: #d74c88; }
   .overlay { background: radial-gradient(ellipse at 15% 10%,#fff9c3,transparent 45%), linear-gradient(155deg,#9de4ff,#d8f8ef 55%,#ffe0ed); color: #4f6080; cursor: default; display: grid; grid-template-columns: minmax(0,1.05fr) minmax(0,1fr); grid-template-rows: auto auto 1fr auto; gap: 14px 32px; padding: 24px max(28px,calc((100vw - 1300px)/2)); align-content: center; }
@@ -1106,7 +1106,8 @@
   }
 
   function resize() {
-    DPR = window.devicePixelRatio || 1;
+    // iPad Pro 的 2x 全屏画布每帧光栅化过重，封顶 1.5 倍
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // visualViewport 比 innerWidth/innerHeight 更准：地址栏收起展开、
     // 浏览器动态 UI 变化时不会让画布比实际可见区域大，避免底部/顶部露出装不下的空白
     const vv = window.visualViewport;
@@ -1565,26 +1566,39 @@
     return { x: OFFX + gx * CELL + CELL / 2, y: OFFY + gy * CELL + CELL / 2 };
   }
 
+  // 棋盘底图（格子 + 背景图 + 边框）很重且不变：缓存到离屏画布，每帧只贴一次
+  let boardCache = null, boardCacheKey = '';
   function drawBoard() {
     ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
-    ctx.save();ctx.beginPath();ctx.rect(OFFX,OFFY,COLS*CELL,ROWS*CELL);ctx.clip();
-    for (let y = 0; y < ROWS; y++) {
-      for (let x = 0; x < COLS; x++) {
-        ctx.fillStyle = (x + y) % 2 === 0 ? '#c7e8bd' : '#d2eec9';
-        ctx.fillRect(OFFX + x * CELL, OFFY + y * CELL, CELL, CELL);
+    const key = [COLS,ROWS,OFFX,OFFY,CELL,DPR,canvas.width,canvas.height,boardImage.complete && boardImage.naturalWidth ? 1 : 0].join();
+    if (key !== boardCacheKey) {
+      boardCacheKey = key;
+      boardCache = document.createElement('canvas');
+      boardCache.width = canvas.width; boardCache.height = canvas.height;
+      const c = boardCache.getContext('2d');
+      c.setTransform(DPR, 0, 0, DPR, 0, 0);
+      c.save();c.beginPath();c.rect(OFFX,OFFY,COLS*CELL,ROWS*CELL);c.clip();
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          c.fillStyle = (x + y) % 2 === 0 ? '#c7e8bd' : '#d2eec9';
+          c.fillRect(OFFX + x * CELL, OFFY + y * CELL, CELL, CELL);
+        }
       }
+      // 用 cover 裁切铺满画布；逻辑格坐标与碰撞边界保持不变。
+      if (boardImage.complete && boardImage.naturalWidth) {
+        const w = COLS*CELL, h = ROWS*CELL;
+        const scale = Math.max(w / boardImage.naturalWidth, h / boardImage.naturalHeight);
+        const sw = w / scale, sh = h / scale;
+        c.drawImage(boardImage, (boardImage.naturalWidth - sw) / 2,
+          (boardImage.naturalHeight - sh) / 2, sw, sh, OFFX, OFFY, w, h);
+      }
+      c.strokeStyle = 'rgba(70,174,151,.35)';
+      c.lineWidth = 6;
+      c.strokeRect(OFFX + 3, OFFY + 3, COLS * CELL - 6, ROWS * CELL - 6);
+      c.restore();
     }
-    // 用 cover 裁切铺满画布；逻辑格坐标与碰撞边界保持不变。
-    if (boardImage.complete && boardImage.naturalWidth) {
-      const w = COLS*CELL, h = ROWS*CELL;
-      const scale = Math.max(w / boardImage.naturalWidth, h / boardImage.naturalHeight);
-      const sw = w / scale, sh = h / scale;
-      ctx.drawImage(boardImage, (boardImage.naturalWidth - sw) / 2,
-        (boardImage.naturalHeight - sh) / 2, sw, sh, OFFX, OFFY, w, h);
-    }
-    ctx.strokeStyle = 'rgba(70,174,151,.35)';
-    ctx.lineWidth = 6;
-    ctx.strokeRect(OFFX + 3, OFFY + 3, COLS * CELL - 6, ROWS * CELL - 6);
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+    ctx.drawImage(boardCache, 0, 0);
     ctx.restore();
   }
 
@@ -1756,9 +1770,16 @@
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.lineWidth = CELL * 0.62;
+    // 无勾边皮肤（彩虹等）：逐段 shadowBlur 是 O(身长) 次模糊，iPad 上越长越卡；
+    // 改为整条身体只做一次柔光底层，逐段只上色
+    if (!skin.edge && pts.length > 1) {
+      ctx.save();
+      ctx.strokeStyle = glowColor(0); ctx.shadowColor = glowColor(0); ctx.shadowBlur = glow;
+      strokePath(pts);
+      ctx.restore();
+    }
     for (let i = 0; i < pts.length - 1; i++) {
       ctx.strokeStyle = skin.body(i, now);
-      if (!skin.edge) { ctx.shadowColor = glowColor(i); ctx.shadowBlur = glow; }
       ctx.beginPath();
       ctx.moveTo(pts[i].x, pts[i].y);
       ctx.lineTo(pts[i + 1].x, pts[i + 1].y);
