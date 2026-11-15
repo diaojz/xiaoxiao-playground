@@ -389,6 +389,9 @@
   .cool-seconds { position:absolute; inset:0; display:grid; place-items:center; font-size:22px; color:white; text-shadow:0 2px 4px #322247; z-index:4; pointer-events:none; }
   .skill-btn small { right:-5px; bottom:-4px; z-index:5; min-width:23px; padding:3px; border:2px solid #fff; border-radius:14px; font-size:11px; line-height:1; }
   .skill-btn[data-slot="0"] { right:122px; bottom:8px; }.skill-btn[data-slot="1"] { right:158px; bottom:88px; }.skill-btn[data-slot="2"] { right:102px; bottom:166px; }.skill-btn[data-slot="3"] { right:22px; bottom:132px; }
+  .spore-btn { right:300px !important; bottom:76px !important; }
+  .leader-row { background:#fff1ad !important; box-shadow:0 0 8px #ffc928; border-radius:8px; }
+  .turn-btn { position:absolute; right:300px; bottom:10px; width:56px; height:56px; min-height:56px; padding:0; border-radius:50%; border:3px solid #fff; background:linear-gradient(#fff,#ffe1a8); font-size:30px; line-height:1; touch-action:none; pointer-events:auto; }
   .skill-more { right:238px; bottom:10px; width:56px; height:56px; min-height:56px; background:linear-gradient(#fff,#cceeff); color:#6d57a0; font-size:32px; line-height:1; }
   .skill-more::before { content:'•••'; letter-spacing:1px; }.skill-more[aria-expanded="true"]::before { content:'×'; }
   .skill-overflow { position:absolute; right:232px; bottom:84px; display:flex; flex-direction:column; gap:12px; padding:5px; border-radius:40px; background:#ecf5ffee; box-shadow:0 4px 18px #6960a344; pointer-events:auto; }
@@ -408,6 +411,36 @@
   .hud{left:92px;max-width:calc(100vw - 426px)}
   .growth-hud{top:112px}
   @media(max-width:700px){.hud{left:8px;right:8px;top:70px;max-width:none;justify-content:center}.growth-hud{top:134px}.leaderboard{top:134px}}
+  /* 触屏/窄屏精简布局：所有浮层缩小、半透明、只留关键信息，把视野还给棋盘 */
+  @media (max-width:900px), (pointer:coarse) {
+    .collection-back { top:calc(6px + var(--safe-top)) !important; left:calc(6px + var(--safe-left)) !important; padding:3px 8px !important; font-size:12px !important; border-width:2px !important; opacity:.7; }
+    .hud { top:calc(6px + var(--safe-top)) !important; left:calc(64px + var(--safe-left)) !important; font-size:13px !important; gap:6px !important; padding:3px 8px !important; border-width:2px !important; border-radius:18px !important; box-shadow:none !important; opacity:.78; }
+    .hud .ui-icon { width:18px !important; height:18px !important; }
+    .hud button { font-size:11px !important; padding:3px 8px !important; }
+    .growth-hud { top:calc(46px + var(--safe-top)) !important; left:calc(64px + var(--safe-left)) !important; transform:scale(.7); transform-origin:top left; opacity:.7; }
+    .leaderboard { top:calc(6px + var(--safe-top)) !important; right:calc(104px + var(--safe-right)) !important; min-width:0 !important; max-width:118px !important; padding:4px 6px !important; border-width:2px !important; border-radius:14px !important; box-shadow:none !important; opacity:.72; font-size:11px !important; }
+    .leaderboard .row { padding:1px 3px !important; gap:4px !important; }
+    .leaderboard .row:nth-child(n+5):not(.me) { display:none; }
+    .leaderboard .ui-icon, .leaderboard img, .leaderboard .avatar { width:18px !important; height:18px !important; }
+    .game-tools { top:calc(6px + var(--safe-top)) !important; right:calc(6px + var(--safe-right)) !important; gap:6px !important; transform:scale(.7); transform-origin:top right; opacity:.8; }
+    .ammo-belt { left:calc(6px + var(--safe-left)) !important; right:auto !important; width:auto !important; max-width:44vw; bottom:calc(6px + var(--safe-bottom)) !important; padding:3px 6px !important; border-width:2px !important; border-radius:16px !important; box-shadow:none !important; opacity:.8; flex-wrap:nowrap !important; }
+    .ammo-label:not(#ammoCount) { display:none !important; }
+    #ammoCount { font-size:11px; margin:0 !important; }
+    .ammo-slots { padding:6px 4px 8px !important; gap:8px !important; max-height:none !important; }
+    .ammo-slot { width:32px !important; height:32px !important; min-height:32px !important; }
+    .ammo-slot .atlas-icon { transform:scale(.62) !important; }
+    .ammo-slot .ammo-num, .ammo-slot .ammo-lv { font-size:10px !important; }
+    .corner-btns { left:calc(6px + var(--safe-left)) !important; bottom:calc(64px + var(--safe-bottom)) !important; gap:6px !important; opacity:.7; }
+    .corner-btn { padding:4px 8px !important; font-size:0 !important; min-height:0 !important; border-width:2px !important; }
+    .corner-btn .ui-icon { width:24px !important; height:24px !important; margin:0 !important; }
+    .combat-controls { transform:scale(.72); transform-origin:bottom right; right:calc(4px + var(--safe-right)) !important; bottom:calc(4px + var(--safe-bottom)) !important; }
+    .combat-controls button { opacity:.88; }
+  }
+  @media (max-width:540px) {
+    .leaderboard { top:calc(38px + var(--safe-top)) !important; right:calc(6px + var(--safe-right)) !important; max-width:104px !important; opacity:.6; }
+    .leaderboard .row:nth-child(n+4):not(.me) { display:none; }
+    .hud { left:calc(62px + var(--safe-left)) !important; max-width:calc(100vw - 130px); }
+  }
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><link rel="stylesheet" href="../app-compat.css"><script defer src="../app-compat.js"></script></head>
 <body>
@@ -430,6 +463,8 @@
   <div class="ammo-belt" id="ammoBelt" aria-label="糖果弹药槽"><span class="ammo-label">糖果弹</span><div class="ammo-slots" id="ammoSlots"></div><span class="ammo-label" id="ammoCount">0/30</span></div>
   <div class="combat-controls" id="combatControls" aria-label="战斗按键">
     <div class="skill-belt" id="skillBelt" aria-label="糖果技能"></div>
+    <button class="turn-btn spore-btn" id="sporeBtn" aria-label="甩出孢子" aria-keyshortcuts="T" title="甩出孢子（T）">🟣</button>
+    <button class="turn-btn" id="turnBtn" aria-label="原地掉头" aria-keyshortcuts="R" title="原地掉头（R）">🔄</button>
     <button class="fire-btn" id="fireBtn" aria-label="发射糖果弹" aria-keyshortcuts="F J Enter"><img class="ui-icon" src="assets/ui/icon_fire.png" alt=""><b class="fire-count" id="fireCount">0</b></button>
   </div>
   <div class="game-tools"><button id="pauseBtn" aria-label="暂停游戏" aria-keyshortcuts="P"><img class="ui-icon" src="assets/ui/icon_pause.png" alt=""></button><button id="muteBtn" aria-label="静音" aria-keyshortcuts="M"><img class="ui-icon" src="assets/ui/icon_sound_on.png" alt=""></button></div>
@@ -889,7 +924,7 @@
     {id:'ghost',key:'z',emoji:'👻',name:'幽灵穿越',lv:1,duration:4000,cooldown:8000,color:'#8d7bff'},
     {id:'rainbow',key:'x',emoji:'🌈',name:'彩虹冲刺',lv:2,duration:2500,cooldown:10000,color:'#ff6aa9'},
     {id:'giant',key:'c',emoji:'🦖',name:'巨人',lv:4,duration:6000,cooldown:14000,color:'#ffad39'},
-    {id:'bomb',key:'v',emoji:'💣',name:'糖果炸弹',lv:6,duration:0,cooldown:16000,color:'#ff5a83'},
+    {id:'bomb',key:'v',emoji:'💣',name:'糖果炸弹',lv:6,duration:0,cooldown:0,color:'#ff5a83'},
     {id:'freeze',key:'b',emoji:'❄️',name:'冰冻全场',lv:8,duration:3000,cooldown:18000,color:'#55cfff'},
     {id:'magnet',key:'n',emoji:'🧲',name:'糖果磁铁',lv:10,duration:5000,cooldown:20000,color:'#ff70a8'},
   ];
@@ -953,6 +988,8 @@
     { name: '精算师', color: '#2980b9', headColor: '#1f618d', strategy: 'efficient', desc: '按性价比选食物，从不做亏本买卖。' },
     { name: '愣头青', color: '#c0392b', headColor: '#922b21', strategy: 'nearest',   desc: '横冲直撞，毫无章法，但速度惊人。' },
     { name: '小心眼', color: '#16a085', headColor: '#117864', strategy: 'coward',    desc: '疑心病重，总躲着大伙儿，独自觅食。' },
+    { name: '粉泡泡', color: '#e84393', headColor: '#b83280', strategy: 'efficient', desc: '软软糯糯却很会算，专挑划算的糖果。' },
+    { name: '金闪闪', color: '#f1c40f', headColor: '#b7950b', strategy: 'biggest',   desc: '闪闪发光的土豪，哪颗最值钱就冲向哪颗。' },
   ];
   // 撞死/射杀后重生的新对手会从整个池子里随机抽，不局限于开局这两位
   const INITIAL_OPPONENTS = AI_POOL.slice(0, 2);
@@ -965,6 +1002,21 @@
 
   let snakes, foods, running;
   let lastStepTime;
+  // 缩圈和孢子使用本局时钟，读档后重新开始计时。
+  let ringLevel = 0, nextRingAt = 0, sporeReadyAt = 0, lastRingToast = 0;
+  function safeMargin() { return Math.min(ringLevel, Math.floor((Math.min(COLS, ROWS)-1)/2)); }
+  function inSafe(x,y) { const m=safeMargin(); return x>=m && x<COLS-m && y>=m && y<ROWS-m; }
+  function clampSafe(p) { const m=safeMargin(); p.x=Math.max(m,Math.min(COLS-1-m,p.x)); p.y=Math.max(m,Math.min(ROWS-1-m,p.y)); }
+  function leader() { return snakes && snakes.reduce((a,b)=>b.score>a.score?b:a); }
+  function throwSpore() {
+    const p=snakes && snakes[0], now=performance.now();
+    if(!running || paused || !p || now<sporeReadyAt) return;
+    if(p.body.length<12){ queueNotice("🟣 孢子", "长到 12 节才能甩出孢子哦！"); return; }
+    p.body.splice(-3); p.contents.splice(-3); p.prevBody=p.body.map(part=>({...part}));
+    const h=p.body[0], pos={x:h.x+p.dir.x*4,y:h.y+p.dir.y*4}; clampSafe(pos);
+    foods.push({...pos, emoji:"🟣", score:8, grow:3, weight:1, category:"fruit", spore:true});
+    sporeReadyAt=now+3000; updateHud();
+  }
   const BASE_SPEED = 900;
   const BOOST_DIVISOR = 3; // 长按空格加速 3 倍
   let spaceHeld = false;
@@ -1069,6 +1121,7 @@
     if(!running)return;paused=!paused;
     if(paused){pauseStartedAt=performance.now();spaceHeld=false;}else{
       const now=performance.now(),waited=now-pauseStartedAt;
+      nextRingAt+=waited; if(sporeReadyAt>pauseStartedAt)sporeReadyAt+=waited;
       for(const timers of [skillCooldowns,skillEnds])for(const id of Object.keys(timers))if(timers[id]>pauseStartedAt)timers[id]+=waited;
       for(const foe of snakes)for(const key of ['frozenUntil','slowedUntil','invincibleUntil'])if(foe[key]>pauseStartedAt)foe[key]+=waited;
       lastStepTime=now;lastFrameTime=now;requestAnimationFrame(loop);
@@ -1150,7 +1203,7 @@
   function spawnOneFood() {
     let pos, tries = 0;
     do {
-      pos = { x: (Math.random() * COLS) | 0, y: (Math.random() * ROWS) | 0 };
+      const m=safeMargin(); pos = { x: m+((Math.random() * (COLS-2*m)) | 0), y: m+((Math.random() * (ROWS-2*m)) | 0) };
       tries++;
     } while (occupied(pos.x, pos.y) && tries < 200);
     const kind = pickWeightedKind();
@@ -1211,14 +1264,15 @@
     let room = foodCap() - foods.length;
     for (let i = 0; i < snake.body.length && room > 0; i++, room--) {
       const seg = snake.body[i];
-      foods.push({ x: seg.x, y: seg.y, ...AVOCADO_KIND });
+      const pos={x:seg.x,y:seg.y}; clampSafe(pos); foods.push({ ...pos, ...AVOCADO_KIND });
     }
   }
 
   // 把撞死/爆头的对手从场上移除后排到这里，稍等一会儿就补一条，始终保持 2 位对手在场。
-  function killOpponent(index) {
+  function killOpponent(index, killer=snakes[0]) {
     const foe=snakes[index];
-    if(foe && !foe.isPlayer){ gainExp(8,'打败小伙伴'); showKillFeedback(foe.body[0]); }
+    if(foe && foe===leader() && killer){ killer.score+=30; if(killer.isPlayer) queueNotice("👑 推翻榜首！", "+30 分！"); }
+    if(foe && !foe.isPlayer && killer && killer.isPlayer){ gainExp(8,'打败小伙伴'); showKillFeedback(foe.body[0]); }
     dropAvocados(foe);
     snakes.splice(index, 1);
     pendingRespawns.push(performance.now() + RESPAWN_MIN_MS + Math.random() * (RESPAWN_MAX_MS - RESPAWN_MIN_MS));
@@ -1235,6 +1289,7 @@
 
   function reset(carry=null) {
     foods = [];
+    ringLevel=0; nextRingAt=performance.now()+60000; sporeReadyAt=0; lastRingToast=0;
     bullets = [];
     pendingRespawns = [];
     if(!carry){ skillEnds = {}; skillCooldowns = {}; } combo = 0; killTexts.length = 0; killParticles.length = 0; skillTrailParticles.length = 0;
@@ -1242,12 +1297,16 @@
       { x: Math.floor(COLS * 0.5),  y: Math.floor(ROWS * 0.5),  dir: { x: 1, y: 0 } },
       { x: Math.floor(COLS * 0.15), y: Math.floor(ROWS * 0.15), dir: { x: 1, y: 0 } },
       { x: Math.floor(COLS * 0.85), y: Math.floor(ROWS * 0.85), dir: { x: -1, y: 0 } },
+      { x: Math.floor(COLS * 0.85), y: Math.floor(ROWS * 0.15), dir: { x: -1, y: 0 } },
+      { x: Math.floor(COLS * 0.15), y: Math.floor(ROWS * 0.85), dir: { x: 1, y: 0 } },
+      { x: Math.floor(COLS * 0.5),  y: Math.floor(ROWS * 0.12), dir: { x: 1, y: 0 } },
+      { x: Math.floor(COLS * 0.5),  y: Math.floor(ROWS * 0.88), dir: { x: -1, y: 0 } },
     ];
     // 无尽模式永远不放障碍，保留空数组只让旧的碰撞和寻路分支自然跳过。
     obstacles = [];
     const defs = [
       { isPlayer: true, name: '你', color: '#2e8b57', headColor: '#1f6b41', strategy: 'nearest', auto: false },
-      ...AI_POOL.slice(0, 2).map(p => ({ isPlayer: false, name: p.name, color: p.color, headColor: p.headColor, strategy: p.strategy, auto: true })),
+      ...AI_POOL.slice(0, 6).map(p => ({ isPlayer: false, name: p.name, color: p.color, headColor: p.headColor, strategy: p.strategy, auto: true })),
     ];
     snakes = defs.map((def, i) => {
       const pos = starts[i];
@@ -1287,7 +1346,7 @@
     lengthEl.textContent = player.body.length;
     document.getElementById('levelText').textContent='Lv'+save.level;
     lbRows.innerHTML = snakes.slice().sort((a, b) => b.score - a.score).map(s =>
-      `<div class="row${s.isPlayer ? ' me' : ''}">${s.isPlayer ? playerAvatarMarkup(28, spriteMarkup('snake', 'player', 28, `<span class="dot" style="background:${s.color}"></span>`)) : spriteMarkup('snake', friendKey(s), 28, `<span class="dot" style="background:${s.color}"></span>`)}<span class="name">${s.name}</span><span class="val">${s.score}</span></div>`
+      `<div class="row${s.isPlayer ? ' me' : ''}${s === leader() ? ' leader-row' : ''}">${s.isPlayer ? playerAvatarMarkup(28, spriteMarkup('snake', 'player', 28, `<span class="dot" style="background:${s.color}"></span>`)) : spriteMarkup('snake', friendKey(s), 28, `<span class="dot" style="background:${s.color}"></span>`)}<span class="name">${s.name}</span><span class="val">${s.score}</span></div>`
     ).join('');
     renderAmmo();
     const next = save.level >= 20 ? LEVEL_EXP[19] : LEVEL_EXP[save.level];
@@ -1358,7 +1417,7 @@
     if(!snake.isPlayer || !skillActive('ghost')) for(const o of obstacles) blocked.add(key(o.x,o.y));
     for(const s of snakes) for(let i=0;i<s.body.length-(s===snake?1:0);i++) blocked.add(key(s.body[i].x,s.body[i].y));
     blocked.delete(key(head.x,head.y)); const q=[head], prev=new Map([[key(head.x,head.y),null]]), dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
-    for(let qi=0;qi<q.length&&qi<COLS*ROWS;qi++){const p=q[qi];if(p.x===target.x&&p.y===target.y){const path=[];let cursor={x:p.x,y:p.y}, k=key(cursor.x,cursor.y);while(prev.get(k)){path.unshift({...cursor});cursor=prev.get(k);k=key(cursor.x,cursor.y);}return path;}for(const d of dirs){const x=p.x+d.x,y=p.y+d.y,k=key(x,y);if(x>=0&&x<COLS&&y>=0&&y<ROWS&&!blocked.has(k)&&!prev.has(k)){prev.set(k,{x:p.x,y:p.y});q.push({x,y});}}}return null;
+    for(let qi=0;qi<q.length&&qi<COLS*ROWS;qi++){const p=q[qi];if(p.x===target.x&&p.y===target.y){const path=[];let cursor={x:p.x,y:p.y}, k=key(cursor.x,cursor.y);while(prev.get(k)){path.unshift({...cursor});cursor=prev.get(k);k=key(cursor.x,cursor.y);}return path;}for(const d of dirs){const x=p.x+d.x,y=p.y+d.y,k=key(x,y);if(x>=0&&x<COLS&&y>=0&&y<ROWS&&(snake.isPlayer || inSafe(x,y) || !inSafe(head.x,head.y))&&!blocked.has(k)&&!prev.has(k)){prev.set(k,{x:p.x,y:p.y});q.push({x,y});}}}return null;
   }
   function openSpace(snake, d){const h=snake.body[0], seen=new Set(), q=[{x:h.x+d.x,y:h.y+d.y}],key=(x,y)=>x+','+y;while(q.length&&seen.size<80){const p=q.shift(),k=key(p.x,p.y);if(seen.has(k)||p.x<0||p.x>=COLS||p.y<0||p.y>=ROWS||obstacles.some(o=>o.x===p.x&&o.y===p.y)||snakes.some(s=>s.body.some(b=>b.x===p.x&&b.y===p.y)))continue;seen.add(k);for(const n of [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}])q.push({x:p.x+n.x,y:p.y+n.y});}return seen.size;}
   // ===== 朝目标水果规划下一步方向，玩家和 AI 都会绕墙，也会躲开对手头部 =====
@@ -1371,6 +1430,7 @@
       target = pickTarget(snake, head);
       snake.targetFood = target;
     }
+    if (!snake.isPlayer && !inSafe(head.x,head.y)) { target={...head}; clampSafe(target); }
     if (!target) return;
 
     const cand = [
@@ -1382,6 +1442,7 @@
       let nx = head.x + d.x, ny = head.y + d.y;
       let s = 0;
       if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) s += 1000;
+      if (!snake.isPlayer && !inSafe(nx,ny)) { const p={x:nx,y:ny}; clampSafe(p); s+=500+manhattan(p,{x:nx,y:ny})*100; }
       if (obstacles.some(o=>o.x===nx&&o.y===ny)) s += 1000;
       for (let i = 0; i < snake.body.length - 1; i++) {
         if (snake.body[i].x === nx && snake.body[i].y === ny) { s += 500; break; }
@@ -1464,6 +1525,24 @@
       while (snake.contents.length < snake.body.length) snake.contents.push(null);
     }
 
+    // 大蛇从被撞位置吃到尾巴；玩家仍只参与自己的头撞对手。
+    for(const attacker of [...snakes]) {
+      if(!snakes.includes(attacker) || (attacker.isPlayer && skillActive('ghost'))) continue;
+      for(const target of [...snakes]) {
+        if(target===attacker || target.isPlayer || !snakes.includes(target)) continue;
+        const h=attacker.body[0], hit=target.body.findIndex(p=>p.x===h.x && p.y===h.y);
+        if(hit<0) continue;
+        if(attacker.body.length>target.body.length) {
+          const count=target.body.length-hit;
+          if(hit===0) { if(attacker.isPlayer) showKillFeedback(h); attacker.grow+=Math.min(count,Math.max(0,MAX_BODY_LEN-attacker.body.length-attacker.grow)); attacker.score+=count*2; killOpponent(snakes.indexOf(target),attacker); continue; }
+          target.body.splice(hit); target.contents.splice(hit); target.prevBody=target.body.map(p=>({...p}));
+          attacker.grow+=Math.min(count,Math.max(0,MAX_BODY_LEN-attacker.body.length-attacker.grow));
+          attacker.score+=count*2;
+          if(attacker.isPlayer) showKillFeedback(h);
+          if(target.body.length<=3) killOpponent(snakes.indexOf(target),attacker);
+        } else if(attacker.isPlayer) killOpponent(snakes.indexOf(target),attacker);
+      }
+    }
     // 撞击判定：玩家的头只要碰到别的蛇（哪怕是对方的头），对方直接死亡；
     // 玩家自己永远不会因为撞击而死，所以只需要单向检测玩家头 -> 别人身体
     const player = snakes[0];
@@ -1471,7 +1550,7 @@
       // 磁铁只拉近附近糖果，避免一口气全盘吸光，也不会改变食物的正常刷新节奏。
       if(skillActive('magnet')) for(const f of foods){const dx=player.body[0].x-f.x,dy=player.body[0].y-f.y;if(Math.hypot(dx,dy)<=5){f.x+=Math.sign(dx);f.y+=Math.sign(dy);}}
       const ph = player.body[0];
-      if(!skillActive('ghost')) for (let i = snakes.length - 1; i >= 1; i--) if (snakes[i].body.some(s => s.x === ph.x && s.y === ph.y)) killOpponent(i);
+      if(!inSafe(ph.x,ph.y)) { if(player.body.length>3){player.body.pop();player.contents.pop();} if(performance.now()-lastRingToast>2000){queueNotice('⚠️ 安全区外','快回到安全区！');lastRingToast=performance.now();} }
       if(skillActive('rainbow')||skillActive('giant')) for(let i=snakes.length-1;i>=1;i--) if(Math.abs(snakes[i].body[0].x-ph.x)+Math.abs(snakes[i].body[0].y-ph.y)<=1) killOpponent(i);
     }
 
@@ -1599,6 +1678,7 @@
     }
     ctx.save(); ctx.setTransform(1,0,0,1,0,0);
     ctx.drawImage(boardCache, 0, 0);
+    if(ringLevel){ctx.fillStyle="rgba(235,35,35,.35)"; for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(!inSafe(x,y))ctx.fillRect(OFFX+x*CELL,OFFY+y*CELL,CELL,CELL);}
     ctx.restore();
   }
 
@@ -1725,13 +1805,14 @@
   }
 
   function drawNameTag(snake, headPt, color) {
+    if(snake===leader()){ctx.save();ctx.font=`${Math.max(20,CELL*.65)}px serif`;ctx.textAlign="center";ctx.fillText("👑",headPt.x,Math.max(22,headPt.y-CELL*1.1));ctx.restore();}
     if (snake.isPlayer && kidAvatarReady) { drawKidAvatar(headPt); return; }
     ctx.save();
     ctx.font = '600 15px -apple-system, "PingFang SC", sans-serif';
     const label = snake.name;
     const w = ctx.measureText(label).width + 16;
     const tagY = headPt.y - CELL * .62;
-    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.fillStyle = snake===leader() ? '#ffe580' : 'rgba(255,255,255,.85)';
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(headPt.x - w / 2, tagY - 12, w, 22, 11);
     else ctx.rect(headPt.x - w / 2, tagY - 12, w, 22);
@@ -1979,6 +2060,7 @@
 
   function loop(now) {
     if (!running || paused) return;
+    if(ringLevel<4 && now>=nextRingAt){ringLevel++;nextRingAt+=25000;for(const f of foods)clampSafe(f);queueNotice("⚠️ 安全区缩小了！", "快向中间走！");}
     if([...combatPointers.values()].some(b=>b===fireBtn))requestFire();
     const speed = (spaceHeld ? BASE_SPEED / BOOST_DIVISOR : BASE_SPEED) / (skillActive('rainbow') ? 2.5 : 1);
     let elapsed = now - lastStepTime;
@@ -2014,6 +2096,23 @@
     renderSkills();
     if (shaking) ctx.restore();
     requestAnimationFrame(loop);
+  }
+
+  // 原地掉头：整条蛇首尾互换，原尾巴变成新蛇头，方向沿尾巴朝向外延伸。
+  function uTurn() {
+    const p = snakes && snakes[0];
+    if (!p || !running || paused || p.body.length < 2) return;
+    const n = p.body.length, a = p.body[n - 1], b = p.body[n - 2];
+    let d = { x: a.x - b.x, y: a.y - b.y };
+    const nx = a.x + d.x, ny = a.y + d.y;
+    // 尾巴前方是墙就换成不撞墙的方向
+    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) {
+      d = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].find(q => { const X=a.x+q.x, Y=a.y+q.y; return X>=0&&X<COLS&&Y>=0&&Y<ROWS&&!(X===b.x&&Y===b.y); }) || d;
+    }
+    p.body.reverse(); p.prevBody = p.body.map(s => ({ ...s })); p.contents.reverse();
+    p.dir = { ...d }; p.nextDir = { ...d };
+    if (p.auto) toggleAuto();
+    playSound('ui');
   }
 
   function setDir(x, y) {
@@ -2056,6 +2155,8 @@
     }
     if (!snakes) return;
     if (running && SKILL_DEFS.some(s=>s.key===k)) { activateSkill(SKILL_DEFS.find(s=>s.key===k).id); e.preventDefault(); return; }
+    if (running && k === 't') { throwSpore(); e.preventDefault(); return; }
+    if (running && k === 'r') { uTurn(); e.preventDefault(); return; }
     if (running && (k === 'q' || k === 'e')) { cycleAmmo(k === 'q' ? -1 : 1); e.preventDefault(); return; }
     if (running && /^[1-6]$/.test(k)) {
       const category = Object.keys(playerAmmoGroups(snakes[0]))[Number(k)-1];
@@ -2150,6 +2251,8 @@
   const combatControls=document.getElementById('combatControls'),combatPointers=new Map();
   function pressCombat(b){
     if(b===fireBtn){requestFire();return;}
+    if(b.id==='sporeBtn'){throwSpore();return;}
+    if(b.id==='turnBtn'){uTurn();return;}
     if(b.id==='skillMore'){
       const opened=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',String(opened));document.getElementById('skillOverflow').classList.toggle('hidden',!opened);playSound('ui');return;
     }
