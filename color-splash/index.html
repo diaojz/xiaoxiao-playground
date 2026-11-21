@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff0dc">
+<title>彩虹颜料工坊</title>
+<style>
+:root{color-scheme:light;--ink:#432d53;--cream:#fff6e8;--line:#fffdf4;--tap:96px;--gap:clamp(6px,1.2vmin,16px)}
+*{box-sizing:border-box}
+body{margin:0;font:700 clamp(16px,2.1vmin,25px)/1.2 "PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);background:#ffe5d2}
+button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation;color:inherit}
+button{font:inherit;cursor:pointer;border:0}
+button:focus-visible,a:focus-visible,svg [tabindex]:focus-visible{outline:4px solid #644ad8;outline-offset:3px}
+button:disabled{cursor:default}
+[hidden]{display:none!important}
+.shell{min-height:100svh;overflow-x:clip;display:grid;grid-template-rows:auto 1fr;gap:var(--gap);padding:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:linear-gradient(135deg,#fffbf492,#ffe8ee32),url('assets/art/bg_workshop.jpg') center/cover fixed,#ffe5d2}
+header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:var(--gap);min-width:0}
+nav{display:flex;gap:var(--gap);align-items:center}
+header a,header button,.bank{border:2px solid var(--line);border-radius:22px;background:var(--cream);box-shadow:0 5px 0 #dab69e77;text-decoration:none;min-height:var(--tap);display:grid;place-items:center;padding:6px 12px;text-align:center}
+header a,header button{min-width:var(--tap)}
+.bank{justify-self:end;display:flex;gap:6px;font-size:clamp(20px,3.7vmin,36px);min-width:var(--tap);justify-content:center}
+h1,h2,p{margin:0}
+h1{font-size:clamp(22px,4.7vmin,60px);text-align:center;text-shadow:0 2px #fff9ee;letter-spacing:.04em}
+main{min-width:0;display:grid;align-content:stretch}
+.home{display:grid;grid-template-rows:auto 1fr;gap:var(--gap);min-height:100%}
+.shelf{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;padding:5px 8px 12px;border-radius:26px;border:3px solid #fff8e7;background:linear-gradient(#fff9dd,#fee3bd);box-shadow:0 8px 0 #d59672,0 15px 22px #8c47622a}
+.bottle{position:relative;display:grid;place-items:center;background:none;padding:0;min-height:var(--tap);min-width:0}
+.bottle svg{width:100%;height:clamp(86px,13vmin,145px)}
+.bottle span{position:absolute;bottom:4%;font-size:clamp(18px,3.8vmin,34px)}
+.home-floor{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,26%);align-items:stretch;gap:var(--gap);min-height:0}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);padding:var(--gap);align-content:stretch}
+.tile,.soft{border:3px solid #fffef7;border-radius:clamp(22px,4vmin,42px);box-shadow:0 7px 0 #ad709840,0 11px 22px #a0566326,inset 0 -8px #7e4c7910;min-height:var(--tap);background:linear-gradient(150deg,#fffdfa,var(--tile,#ffe5ac))}
+.tile{display:grid;align-content:center;justify-items:center;gap:8px;padding:8px}
+.tile strong{font-size:clamp(18px,3.3vmin,36px)}
+.icon{font-size:clamp(38px,9.8vmin,116px);line-height:1.06}
+.soft{padding:7px 15px}
+.soft:active,.tile:active,.bottle:active{transform:translateY(3px)}
+.kid-side{position:relative;display:grid;grid-template-rows:minmax(0,1fr) auto;align-items:end;justify-items:center;padding:var(--gap)}
+.kid-side img{position:absolute;top:0;width:100%;height:calc(100% - 102px);object-fit:contain;object-position:bottom}
+.kid-side .brush{position:absolute;bottom:33%;left:22%;font-size:clamp(26px,5vmin,62px);transform:rotate(-32deg)}
+.kid-side button{grid-row:2;width:100%}
+.play{display:grid;grid-template-rows:auto 1fr auto;gap:var(--gap);min-width:0;align-items:stretch;min-height:calc(100svh - 130px)}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:var(--gap)}
+.topline h2{font-size:clamp(19px,4vmin,46px);text-shadow:0 2px #fff8e7}
+.progress{color:#a54472;white-space:nowrap;font-size:clamp(14px,2.8vmin,28px)}
+.replay{min-width:var(--tap);font-size:clamp(26px,5vmin,50px);background:var(--cream)}
+.scene{position:relative;display:grid;place-items:center;min-height:185px;overflow:hidden;border:3px solid #fff9e9;border-radius:clamp(24px,5vmin,52px);background:radial-gradient(ellipse at 50% 45%,#fffdf5,#ffe3ae 80%);isolation:isolate}
+.scene::before{content:"";z-index:-1;position:absolute;inset:72% 0 0;background:linear-gradient(#f3ba8e55,#f5bc9b88);border-top:2px solid #fff6e9}
+.figure{width:min(57%,520px);height:min(100%,48svh);display:grid;place-items:center;position:relative}
+.figure svg{width:100%;height:100%;max-height:48svh}
+.scene-kid{position:absolute;right:1%;bottom:2%;width:clamp(75px,16%,200px);height:54%;object-fit:contain;object-position:bottom;pointer-events:none}
+.tray{display:flex;justify-content:center;gap:var(--gap);min-width:0}
+.tray .bottle{min-width:var(--tap);background:#fff5e6;border:2px solid #fff;border-radius:24px;box-shadow:0 5px #b483732e;touch-action:none}
+.bucket{width:clamp(96px,19vw,220px)}
+.bucket svg{height:clamp(86px,14vmin,145px)}
+.palette{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px}
+.palette .bottle[aria-pressed=true]{outline:4px solid #6946a6;outline-offset:-5px;background:#fcdeff}
+.pot{width:min(46%,420px);max-height:38svh;cursor:pointer;touch-action:manipulation}
+.pot svg{width:100%;height:100%;max-height:38svh}
+.ingredients{position:absolute;top:4%;left:4%;display:flex;gap:8px;pointer-events:none}
+.ingredients svg{width:clamp(33px,8vmin,85px)}
+.find{grid-template-rows:auto 1fr auto}
+.objects{display:grid;grid-template-columns:repeat(5,minmax(96px,1fr));grid-auto-rows:minmax(96px,1fr);gap:var(--gap);padding:var(--gap);border-radius:32px;background:linear-gradient(160deg,#deffdd,#bcebf8)}
+.objects button{position:relative;isolation:isolate;font-size:clamp(42px,11vmin,106px);line-height:1;padding:4px}
+.picker{grid-template-columns:repeat(3,minmax(96px,1fr))}
+.picker svg{width:100%;height:100%;max-height:32svh}
+.canvas-scene{min-height:260px;background:linear-gradient(140deg,#eedcff,#ffe4f0)}
+.sheet{width:min(100%,640px);height:min(48svh,510px);padding:8px;display:grid;place-items:center}
+.sheet svg{width:100%;height:100%;max-height:48svh}
+.sheet [data-region]{cursor:pointer;touch-action:manipulation}
+.play-actions{display:flex;gap:var(--gap)}
+.play-actions button{min-width:var(--tap)}
+#finish{--tile:#ceefb9;font-size:clamp(27px,4.6vmin,53px)}
+.play-end{display:grid;align-items:center;justify-items:center;gap:var(--gap);padding:12px;text-align:center}
+.play-end .tray{flex-wrap:wrap}
+.listen-scene{display:grid;align-content:center;gap:12px}
+.listen-scene .scene-kid{height:68%}
+.word{font-size:clamp(35px,10vmin,110px);line-height:1;text-align:center;text-shadow:0 4px #fff}
+.word-swatch{width:clamp(84px,20vmin,200px);margin:auto}
+.mic{min-width:128px;font-size:clamp(29px,5vmin,54px);--tile:#ffd7ed}
+.live{animation:bounce .7s infinite alternate}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(155px,100%),1fr));gap:var(--gap);align-content:start}
+.gallery button{padding:8px;display:grid;justify-items:center;gap:6px}
+.gallery img:first-child{width:100%;aspect-ratio:4/3;object-fit:contain;border-radius:16px;background:#fffdf4}
+.avatar{width:58px;height:58px;object-fit:contain;border-radius:50%;background:#ffedcc}
+dialog{position:fixed;inset:0;margin:0;border:0;padding:0;max-width:none;max-height:none;width:100%;height:100%;color:var(--ink);background:#562d75bf}
+dialog[open]{display:grid;place-items:center}
+.reveal{display:grid;justify-items:center;gap:var(--gap);max-width:92vw;padding:clamp(12px,3.5vmin,44px);text-align:center;border-radius:40px;background:radial-gradient(#fff8c8,#ffd9ed);border:4px solid #fffdf2;box-shadow:0 14px 0 #763c7755}
+.reveal .award-art{width:min(44vw,34svh,300px);height:min(44vw,34svh,300px);display:grid;place-items:center;animation:reveal .72s both;font-size:clamp(65px,20vmin,200px)}
+.wall-preview{position:absolute;top:3%;right:3%;display:flex;justify-content:center;gap:2px;padding:4px;border-radius:16px;background:#ffedce;border-bottom:6px solid #d99974;width:min(58%,460px)}
+.wall-preview svg{width:8.5%;height:auto}
+dialog[data-type=medal] .award-art{border:clamp(6px,1.2vmin,14px) solid #fff0a4;border-radius:50%;background:radial-gradient(circle at 34% 24%,#fff9cc 9%,#ffd874 38%,#f5a542 91%);box-shadow:0 7px 0 #d88445,inset 0 0 0 4px #f4ad52,0 12px 28px #f1a1566e}
+.reveal svg,.reveal img:not(.avatar){max-width:100%;max-height:56svh}
+.reveal button{min-width:var(--tap)}
+.effects{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.drag-ghost{position:fixed;z-index:8;width:88px;height:105px;pointer-events:none;left:0;top:0}
+.drag-ghost svg{width:100%;height:100%}
+.jump{animation:bounce .55s both}
+.shake{animation:shake .36s both}
+.spin{animation:spin .63s both}
+@keyframes bounce{45%{transform:translateY(-18px) scale(1.11)}75%{transform:translateY(3px) scale(.97,1.05)}}
+@keyframes shake{25%{transform:translateX(-8px) rotate(-5deg)}65%{transform:translateX(8px) rotate(5deg)}}
+@keyframes spin{55%{transform:scale(1.17) rotate(18deg)}}
+@keyframes reveal{from{opacity:0;transform:scale(.25) rotate(-24deg)}70%{transform:scale(1.14) rotate(7deg)}}
+@media(max-width:1000px){.shelf{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:630px){
+  .shell{background-attachment:scroll}
+  header{grid-template-columns:1fr auto}
+  header h1{grid-column:1/-1;grid-row:2}
+  .shelf{grid-template-columns:none;grid-template-rows:repeat(2,96px);grid-auto-flow:column;grid-auto-columns:96px;overflow-x:auto}
+  .home-floor{grid-template-columns:1fr}
+  .kid-side{grid-template-columns:1fr 1fr;grid-template-rows:auto;min-height:108px}
+  .kid-side img{height:100%;width:47%;left:0}
+  .kid-side .brush{left:14%;bottom:47%}
+  .kid-side button{grid-column:2;grid-row:1}
+  .objects,.palette{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .figure{width:76%}
+  .scene-kid{right:0;width:19%}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+</style>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><link rel="stylesheet" href="../app-compat.css"><script defer src="../app-compat.js"></script></head>
+<body>
+<div class="shell">
+<header>
+  <nav><a href="../index.html" aria-label="返回合集">‹ 合集</a><button id="home" type="button" hidden aria-label="工坊首页">🏠</button></nav>
+  <h1>彩虹颜料工坊</h1>
+  <div class="bank" data-flower-counter aria-label="小红花"><span aria-hidden="true">🌺</span><output id="flowers">0</output></div>
+</header>
+<main id="game"></main>
+</div>
+<dialog id="dialog"></dialog>
+<script src="../shared/rewards.js"></script>
+<script>
+(() => {
+'use strict';
+
+// 纯逻辑供游戏和 Node 自测共用。
+const paints = {
+  red:'#ef4057', yellow:'#ffcf36', blue:'#4087ed', green:'#4ac76a', orange:'#ff882f',
+  purple:'#9156df', pink:'#f77db0', brown:'#a36a4a', black:'#333243', white:'#fffdfa'
+};
+const colors = Object.keys(paints);
+const basic = colors.slice(0, 6);
+const aliases = {
+  red:'red read rad bread fred', yellow:'yellow yello hello jello', blue:'blue blew boo glue',
+  green:'green grin queen clean', orange:'orange orenj arrange', purple:'purple paper people pupil',
+  pink:'pink ping think', brown:'brown brian round crown', black:'black block back blank', white:'white why wide light'
+};
+const recipes = { 'red|yellow':'orange', 'blue|yellow':'green', 'blue|red':'purple',
+  'red|white':'pink', 'green|red':'brown' };
+const names = {car:'小汽车', rocket:'小火箭', dino:'大恐龙', house:'小房子', fish:'小鱼', kid:'我的小人', cat:'小猫'};
+const templates = Object.keys(names).slice(0, 6);
+const positive = n => Number.isSafeInteger(n) && n > 0;
+const thumbPattern = /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/]+={0,2}$/i;
+const esc = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+function matchColor(transcripts, color) {
+  if (!Object.hasOwn(aliases, color) || !Array.isArray(transcripts)) return false;
+  const words = aliases[color].split(' ');
+  return transcripts.some(candidate => {
+    if (typeof candidate !== 'string') return false;
+    const tokens = candidate.toLowerCase().match(/[a-z]+/g) || [];
+    return !tokens.some(token => token !== color && colors.includes(token)) && tokens.some(token => words.includes(token));
+  });
+}
+function mixColor(a, b) {
+  return recipes[[a, b].sort().join('|')];
+}
+function addArtwork(save, art) {
+  save.artworks = [...save.artworks, art].slice(-24);
+}
+function normalizeSave(raw) {
+  const source = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const splashed = Object.fromEntries(colors.filter(c => positive(source.splashed?.[c])).map(c => [c, source.splashed[c]]));
+  const mixed = Object.values(recipes).filter(c => Array.isArray(source.mixed) && source.mixed.includes(c));
+  const artworks = (Array.isArray(source.artworks) ? source.artworks : []).filter(art =>
+    art && typeof art.id === 'string' && templates.includes(art.svgName) &&
+    typeof art.thumb === 'string' && art.thumb.length <= 160000 && thumbPattern.test(art.thumb)).slice(-24).map(art => ({
+      id:art.id, svgName:art.svgName, thumb:art.thumb, time:positive(art.time) ? art.time : 0,
+      fills:Object.fromEntries(Array.from({length:10}, (_, i) => i)
+        .filter(i => Object.hasOwn(paints, art.fills?.[i])).map(i => [i, art.fills[i]]))
+    }));
+  const save = {
+    unlocked: colors.filter(c => basic.includes(c) || (Array.isArray(source.unlocked) && source.unlocked.includes(c))),
+    splashed, mixed, artworks, reads:positive(source.reads) ? source.reads : 0
+  };
+  updateUnlocks(save);
+  return save;
+}
+function updateUnlocks(save) {
+  const mastered = basic.every(c => save.splashed[c] > 0);
+  const fresh = colors.filter(c => !save.unlocked.includes(c) &&
+    ((c === 'white' && mastered) || (c === 'black' && mastered && save.reads >= 5) ||
+      ((c === 'pink' || c === 'brown') && save.mixed.includes(c))));
+  save.unlocked.push(...fresh);
+  return fresh;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { basic, matchColor, mixColor, normalizeSave, updateUnlocks, addArtwork };
+  return;
+}
+
+// 线稿从大轮廓到小配件绘制；眼睛等装饰不拦触摸。
+const path = d => '<path d="' + d + '"/>';
+const circle = (x,y,r) => '<circle cx="' + x + '" cy="' + y + '" r="' + r + '"/>';
+const oval = (x,y,rx,ry) => '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '"/>';
+const rect = (x,y,w,h,r) => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + r + '"/>';
+const drawings = {
+  car: [path('M91 166 132 89 Q144 70 171 70 H290 Q318 70 336 98 L382 167Z'),
+    path('M141 151 167 96 H224 V151Z'),path('M249 96H287Q300 96 313 115L338 151H249Z'),
+    path('M57 167Q88 149 137 154H370Q426 154 432 198V241Q432 260 409 260H63Q40 260 40 239V204Q40 181 57 167Z'),
+    oval(398,197,24,18),rect(45,193,40,33,12),circle(128,252,42),circle(352,252,42)],
+  rocket: [path('M193 184Q110 196 108 265L201 234Z'),path('M287 184Q370 196 372 265L279 234Z'),
+    path('M220 240Q188 275 240 317Q288 275 260 240Z'),path('M240 21Q315 78 313 157Q310 228 270 248H210Q170 228 167 157Q165 78 240 21Z'),
+    path('M240 21Q274 46 293 82Q240 105 187 82Q206 46 240 21Z'),circle(240,151,40),rect(206,208,68,35,14)],
+  dino: [path('M161 134 177 89 210 122Z'),path('M209 120 233 85 253 122Z'),
+    path('M116 166 119 120 159 142Z'),path('M55 168Q87 198 117 173Q148 119 227 117Q263 116 289 144Q282 45 346 46Q405 43 418 91Q429 141 374 146L368 206Q348 250 245 255H155Q71 254 55 168Z'),
+    path('M172 224Q200 203 228 227L222 289H153Z'),path('M298 225Q320 207 344 226L370 289H299Z'),
+    oval(268,188,43,24),oval(377,120,39,22)],
+  house: [rect(109,131,264,164,20),rect(309,48,43,77,9),path('M73 141 218 39Q240 23 263 39L407 141Q421 160 394 167H86Q59 160 73 141Z'),
+    rect(210,206,63,89,21),rect(129,191,60,53,9),rect(292,191,60,53,9),circle(241,114,25)],
+  fish: [path('M330 133Q376 91 425 87Q410 167 425 239Q377 231 330 197Z'),
+    path('M191 110Q184 62 240 47Q285 68 293 114Z'),path('M213 222Q217 277 294 263L312 218Z'),
+    path('M66 163Q118 83 230 87Q323 89 365 163Q326 239 226 237Q121 235 66 163Z'),
+    oval(118,178,39,32),path('M218 151Q270 129 297 169Q265 209 218 189Z'),circle(67,96,20),circle(100,56,15)],
+  kid: [rect(172,244,62,62,20),rect(247,244,62,62,20),path('M175 164Q136 175 123 235Q160 262 193 197Z'),
+    path('M297 164Q343 177 357 235Q325 266 284 198Z'),rect(174,153,133,112,36),oval(240,106,79,74),
+    path('M162 95Q154 33 240 28Q322 33 318 94Q275 67 162 95Z'),rect(220,194,45,29,9)],
+  cat: [path('M329 220Q392 173 400 111Q457 184 371 259L310 272Z'),oval(240,218,119,76),
+    path('M122 131 123 42Q130 31 144 42L210 94Z'),path('M358 131 357 42Q350 31 336 42L270 94Z'),
+    oval(240,148,127,81),oval(166,276,45,20),oval(314,276,45,20)],
+};
+const details = {
+  dino: circle(366,83,7), fish:circle(135,145,7), kid:circle(212,106,6)+circle(268,106,6)+path('M222 132Q240 149 258 132'),
+  cat:circle(192,148,8)+circle(288,148,8)+path('M225 170H255L240 183Z')
+};
+function drawing(name, fills = {}, interactive = false, solid) {
+  const regions = drawings[name].map((shape, i) => {
+    const role = interactive ? ' tabindex="0" role="button" aria-label="填色区域 ' + (i + 1) + '"' : '';
+    const fill = paints[solid || fills[i]] || '#fffdf9';
+    return '<g data-region="' + i + '" fill="' + fill + '"' + role + '>' + shape + '</g>';
+  }).join('');
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 330" role="' + (interactive ? 'group' : 'img') +
+    '" aria-label="' + names[name] + '"><g stroke="#4b3657" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">' +
+    regions + '</g><g pointer-events="none" fill="#4b3657" stroke="#4b3657" stroke-width="4">' + (details[name] || '') + '</g></svg>';
+}
+let svgId = 0;
+function bottle(color, {locked = false, bucket = false} = {}) {
+  const id = 'gloss' + ++svgId;
+  const body = bucket ? path('M13 40H87L77 91Q50 100 23 91Z') : rect(19,33,62,61,16);
+  return '<svg viewBox="0 0 100 104" aria-hidden="true"><defs><linearGradient id="' + id +
+    '" x2="1" y2="1"><stop stop-color="' + (locked ? '#b8b4c0' : paints[color]) +
+    '"/><stop offset="1" stop-color="' + (locked ? '#888392' : paints[color]) +
+    '"/></linearGradient></defs><g stroke="#554065" stroke-width="3.5" stroke-linejoin="round">' +
+    (bucket ? '<path d="M19 43C8 8 92 8 81 43" fill="none" stroke-width="5"/>' : '<rect x="29" y="11" width="42" height="28" rx="8" fill="#fff0ca"/><path d="M29 25H71" opacity=".35"/>') +
+    '<g fill="url(#' + id + ')">' + body + '</g>' +
+    (bucket ? '<ellipse cx="50" cy="41" rx="37" ry="9" fill="' + paints[color] + '"/>' : '') +
+    '<path d="M30 51Q38 41 51 45" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".72"/>' +
+    '<path d="M69 53V78Q66 85 56 85" fill="none" stroke="#4c284d" stroke-width="5" stroke-linecap="round" opacity=".15"/></g></svg>';
+}
+function potSVG(color) {
+  return `<svg viewBox="0 0 300 220" aria-hidden="true">
+    <ellipse cx="150" cy="196" rx="115" ry="16" fill="#6b3d7133"/>
+    <path d="M66 137Q14 151 16 110Q16 87 66 98M234 137Q286 151 284 110Q284 87 234 98" fill="#ffd35c" stroke="#4b3657" stroke-width="10"/>
+    <path d="M47 95H253L225 175Q212 196 150 196Q88 196 75 175Z" fill="#8059b2" stroke="#4b3657" stroke-width="8"/>
+    <path d="M77 122Q84 154 100 161" fill="none" stroke="#c3a6e7" stroke-width="10" stroke-linecap="round"/>
+    <ellipse cx="150" cy="94" rx="104" ry="26" fill="${paints[color] || '#ece0ff'}" stroke="#4b3657" stroke-width="8"/>
+    <circle cx="113" cy="90" r="8" fill="#fff" opacity=".62"/><circle cx="174" cy="99" r="11" fill="#fff" opacity=".52"/>
+    <path d="M150 133 157 147 173 150 161 161 163 177 150 170 137 177 139 161 127 150 143 147Z" fill="#ffdc6b"/>
+  </svg>`;
+}
+
+const $ = selector => document.querySelector(selector);
+const game = $('#game');
+const modal = $('#dialog');
+const qa = new URLSearchParams(location.search).has('qa');
+const key = qa ? 'colorSplashQASave' : 'colorSplashSave';
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch (_) { return null; }
+}
+function store(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (_) { return false; }
+}
+const save = normalizeSave(load(key));
+function localRewards() {
+  const key = qa ? 'kidRewardsQA' : 'kidRewards';
+  const existing = load(key);
+  let memory = existing && typeof existing === 'object' ? existing : {};
+  const getState = () => {
+    const value = load(key) || memory;
+    return {...value, flowers:positive(value.flowers) ? value.flowers : 0,
+      medals:value.medals && typeof value.medals === 'object' ? value.medals : {}};
+  };
+  function write(state) { memory = state; store(key, state); }
+  return {
+    getState,
+    touchStreak() {},
+    addFlowers(n) {
+      const state = getState();
+      state.flowers += n;
+      write(state);
+      return state.flowers;
+    },
+    awardMedal(id) {
+      const state = getState();
+      if (state.medals[id]) return false;
+      state.medals[id] = true;
+      write(state);
+      return true;
+    },
+    flyFlower(from) {
+      if (!from || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const a = from.getBoundingClientRect();
+      const b = $('.bank').getBoundingClientRect();
+      const flower = document.createElement('span');
+      flower.textContent = '🌺';
+      flower.style.cssText = 'position:fixed;z-index:20;pointer-events:none;font-size:48px;left:' + (a.left+a.width/2-24) + 'px;top:' + (a.top+a.height/2-24) + 'px';
+      document.body.append(flower);
+      flower.animate([{transform:'scale(1)'},{transform:`translate(${b.left+b.width/2-a.left-a.width/2}px,${b.top+b.height/2-a.top-a.height/2}px) scale(.4)`}],
+        {duration:700,easing:'ease-out'}).finished.then(() => flower.remove(), () => flower.remove());
+    }
+  };
+}
+const rewards = window.KidRewards || localRewards();
+const clipText = {
+  zh_splash:'泼泼乐！听一听，把对的颜色泼上去。', zh_follow:'一起读颜色吧！',
+  zh_tap_mic:'点一下话筒，再大声说。', zh_mix:'把两瓶颜料放进魔法锅！', zh_find:'听一听，找颜色！',
+  zh_paint:'选一瓶颜料，再给画填上颜色。', zh_not_this:'再听一次。', zh_good:'真棒！',
+  zh_new_color:'新颜料！它要飞回收藏墙啦！', zh_gallery:'来看看你的作品！', zh_pick:'选一张你想画的画。',
+  zh_hear_me:'听听你刚才读的。', en_wow:'Wow!', en_great:'Great!', en_yay:'Yay!', en_tryagain:'Try again!',
+  en_magic:'Magic!', en_masterpiece:'What a masterpiece!'
+};
+for (const c of colors) {
+  clipText['en_' + c] = c;
+  clipText['en_find_' + c] = 'Find something ' + c + '!';
+  clipText['en_paint_' + c] = 'Paint it ' + c + '!';
+}
+for (const [key, c] of Object.entries(recipes)) {
+  clipText['en_mix_' + c] = key.replace('|', ' and ') + ' make ' + c + '!';
+}
+
+const audio = new Audio();
+let stopClip;
+let audioRun = 0;
+function stopAudio() { audioRun++; stopClip?.(); }
+function playClip(id) {
+  return new Promise(resolve => {
+    let timer;
+    let utterance;
+    let closed = false;
+    let usingSpeech = false;
+    function done() {
+      if (closed) return;
+      closed = true;
+      clearTimeout(timer);
+      audio.onended = audio.onerror = null;
+      audio.pause();
+      if (utterance) {
+        utterance.onend = utterance.onerror = null;
+        window.speechSynthesis?.cancel();
+      }
+      stopClip = null;
+      resolve();
+    }
+    function fallback() {
+      if (closed || usingSpeech) return;
+      usingSpeech = true;
+      clearTimeout(timer);
+      audio.pause();
+      if (!clipText[id] || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return done();
+      utterance = new SpeechSynthesisUtterance(clipText[id]);
+      utterance.lang = id.startsWith('zh_') ? 'zh-CN' : 'en-US';
+      utterance.rate = .86;
+      utterance.onend = utterance.onerror = done;
+      timer = setTimeout(done, 6500);
+      try { speechSynthesis.speak(utterance); } catch (_) { done(); }
+    }
+    stopClip = done;
+    if (id === 'zh_read_done') return fallback();
+    audio.onended = done;
+    audio.onerror = fallback;
+    audio.src = id.startsWith('blob:') ? id : 'assets/voice/' + id + '.m4a';
+    timer = setTimeout(fallback, 6500);
+    audio.play().catch(fallback);
+  });
+}
+async function say(...ids) {
+  stopAudio();
+  const run = audioRun;
+  for (const id of ids) {
+    if (run !== audioRun || document.hidden) break;
+    await playClip(id);
+  }
+}
+
+let screen = 'home', epoch = 0, busy = false, prompt = [], stopMic, recordingUrl, drag;
+let round = 0, target, artName, options = [], deck = [], followDeck = [], attempts = 0, micMode = 'ready';
+let ingredients = [], selected = 'red', fills = {};
+const pending = [];
+const modes = {
+  splash:['🪣','泼泼乐','#ffd68f'], mix:['🧪','魔法混色锅','#dcceff'],
+  find:['🔍','找颜色','#c5f2ca'], paint:['🖌️','涂色画廊','#ffd4e6']
+};
+const medals = {
+  color_first_splash:['🌺','第一朵颜料花'], color_all_basic:['🌈','六色小画家'],
+  color_mixer:['🪄','混色魔法师'], color_artist:['🎨','画廊小画家'], color_rainbow:['🏆','彩虹收藏家']
+};
+const later = (fn, ms) => {
+  const current = epoch;
+  setTimeout(() => { if (current === epoch) fn(); }, ms);
+};
+function shuffle(values) {
+  const copy = [...values];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i],copy[j]] = [copy[j],copy[i]];
+  }
+  return copy;
+}
+function animate(el, name) {
+  el?.classList.remove(name);
+  if (!el) return;
+  requestAnimationFrame(() => el.classList.add(name));
+}
+function updateBank() { $('#flowers').value = rewards.getState().flowers; }
+function award(n, from) {
+  rewards.addFlowers(n, from);
+  rewards.touchStreak();
+  rewards.flyFlower(from);
+  updateBank();
+  animate($('.bank'), 'jump');
+}
+function questions(count) {
+  const previous = save.unlocked.filter(c => !save.splashed[c]);
+  const order = [...shuffle(previous), ...shuffle(save.unlocked.filter(c => !previous.includes(c)))];
+  return order.slice(0, count);
+}
+function resetCapture() {
+  stopMic?.();
+  if (recordingUrl) URL.revokeObjectURL(recordingUrl);
+  recordingUrl = null;
+}
+function clearDrag() {
+  drag?.ghost.remove();
+  drag = null;
+}
+function view(next) {
+  epoch++;
+  stopAudio();
+  resetCapture();
+  clearDrag();
+  modal.close();
+  screen = next;
+  busy = false;
+  prompt = [];
+  $('#home').hidden = next === 'home';
+}
+function topLine(title, progress = '', action = '') {
+  return '<div class="topline"><h2>' + title + '</h2>' +
+    (progress ? '<span class="progress">' + progress + '</span>' : '') +
+    '<div class="play-actions"><button class="soft replay" id="replay" aria-label="再听一次">🔊</button>' + action + '</div></div>';
+}
+function hear(...ids) {
+  prompt = ids;
+  return say(...ids);
+}
+function kid(cheer = false) {
+  return '<img class="scene-kid" alt="" src="assets/kid/kid_' + (cheer ? 'cheer' : 'front') + '.png">';
+}
+function paintButtons(list, bucket = false) {
+  return list.map(c => '<button class="bottle' + (bucket ? ' bucket' : '') + '" data-color="' + c +
+    '" aria-label="' + c + '">' + bottle(c,{bucket}) + '</button>').join('');
+}
+function draw(markup) {
+  game.innerHTML = markup;
+  $('#replay')?.addEventListener('click', () => { if (!stopMic) void say(...prompt); });
+}
+function showHome() {
+  view('home');
+  draw('<section class="home"><div class="shelf" aria-label="颜料收藏">' +
+    colors.map(c => {
+      const locked = !save.unlocked.includes(c);
+      return '<button class="bottle" data-color="' + c + '" aria-label="' + c + (locked ? ' 未解锁' : '') +
+        '">' + bottle(c,{locked}) + (locked ? '<span>🔒</span>' : '') + '</button>';
+    }).join('') + '</div><div class="home-floor"><div class="mode-grid">' +
+    Object.entries(modes).map(([id,[icon,label,tint]]) => '<button class="tile" style="--tile:' + tint +
+      '" data-mode="' + id + '"><span class="icon">' + icon + '</span><strong>' + label + '</strong></button>').join('') +
+    '</div><aside class="kid-side"><img src="assets/kid/kid_front.png" alt=""><span class="brush" aria-hidden="true">🖌️</span>' +
+    '<button class="soft" id="gallery">🖼️ 我的作品</button></aside></div></section>');
+  game.querySelectorAll('[data-mode]').forEach(btn => btn.onclick = () => startMode(btn.dataset.mode));
+  game.querySelectorAll('[data-color]').forEach(btn => btn.onclick = () => {
+    const c = btn.dataset.color;
+    animate(btn, 'shake');
+    void say(save.unlocked.includes(c) ? 'en_' + c : 'zh_pick');
+  });
+  $('#gallery').onclick = showGallery;
+}
+$('#home').onclick = showHome;
+
+function checkpoint() {
+  for (const c of updateUnlocks(save)) pending.push({color:c});
+  const tests = [Object.keys(save.splashed).length > 0, basic.every(c => save.splashed[c]), save.mixed.length === 5,
+    save.artworks.length >= 3, save.unlocked.length === 10];
+  Object.keys(medals).forEach((id,i) => {
+    if (tests[i] && rewards.awardMedal(id)) pending.push({medal:id});
+  });
+  store(key, save);
+}
+function revealNext(next) {
+  const item = pending.shift();
+  if (!item) return next();
+  if (item.medal) {
+    const [icon,label] = medals[item.medal];
+    showDialog('<div class="award-art">' + icon + '</div><h2>' + label + '</h2>', () => revealNext(next), 'medal');
+    void say('en_yay','zh_good');
+  } else {
+    showDialog('<div class="wall-preview" aria-hidden="true" data-slot="' + colors.indexOf(item.color) + '">' + colors.map(c =>
+      bottle(c,{locked:c === item.color || !save.unlocked.includes(c)})).join('') +
+      '</div><div class="award-art">' + bottle(item.color) + '</div><h2>新颜料！</h2>',
+      () => revealNext(next), 'bottle');
+    void say('zh_new_color','en_' + item.color);
+  }
+}
+function showDialog(content, next, type) {
+  modal.dataset.type = type;
+  modal.innerHTML = '<div class="reveal">' + content + '<button class="soft" aria-label="继续">⭐</button></div>';
+  modal.showModal();
+  function continueGame() {
+    if (!modal.open) return;
+    if (type === 'bottle') {
+      const preview = modal.querySelector('.wall-preview');
+      const wall = preview.getBoundingClientRect();
+      const card = modal.querySelector('.award-art');
+      const rect = card.getBoundingClientRect();
+      const dx = wall.left + wall.width * (Number(preview.dataset.slot) + .5) / colors.length - rect.left - rect.width/2;
+      const dy = wall.top + wall.height/2 - rect.top - rect.height/2;
+      modal.querySelector('button').disabled = true;
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        card.animate([{transform:'none'},{transform:`translate(${dx}px,${dy}px) scale(.22)`,opacity:.25}], {duration:420,fill:'forwards'});
+        return later(() => { modal.close(); next(); }, 420);
+      }
+    }
+    modal.close();
+    next();
+  }
+  modal.querySelector('button').onclick = continueGame;
+  modal.oncancel = event => { event.preventDefault(); if (!modal.querySelector('button').disabled) continueGame(); };
+}
+
+// 同一按钮支持点击和指针拖动；拖动只有在目标上松手才投放。
+function wireDrag(zone, accept, bucket = false) {
+  const drop = $(zone);
+  game.querySelectorAll('[data-color]').forEach(btn => {
+    const c = btn.dataset.color;
+    btn.onclick = event => { if (!event.detail) accept(c, btn); };
+    btn.onpointerdown = event => {
+      if (busy || drag || !event.isPrimary || event.button !== 0) return;
+      btn.setPointerCapture(event.pointerId);
+      const ghost = document.createElement('div');
+      ghost.className = 'drag-ghost';
+      ghost.hidden = true;
+      ghost.innerHTML = bottle(c,{bucket});
+      document.body.append(ghost);
+      drag = {ghost, x:event.clientX, y:event.clientY, id:event.pointerId};
+      animate(btn,'shake');
+    };
+    btn.onpointermove = event => {
+      if (drag?.id !== event.pointerId) return;
+      if (Math.hypot(event.clientX-drag.x,event.clientY-drag.y) > 9) drag.ghost.hidden = false;
+      drag.ghost.style.transform = `translate(${event.clientX-44}px,${event.clientY-52}px)`;
+    };
+    btn.onpointerup = event => {
+      if (drag?.id !== event.pointerId) return;
+      const moved = !drag.ghost.hidden;
+      clearDrag();
+      const bounds = drop.getBoundingClientRect();
+      if (!moved || (event.clientX >= bounds.left && event.clientX <= bounds.right &&
+          event.clientY >= bounds.top && event.clientY <= bounds.bottom)) accept(c, btn);
+    };
+    btn.onpointercancel = btn.onlostpointercapture = event => { if (drag?.id === event.pointerId) clearDrag(); };
+  });
+}
+
+// 短促的双音泼水声由 Web Audio 合成，跟读和提示仍使用本地语音。
+let soundContext;
+function splatSound() {
+  if (document.hidden) return;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    soundContext ??= new AudioContext();
+    const play = () => {
+      if (document.hidden) return;
+      const t = soundContext.currentTime;
+      const tone = soundContext.createOscillator();
+      const gain = soundContext.createGain();
+      tone.type = 'triangle';
+      tone.frequency.setValueAtTime(520,t);
+      tone.frequency.exponentialRampToValueAtTime(92,t + .16);
+      gain.gain.setValueAtTime(.19,t);
+      gain.gain.exponentialRampToValueAtTime(.001,t + .19);
+      tone.connect(gain).connect(soundContext.destination);
+      tone.start(t);
+      tone.stop(t + .2);
+    };
+    if (soundContext.state === 'running') play();
+    else void soundContext.resume().then(play, () => {});
+  } catch (_) {}
+}
+function effect(scene, color, kind) {
+  scene.querySelector('.effects')?.remove();
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.classList.add('effects');
+  svg.dataset.effect = kind;
+  svg.setAttribute('viewBox','0 0 800 400');
+  const y = kind === 'miss' ? 326 : kind === 'smoke' ? 145 : 210;
+  const tint = paints[color] || '#f3b4ef';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (kind === 'hit' || kind === 'miss') {
+    svg.innerHTML = '<path fill="' + tint + '" d="M-118 4 Q-130 -15 -85 -24 Q-52 -32 -74 -62 Q-61 -85 -30 -59 Q-2 -79 16 -68 Q35 -101 54 -70 Q63 -48 87 -52 Q124 -67 112 -36 Q151 -33 117 -6 Q146 22 96 25 Q97 55 66 48 Q46 83 20 53 Q-4 100 -25 61 Q-58 76 -69 45 Q-110 55 -97 27 Q-134 26 -118 4Z"/>';
+    const splat = svg.firstChild;
+    scene.append(svg);
+    splat.animate([{transform:`translate(400px,${y+64}px) scale(.05)`,opacity:1},
+      {transform:`translate(400px,${y}px) scale(1.65,${kind === 'miss' ? .29 : 1.3})`,opacity:.96},
+      {transform:`translate(400px,${y}px) scale(1.7,${kind === 'miss' ? .32 : 1.38})`,opacity:0}], {duration:reduced ? 1 : 970,fill:'both'});
+  } else scene.append(svg);
+  const count = kind === 'smile' ? 1 : 23;
+  for (let i = 0; i < count; i++) {
+    const star = kind === 'smile' || (kind === 'smoke' && i % 4 === 0);
+    const drop = document.createElementNS(ns, star ? 'text' : 'circle');
+    if (star) {
+      drop.textContent = kind === 'smile' ? '☺' : '✦';
+      drop.setAttribute('font-size',kind === 'smile' ? 68 : 33);
+      drop.setAttribute('fill','#ffe359');
+    } else {
+      drop.setAttribute('r',String((kind === 'smoke' ? 12 : 5) + i % 11));
+      drop.setAttribute('fill',tint);
+    }
+    svg.append(drop);
+    const angle = i * 2.399;
+    const dx = kind === 'smile' ? 0 : Math.cos(angle) * (75 + i * 6);
+    const dy = kind === 'smoke' || kind === 'smile' ? -60 - i * 4 : Math.sin(angle) * (50 + i * 4);
+    drop.animate([{transform:`translate(400px,${y}px) scale(.2)`,opacity:.8},
+      {transform:`translate(${400+dx*.72}px,${y+dy*.72}px) scale(1.35)`,opacity:.92},
+      {transform:`translate(${400+dx}px,${y+dy}px) scale(.52)`,opacity:0}], {duration:reduced ? 1 : 1020,fill:'both'});
+  }
+  setTimeout(() => svg.remove(), 1050);
+}
+
+function startMode(name) {
+  round = 0;
+  if (name === 'splash') {
+    deck = questions(5);
+    followDeck = [];
+    return showSplash(true);
+  }
+  if (name === 'follow') {
+    followDeck = [save.unlocked[0]];
+    return showFollow(true);
+  }
+  if (name === 'mix') return showMix(true);
+  if (name === 'find') { deck = shuffle(save.unlocked).slice(0,5); return showFind(true); }
+  if (name === 'paint') return showPicker();
+  if (name === 'gallery') return showGallery();
+  showHome();
+}
+const splashFigures = ['car','fish','dino','rocket','cat','house'];
+let figureOffset = 0;
+function showSplash(first = false) {
+  view('splash');
+  if (first) figureOffset = (figureOffset + 1) % splashFigures.length;
+  target = deck[round];
+  artName = splashFigures[(figureOffset + round) % splashFigures.length];
+  options = shuffle([target, ...shuffle(save.unlocked.filter(c => c !== target)).slice(0,2)]);
+  draw('<section class="play">' + topLine('🪣 泼泼乐','🌺 ' + (round+1) + '/5') +
+    '<div class="scene" id="splash-zone"><div class="figure">' + drawing(artName) + '</div>' + kid() +
+    '</div><div class="tray">' + paintButtons(options,true) + '</div></section>');
+  wireDrag('.figure', splash, true);
+  void hear(...(first ? ['zh_splash'] : []),'en_paint_' + target);
+}
+function splash(c, from) {
+  if (busy) return;
+  busy = true;
+  splatSound();
+  const scene = $('#splash-zone');
+  const figure = $('.figure');
+  if (c !== target) {
+    effect(scene,c,'miss');
+    animate(figure,'shake');
+    void say('zh_not_this',...prompt);
+    return later(() => { busy = false; },550);
+  }
+  award(1,from);
+  save.splashed[c] = Math.min(Number.MAX_SAFE_INTEGER, (save.splashed[c] || 0) + 1);
+  followDeck.push(c);
+  checkpoint();
+  effect(scene,c,'hit');
+  animate(scene,'shake');
+  const spoken = say('en_' + c);
+  later(() => {
+    figure.innerHTML = drawing(artName,{},false,c);
+    animate(figure,'jump');
+    $('.scene-kid').src = 'assets/kid/kid_cheer.png';
+  },250);
+  const current = epoch;
+  void Promise.all([spoken, new Promise(resolve => setTimeout(resolve,1750))]).then(() => {
+    if (epoch !== current) return;
+    revealNext(() => {
+      round++;
+      if (round < deck.length) showSplash();
+      else { round = 0; showFollow(true); }
+    });
+  });
+}
+
+function showFollow(first) {
+  view('follow');
+  target = followDeck[round];
+  attempts = 0;
+  micMode = 'ready';
+  draw('<section class="play">' + topLine('🎤 跟我读','⭐ ' + (round+1) + '/' + followDeck.length) +
+    '<div class="scene listen-scene"><div><div class="word-swatch">' + bottle(target) +
+    '</div><p class="word" lang="en">' + target + '</p></div>' + kid() +
+    '</div><div class="tray"><button class="soft mic" id="mic" aria-label="开始跟读">🎤</button>' +
+    '<button class="soft mic" id="done" hidden>⭐ 我读好了</button></div></section>');
+  $('#mic').onclick = startMic;
+  $('#done').onclick = () => passRead($('#done'));
+  void hear(...(first ? ['zh_follow'] : []),'en_' + target,'zh_tap_mic');
+}
+function showMic(mode) {
+  micMode = mode;
+  const mic = $('#mic');
+  if (!mic) return;
+  mic.hidden = mode === 'manual';
+  mic.disabled = mode === 'live' || mode === 'playback' || mode === 'passed';
+  mic.classList.toggle('live',mode === 'live');
+  mic.textContent = mode === 'live' ? '🔴 🎤' : mode === 'playback' ? '🔊' : mode === 'passed' ? '⭐' : '🎤';
+  $('#done').hidden = mode !== 'manual';
+}
+function startMic() {
+  if (micMode !== 'ready' || document.hidden || busy) return;
+  resetCapture();
+  stopAudio();
+  const current = epoch;
+  attempts++;
+  showMic('live');
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) return void recordVoice(current);
+  let recognition;
+  try { recognition = new Recognition(); } catch (_) { return void recordVoice(current); }
+  recognition.lang = 'en-US';
+  recognition.maxAlternatives = 5;
+  recognition.interimResults = true;
+  let timer;
+  let endTimer;
+  let closed = false;
+  let heard = false;
+  function release() {
+    if (closed) return false;
+    closed = true;
+    clearTimeout(timer);
+    clearTimeout(endTimer);
+    recognition.onend = recognition.onresult = recognition.onerror = recognition.onspeechstart = null;
+    try { recognition.abort(); } catch (_) {}
+    stopMic = null;
+    return true;
+  }
+  stopMic = release;
+  function finish(status) {
+    if (!release() || epoch !== current || document.hidden) return;
+    if (status === 'match' || attempts >= 3) return passRead($('#mic'));
+    if (status === 'unavailable') return void recordVoice(current);
+    showMic('ready');
+    void say('en_tryagain','en_' + target,'zh_tap_mic');
+  }
+  const ended = () => finish(heard ? 'miss' : 'unavailable');
+  recognition.onspeechstart = () => { heard = true; };
+  recognition.onresult = event => {
+    const results = Array.from(event.results);
+    if (matchColor(results.flatMap(result => Array.from(result, item => item.transcript)),target)) finish('match');
+    else if (results.some(result => result.isFinal)) finish('miss');
+  };
+  recognition.onend = ended;
+  recognition.onerror = () => finish('unavailable');
+  timer = setTimeout(() => {
+    try { recognition.stop(); } catch (_) { ended(); }
+    if (!closed) endTimer = setTimeout(ended,500);
+  },4000);
+  try { recognition.start(); } catch (_) { finish('unavailable'); }
+}
+async function recordVoice(current) {
+  if (!window.MediaRecorder || !navigator.mediaDevices?.getUserMedia) {
+    showMic('manual');
+    void say('zh_read_done');
+    return;
+  }
+  let stream, recorder, timer, cancelled = false;
+  const chunks = [];
+  function release() {
+    cancelled = true;
+    clearTimeout(timer);
+    if (recorder) {
+      recorder.onstop = recorder.onerror = recorder.ondataavailable = null;
+      if (recorder.state !== 'inactive') {
+        try { recorder.stop(); } catch (_) {}
+      }
+    }
+    stream?.getTracks().forEach(track => track.stop());
+    stopMic = null;
+  }
+  function unavailable() {
+    release();
+    if (epoch === current && !document.hidden) { showMic('manual'); void say('zh_read_done'); }
+  }
+  stopMic = release;
+  timer = setTimeout(unavailable,6500);
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    if (cancelled || epoch !== current || document.hidden) {
+      stream.getTracks().forEach(track => track.stop());
+      return;
+    }
+    clearTimeout(timer);
+    recorder = new MediaRecorder(stream);
+    recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
+    recorder.onerror = unavailable;
+    recorder.onstop = async () => {
+      release();
+      if (epoch !== current || document.hidden) return;
+      if (!chunks.length) return unavailable();
+      recordingUrl = URL.createObjectURL(new Blob(chunks,{type:recorder.mimeType}));
+      showMic('playback');
+      await say('zh_hear_me',recordingUrl);
+      if (epoch === current && !document.hidden && micMode === 'playback') {
+        showMic('manual');
+        void say('zh_read_done');
+      }
+    };
+    recorder.start();
+    timer = setTimeout(() => {
+      try { recorder.stop(); } catch (_) { unavailable(); }
+    },2500);
+  } catch (_) {
+    if (!cancelled) unavailable();
+  }
+}
+clipText.zh_read_done = '读好了，就点大星星吧！';
+function passRead(from) {
+  if (busy) return;
+  busy = true;
+  resetCapture();
+  award(1,from);
+  save.reads = Math.min(Number.MAX_SAFE_INTEGER, save.reads + 1);
+  checkpoint();
+  showMic('passed');
+  const avatar = $('.scene-kid');
+  avatar.src = 'assets/kid/kid_cheer.png';
+  animate(avatar,'jump');
+  void say('en_great');
+  later(() => revealNext(() => {
+    round++;
+    if (round < followDeck.length) showFollow(false);
+    else finishRound('splash');
+  }),1050);
+}
+
+function showMix(first = false) {
+  view('mix');
+  ingredients = [];
+  draw('<section class="play">' + topLine('🧪 魔法混色锅','⭐ ' + round + '/5') +
+    '<div class="scene" id="mix-zone"><div class="ingredients" aria-hidden="true"></div>' +
+    '<div class="pot" aria-label="魔法锅">' + potSVG() + '</div>' + kid() + '</div>' +
+    '<div class="tray palette">' + paintButtons(save.unlocked) + '</div></section>');
+  wireDrag('.pot', mix);
+  void hear(...(first ? ['zh_mix'] : []));
+  if (!first) prompt = ['zh_mix'];
+}
+function mix(color, from) {
+  if (busy) return;
+  ingredients.push(color);
+  $('.ingredients').innerHTML = ingredients.map(c => bottle(c)).join('');
+  const pot = $('.pot');
+  animate(pot,'spin');
+  if (ingredients.length === 1) {
+    void say('en_' + color);
+    return;
+  }
+  busy = true;
+  const result = mixColor(...ingredients);
+  ingredients = [];
+  if (result) {
+    round++;
+    if (!save.mixed.includes(result)) save.mixed.push(result);
+    award(1,from);
+    checkpoint();
+  }
+  effect($('#mix-zone'),result,result ? 'smoke' : 'smile');
+  if (result) {
+    pot.innerHTML = potSVG(result);
+    $('.scene-kid').src = 'assets/kid/kid_cheer.png';
+  }
+  const current = epoch;
+  const spoken = result ? say('en_mix_' + result,'en_magic') : say('en_tryagain','zh_mix');
+  void Promise.all([spoken, new Promise(resolve => setTimeout(resolve, result ? 1250 : 1000))]).then(() => {
+    if (epoch !== current) return;
+    revealNext(() => {
+      if (round >= 5) finishRound('mix');
+      else {
+        $('.ingredients').replaceChildren();
+        pot.innerHTML = potSVG();
+        $('.scene-kid').src = 'assets/kid/kid_front.png';
+        $('.progress').textContent = '⭐ ' + round + '/5';
+        busy = false;
+      }
+    });
+  });
+}
+
+const objects = {red:'🍎', yellow:'🍌', blue:'🐳', green:'🐸', orange:'🍊',
+  purple:'🍇', pink:'🌸', brown:'🍫', black:'🎱', white:'☁️'};
+function showFind(first = false) {
+  view('find');
+  target = deck[round];
+  draw('<section class="play find">' + topLine('🔍 找颜色','⭐ ' + (round+1) + '/5') +
+    '<div class="objects" aria-label="找一找">' + shuffle(colors).map(c =>
+      '<button class="tile" data-object="' + c + '" aria-label="' + c + ' 物件" style="--tile:' +
+      paints[c] + '52">' + objects[c] + '</button>').join('') + '</div></section>');
+  game.querySelectorAll('[data-object]').forEach(btn => btn.onclick = () => find(btn));
+  void hear(...(first ? ['zh_find'] : []),'en_find_' + target);
+}
+function find(btn) {
+  if (busy) return;
+  const c = btn.dataset.object;
+  if (c !== target) {
+    animate(btn,'shake');
+    void say('en_' + c,...prompt);
+    return;
+  }
+  busy = true;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) btn.animate(
+    [{transform:'none'},{transform:'scale(1.15) rotate(180deg)'},{transform:'rotate(360deg)'}], {duration:650});
+  effect(btn,c,'smoke');
+  award(1,btn);
+  const current = epoch;
+  const spoken = say('en_' + c,'en_great');
+  void Promise.all([spoken, new Promise(resolve => setTimeout(resolve,1500))]).then(() => {
+    if (epoch !== current) return;
+    round++;
+    if (round < deck.length) showFind();
+    else finishRound('find');
+  });
+}
+function finishRound(mode) {
+  view('end');
+  draw('<section class="play-end scene"><div class="icon">🎉 🌺</div><h2>真棒！</h2>' +
+    '<div class="tray"><button class="soft" id="again">🔁 再玩一次</button>' +
+    '<button class="soft" id="back">🏠 回工坊</button></div>' + kid(true) + '</section>');
+  $('#again').onclick = () => startMode(mode);
+  $('#back').onclick = showHome;
+  void say('zh_good');
+}
+
+function showPicker() {
+  view('pick');
+  draw('<section class="play">' + topLine('🖌️ 选一张画') + '<div class="objects picker">' +
+    templates.map(name => '<button class="tile" data-art="' + name + '" aria-label="' + names[name] + '">' +
+      drawing(name) + '</button>').join('') + '</div></section>');
+  game.querySelectorAll('[data-art]').forEach(btn => btn.onclick = () => showPaint(btn.dataset.art));
+  void hear('zh_pick');
+}
+function showPaint(name) {
+  view('paint');
+  artName = name;
+  selected = save.unlocked[0];
+  fills = {};
+  draw('<section class="play">' + topLine('🖌️ ' + names[name], '', '<button class="soft" id="finish" aria-label="完成作品">✅</button>') +
+    '<div class="scene canvas-scene"><div class="sheet">' + drawing(name,{},true) + '</div>' + kid() +
+    '</div><div class="tray palette">' + paintButtons(save.unlocked) + '</div></section>');
+  function select(btn) {
+    selected = btn.dataset.color;
+    game.querySelectorAll('[data-color]').forEach(button => button.setAttribute('aria-pressed',button === btn));
+  }
+  game.querySelectorAll('[data-color]').forEach(btn => {
+    btn.setAttribute('aria-pressed',btn.dataset.color === selected);
+    btn.onclick = () => { select(btn); void say('en_' + selected); };
+  });
+  const sheet = $('.sheet svg');
+  function fill(region) {
+    if (!region || busy) return;
+    fills[region.dataset.region] = selected;
+    region.setAttribute('fill',paints[selected]);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ring = region.cloneNode(true);
+    for (const attr of ['tabindex','role','aria-label','data-region']) ring.removeAttribute(attr);
+    ring.setAttribute('pointer-events','none');
+    ring.setAttribute('fill','none');
+    ring.setAttribute('stroke',paints[selected]);
+    ring.setAttribute('stroke-width','15');
+    ring.style.transformBox = 'fill-box';
+    ring.style.transformOrigin = 'center';
+    region.parentNode.append(ring);
+    const rings = sheet.querySelectorAll('[data-ripple]');
+    if (rings.length >= 8) rings[0].remove();
+    ring.dataset.ripple = '';
+    ring.animate([{transform:'scale(.75)',opacity:1},{transform:'scale(1.2)',opacity:0}],
+      {duration:360}).finished.then(() => ring.remove(), () => ring.remove());
+  }
+  sheet.onclick = event => fill(event.target.closest('[data-region]'));
+  sheet.onkeydown = event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      fill(event.target.closest('[data-region]'));
+    }
+  };
+  $('#finish').onclick = finishArt;
+  void hear('zh_paint');
+}
+async function thumbnail(name, regions) {
+  const svg = drawing(name,regions).replace('<svg ','<svg width="480" height="330" ');
+  const img = new Image();
+  const url = URL.createObjectURL(new Blob([svg], {type:'image/svg+xml'}));
+  try {
+    await new Promise((resolve,reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = url;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = 320;
+    canvas.height = 240;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff6eb';
+    ctx.fillRect(0,0,320,240);
+    ctx.drawImage(img,0,10,320,220);
+    return canvas.toDataURL('image/jpeg', .82);
+  } finally { URL.revokeObjectURL(url); }
+}
+async function finishArt() {
+  if (busy) return;
+  const current = epoch;
+  busy = true;
+  const name = artName;
+  const artFills = {...fills};
+  let thumb;
+  try { thumb = await thumbnail(name,artFills); } catch (_) {
+    if (epoch === current) {
+      busy = false;
+      void say('en_tryagain');
+    }
+    return;
+  }
+  if (epoch !== current) return;
+  addArtwork(save,{id:globalThis.crypto?.randomUUID?.() || String(Date.now()),svgName:name,fills:artFills,thumb,time:Date.now()});
+  award(3,$('#finish'));
+  checkpoint();
+  later(() => revealNext(() => showGallery(true)),850);
+}
+function showGallery(newArt = false) {
+  view('gallery');
+  const arts = [...save.artworks].reverse();
+  draw('<section class="play">' + topLine('🖼️ 我的作品','🎨 ' + arts.length + '/24') +
+    (arts.length ? '<div class="gallery">' + arts.map((art,i) =>
+      '<button class="soft" data-work="' + i + '" aria-label="' + names[art.svgName] +
+      '"><img src="' + esc(art.thumb) + '" alt=""><img class="avatar" src="assets/kid/kid_avatar.png" alt=""></button>').join('') +
+      '</div>' : '<div class="scene"><div class="icon">🖼️</div>' + kid() + '</div>') +
+    '<div class="tray"><button class="soft" id="new-paint">🖌️ 再画一张</button></div></section>');
+  game.querySelectorAll('[data-work]').forEach(btn => btn.onclick = () => {
+    const art = arts[Number(btn.dataset.work)];
+    showDialog(drawing(art.svgName,art.fills) + '<img class="avatar" src="assets/kid/kid_avatar.png" alt="">', () => {}, 'art');
+    void say('en_masterpiece');
+  });
+  $('#new-paint').onclick = showPicker;
+  void hear('zh_gallery',...(newArt === true ? ['en_masterpiece'] : []));
+}
+
+function suspend() {
+  stopAudio();
+  resetCapture();
+  clearDrag();
+  if (screen === 'follow' && (micMode === 'live' || micMode === 'playback')) showMic('ready');
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) suspend(); });
+window.addEventListener('pagehide',suspend);
+updateBank();
+showHome();
+
+if (qa) window.__colorSplashQA = {
+  startMode,
+  forcePass() {
+    if (modal.open) return modal.querySelector('button').click();
+    if (busy) return;
+    if (screen === 'splash') return splash(target,game.querySelector('[data-color="' + target + '"]'));
+    if (screen === 'follow') return passRead($('#mic').hidden ? $('#done') : $('#mic'));
+    if (screen === 'find') return find(game.querySelector('[data-object="' + target + '"]'));
+    if (screen === 'mix') {
+      const pair = Object.keys(recipes).map(key => key.split('|')).find(pair =>
+        pair.every(c => save.unlocked.includes(c)) && !save.mixed.includes(mixColor(...pair))) || ['red','yellow'];
+      if (ingredients.length) ingredients.length = 0;
+      for (const c of pair) mix(c,game.querySelector('[data-color="' + c + '"]'));
+    }
+    if (screen === 'pick') return showPaint('car');
+    if (screen === 'paint') return finishArt();
+  },
+  get state() { return JSON.parse(JSON.stringify({screen,save,round,target,options,artName,attempts,micMode,busy,
+    ingredients,dialog:modal.open ? modal.dataset.type : null})); }
+};
+})();
+</script>
+</body>
+</html>
