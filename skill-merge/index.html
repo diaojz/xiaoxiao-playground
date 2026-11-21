@@ -257,6 +257,7 @@ run.phase='ready';
 const assets=Object.create(null),audioFiles=Object.create(null),activeSounds=new Set();
 let toneCount=0;
 let audioContext=null,bgm=null,bgmFailed=false,lastCast=-1,fallbackBeat=0,lastBeat=-1;
+const sfxPools=Object.create(null);
 const IMAGE_NAMES=['gem_fire','gem_ice','gem_thunder','gem_wind','gem_heal','enemy_devil','enemy_pirate','enemy_robot','enemy_slime','boss_slime','boss_octopus','chest','fountain','gate_a','gate_b','coin','fx_fire','fx_ice','fx_thunder','fx_wind','fx_heal','fx_explosion','fx_steam','fx_storm','heart','star','lock','btn_play','btn_pause','btn_sound','btn_retry','merge_tray','health_bar','kid_cast','kid_hurt','kid_victory','kid_front','kid_cheer','kid_sad','kid_run_front','kid_avatar','kid_run_1','kid_run_2','kid_run_3','kid_run_4','kid_run_5','kid_run_6','bg_sky','bg_islands','track_tile','hero_poster','cover_skill',...KINDS.flatMap(k=>[1,2,3,4].map(l=>'gem_'+k+'_'+l))];
 IMAGE_NAMES.push(...Array.from({length:6},(_,i)=>'run/kid_run_'+(i+1)+'_sheet'));
 const SOUND_NAMES=['collect','merge','cast','hit','heal','coin','chest','gate','combo','boss','win','lose','tap','bgm'];
@@ -283,7 +284,11 @@ function sound(name){
   if(muted)return;if(name==='cast'&&time-lastCast<.15)return;if(name==='cast')lastCast=time;
   const fallback=()=>{const seq=name==='merge'||name==='win'?[523,659,784,1047]:name==='hit'||name==='lose'?[196,147]:[784,1047];seq.forEach((n,i)=>tone(n,i*.07,.19,name==='cast'?.015:.035));};
   const source=audioFiles[name];if(!source){fallback();return;}
-  if(activeSounds.size>12)return;const a=source.cloneNode();a.volume=name==='cast'?.07:.25;activeSounds.add(a);const clear=()=>activeSounds.delete(a);a.addEventListener('ended',clear,{once:true});a.play().catch(()=>{clear();fallback();});
+  // 性能：以前每声都 cloneNode 新 <audio>（施法每 0.15 秒一次），iPad 上媒体播放器越堆越多越玩越卡。
+  // 现在每种音效固定最多 3 个 <audio> 轮流复用，播完的直接倒带重播。
+  const vol=name==='cast'?.07:.25;
+  const pool=sfxPools[name]||(sfxPools[name]=[]);let a=pool.find(v=>v.paused||v.ended);if(!a){if(pool.length>=3)return;a=source.cloneNode();pool.push(a);}
+  a.volume=vol;activeSounds.add(a);const clear=()=>activeSounds.delete(a);a.addEventListener('ended',clear,{once:true});try{a.currentTime=0;}catch(_){}a.play().catch(()=>{clear();fallback();});
 }
 function stopAudio(){if(bgm)bgm.pause();for(const a of activeSounds)a.pause();activeSounds.clear();if(audioContext&&audioContext.state==='running')audioContext.suspend().catch(()=>{});}
 function startMusic(){

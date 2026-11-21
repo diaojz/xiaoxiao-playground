@@ -353,6 +353,7 @@
   .cat-emojis { display:flex; flex-wrap:wrap; align-items:center; gap:4px; }
   /* ===== 成长条：只记录小蛇越来越厉害，不再限制能玩的内容 ===== */
   .growth-hud { position:fixed; z-index:9; border:3px solid #fff; border-radius:18px; padding:7px 12px; background:linear-gradient(#fff8ce,#ffd8ef); box-shadow:0 5px 0 #e99cc1; color:#8b4275; font-size:14px; font-weight:900; min-width:190px; left:16px; top:92px; }
+  .fever-row { display:flex; align-items:center; gap:6px; margin-top:4px; font-size:14px; } .fever-row .candy-meter { flex:1; margin-top:0; } .fever-meter i { background:linear-gradient(90deg,#ffd23f,#ff7ab3,#7ad7ff); transition:width .15s; } .fever-row.on .fever-meter { border-color:#ffd23f; box-shadow:0 0 0 2px #fff6, 0 0 10px #ffd23f; } .fever-row.on span { animation:feverSpin .6s linear infinite; display:inline-block; } @keyframes feverSpin { to { transform:rotate(360deg); } }
   .candy-meter { height:11px; border-radius:99px; overflow:hidden; background:#fff; border:2px solid #f4a5ca; margin-top:4px; } .candy-meter i { display:block; height:100%; width:0; background:linear-gradient(90deg,#8ee8ff,#a784ff,#ff79b1); border-radius:99px; transition:width .25s; }
   .trail-picker { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:12px 0; } .trail { border:2px solid #f3a2c7; background:#fff4fa; color:#8b4275; border-radius:16px; padding:8px 10px; cursor:pointer; font-size:13px; } .trail.active { background:#fff1a8; border-color:#f1b94a; }
   /* ===== v1.13.0：上方信息、下方拇指区，棋盘独占中间，不把小蛇藏在按键下 ===== */
@@ -457,7 +458,7 @@
     <div><img class="ui-icon" id="lengthIcon" src="assets/ui/icon_length.png" alt="">长度 <span id="length">3</span></div>
     <button id="autoBtn">自动吃：关</button>
   </div>
-  <div class="growth-hud" id="growthHud"><img class="ui-icon" src="assets/ui/icon_exp.png" alt="经验"> <span id="levelText">Lv1</span> <span id="expText">0/20</span><div class="candy-meter"><i id="expBar"></i></div></div>
+  <div class="growth-hud" id="growthHud"><img class="ui-icon" src="assets/ui/icon_exp.png" alt="经验"> <span id="levelText">Lv1</span> <span id="expText">0/20</span><div class="candy-meter"><i id="expBar"></i></div><div class="fever-row" id="feverRow" title="连续吃糖攒满彩虹条，进入糖果狂欢"><span>🌈</span><div class="candy-meter fever-meter"><i id="feverBar"></i></div></div></div>
 
   <div class="leaderboard">
     <h3><img class="ui-icon" id="rankIcon" src="assets/ui/icon_rank.png" alt="">排行榜</h3>
@@ -514,7 +515,8 @@
   const canvas = document.getElementById('game');
 // 性能档位和可选的帧耗时面板。
 const perfParams=new URLSearchParams(location.search),forcedQuality=perfParams.get('quality');
-let quality=['low','mid','high'].includes(forcedQuality)?forcedQuality:(matchMedia('(pointer:coarse)').matches?'mid':'high');
+const coarsePointer=matchMedia('(pointer:coarse)');
+let quality=['low','mid','high'].includes(forcedQuality)?forcedQuality:(coarsePointer.matches?'mid':'high');
 let perfCount=0,perfSum=0,perfLast=0,perfPanel=null;
 if(perfParams.get('perf')==='1'){perfPanel=document.createElement('div');perfPanel.style.cssText='position:fixed;left:0;top:0;z-index:9999;background:#000b;color:white;font:12px monospace;padding:4px;pointer-events:none';document.body.appendChild(perfPanel);}
 function perfFrame(start, count){const cost=performance.now()-start;perfSum+=cost;perfCount++;if(perfCount>=60){const avg=perfSum/perfCount;if(!forcedQuality && true && avg>14){quality=quality==='high'?'mid':'low';}if(perfPanel)perfPanel.textContent=(perfLast?Math.round(1000*perfCount/(start-perfLast)):0)+' FPS · '+avg.toFixed(1)+' ms · 粒子 '+count+' · '+quality;perfLast=start;perfCount=0;perfSum=0;}}
@@ -540,6 +542,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   const ammoSlotsEl = document.getElementById('ammoSlots');
   const ammoCountEl = document.getElementById('ammoCount');
   const fireBtn = document.getElementById('fireBtn');
+  const levelTextEl = document.getElementById('levelText'), fireCountEl = document.getElementById('fireCount');
   const growthHud = document.getElementById('growthHud'), expText = document.getElementById('expText'), expBar = document.getElementById('expBar');
   const trailModal = document.getElementById('trailModal');
   const skillBelt = document.getElementById('skillBelt'), pauseBtn = document.getElementById('pauseBtn'), muteBtn = document.getElementById('muteBtn');
@@ -596,11 +599,39 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   ));
 
   // 只取已加载的雪碧图；缺图时由调用处保留 emoji / 原绘制。
+  // 每次从 1024px 大图集里缩放采样很贵（一条长蛇每帧要画近百颗珠子），
+  // 所以按「图集+名字+设备像素尺寸」预先缩放成小画布，之后每帧 1:1 直接贴。
+  const spriteCache = new Map();
   function drawSprite(atlas, key, x, y, size) {
     const img = atlasImages[atlas], r = ATLAS_DATA[atlas].sprites[key];
     if (!img || !r) return false;
-    ctx.drawImage(img, r.x, r.y, r.w, r.h, x-size/2, y-size/2, size, size);
+    const px = Math.max(1, Math.round(size * DPR)), k = atlas + '|' + key + '|' + px;
+    let c = spriteCache.get(k);
+    if (!c) {
+      if (spriteCache.size > 600) spriteCache.clear();
+      c = document.createElement('canvas'); c.width = c.height = px;
+      const g = c.getContext('2d'); g.imageSmoothingQuality = 'high';
+      g.drawImage(img, r.x, r.y, r.w, r.h, 0, 0, px, px);
+      spriteCache.set(k, c);
+    }
+    ctx.drawImage(c, x - size / 2, y - size / 2, size, size);
     return true;
+  }
+  // emoji 文字在 iPad 上逐帧 fillText 很慢（彩色字形每次都要重新光栅化），同样缓存成小画布。
+  const emojiCache = new Map();
+  function drawEmoji(text, x, y, fontPx, color = '#000') {
+    const px = Math.max(1, Math.round(fontPx * 1.25 * DPR)), k = text + '|' + px + '|' + color;
+    let c = emojiCache.get(k);
+    if (!c) {
+      if (emojiCache.size > 200) emojiCache.clear();
+      c = document.createElement('canvas'); c.width = c.height = px;
+      const g = c.getContext('2d');
+      g.font = Math.round(fontPx * DPR) + 'px serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = color;
+      g.fillText(text, px / 2, px / 2);
+      emojiCache.set(k, c);
+    }
+    const s = fontPx * 1.25;
+    ctx.drawImage(c, x - s / 2, y - s / 2, s, s);
   }
   function spriteMarkup(atlas, key, size, fallback = '') {
     const data = ATLAS_DATA[atlas], r = data.sprites[key];
@@ -620,6 +651,10 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
 
   let CELL = 52; // 横屏可按可用高度缩小格子，始终给战斗键留出独立区域
   const MAX_BODY_LEN = 40; // 封顶长度：超过后只加分不再变长，避免把棋盘占满看不清
+  // AI 单独封顶 24：6 条 AI 都长到 40 节会铺满 22×15 的棋盘（约 85%），
+  // 每帧要画 500 多颗珠子，玩一两分钟后明显卡顿，也看不清糖果
+  const AI_MAX_LEN = 24;
+  const maxLen = s => s.isPlayer ? MAX_BODY_LEN : AI_MAX_LEN;
   let FOOD_FONT_SIZE = (CELL - 8) * 1.5;
   const AMMO_MAX = 30; // 糖果弹药槽容量，满仓后继续吃只加分和长度
   let COLS, ROWS, OFFX, OFFY, DPR;
@@ -954,7 +989,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   function loadSave(){ try { const v=JSON.parse(localStorage.getItem('snakeSave')); if(!v) return defaultSave(); const d=defaultSave(); return {...d,...v,version:SAVE_VERSION,unlocks:allUnlocks(),stars:v.stars||{},run:v.run||null}; } catch(e){ return defaultSave(); } }
   function saveGame(force=false){ if(!save) return; try { const p=snakes&&snakes[0]; save.version=SAVE_VERSION; save.unlocks=allUnlocks(); save.highScore=Math.max(save.highScore||0,p?p.score:0); if(p) save.run={body:p.body,ammo:p.ammo,score:p.score,grow:p.grow,dir:p.dir,nextDir:p.nextDir,skillEnds,skillCooldowns,clockAt:paused?pauseStartedAt:performance.now()}; localStorage.setItem('snakeSave',JSON.stringify(save)); }catch(e){} }
   function isUnlocked(type,id){ return true; }
-  function gainExp(amount, why){ if(!save || save.level>=20) return; save.exp+=amount; while(save.level<20 && save.exp>=LEVEL_EXP[save.level]) { save.level++; queueNotice('升级啦！','🎉 Lv'+save.level+'！'+(why||'')); playSound('level'); addAmmoParticles(snakes&&snakes[0]?snakes[0].body[0]:{x:COLS/2,y:ROWS/2},{color:'#ff7ab3'},3,28); } saveGame(true); }
+  function gainExp(amount, why){ if(!save || save.level>=20) return; save.exp+=amount; let leveled=false; while(save.level<20 && save.exp>=LEVEL_EXP[save.level]) { save.level++; leveled=true; queueNotice('升级啦！','🎉 Lv'+save.level+'！'+(why||'')); playSound('level'); addAmmoParticles(snakes&&snakes[0]?snakes[0].body[0]:{x:COLS/2,y:ROWS/2},{color:'#ff7ab3'},3,28); } if(leveled) saveGame(true); } // 平时由吃糖处每 2 秒存一次，不再每颗糖都同步写 localStorage
   // 所有游戏提示都只走顶部 toast，绝不暂停或遮住正在游玩的画面。
   function queueNotice(title,sub){ document.querySelectorAll('.candy-toast').forEach(el=>el.remove());const el=document.createElement('div');el.className='candy-toast';el.innerHTML=`${title}<small>${sub||''}</small>`;document.body.appendChild(el);setTimeout(()=>el.remove(),1500); }
   save = loadSave();
@@ -1066,7 +1101,8 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   const bgm = new Audio('assets/sfx/bgm_candy.m4a'); bgm.loop = true; bgm.preload = 'auto'; bgm.volume = .22; bgm.load();
   function audioAllowed(){ return audioUnlocked && !muted && !paused && !document.hidden; }
   function stopSoundVoices(){
-    for (const voices of soundVoices.values()) for (const voice of [...voices]) { voice.pause(); voices.delete(voice); }
+    for (const pool of Object.values(soundPools)) for (const voice of pool) voice.pause();
+    for (const voices of bufferVoices.values()) for (const src of [...voices]) { try { src.stop(); } catch (_) {} voices.delete(src); }
     for (const voices of fallbackVoices.values()) for (const voice of [...voices]) { try { voice.stop(); } catch (_) {} voices.delete(voice); }
   }
   function syncAudio(){
@@ -1080,7 +1116,9 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   }
   function unlockAudio(){
     audioUnlocked = true;
-    try { audioCtx ||= new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{}); } catch (_) {}
+    // iOS 静音键会把 Web Audio 静掉；声明为 playback，和原来 <audio> 播放的行为保持一致
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}
+    try { audioCtx ||= new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{}); decodeSounds(); } catch (_) {}
     syncAudio();
   }
   // 文件丢失、解码失败或浏览器拒播时，保留原来的轻量振荡器兜底；同类最多三个。
@@ -1093,14 +1131,34 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
       o.type=conf[2];o.frequency.setValueAtTime(conf[0],now);o.frequency.exponentialRampToValueAtTime(conf[0]*1.55,now+conf[1]);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.045,now+.015);g.gain.exponentialRampToValueAtTime(.0001,now+conf[1]);o.connect(g).connect(audioCtx.destination);voices.add(o);o.onended=()=>{voices.delete(o);o.disconnect();g.disconnect();};o.start(now);o.stop(now+conf[1]+.03);
     } catch (_) {}
   }
+  // 性能关键：以前每个音效都 cloneNode 一个新 <audio>，iPad 上每个都会起一个媒体播放器，
+  // 吃糖又特别频繁，玩久了几百个播放器堆着回收不掉，整个页面越来越卡。
+  // 现在优先用 Web Audio：每个音效只解码一次，之后播放只是开一个极轻的 BufferSource；
+  // 拿不到文件（file:// 双击打开时 fetch 被拒）就退回每种音效固定 3 个 <audio> 轮流复用。
+  const soundBuffers = {}, soundRaw = {}, bufferVoices = new Map(), soundPools = {};
+  for (const name of SOUND_NAMES) {
+    try { fetch('assets/sfx/'+name+'.m4a').then(r=>r.ok?r.arrayBuffer():null).then(b=>{ if(b){ soundRaw[name]=b; decodeSounds(); } }).catch(()=>{}); } catch (_) {}
+  }
+  function decodeSounds(){
+    if(!audioCtx) return;
+    for (const name of Object.keys(soundRaw)) {
+      const raw = soundRaw[name]; delete soundRaw[name];
+      try { audioCtx.decodeAudioData(raw, buf=>{ soundBuffers[name]=buf; }, ()=>{}); } catch (_) {}
+    }
+  }
   function playSound(kind){
     if(!audioAllowed())return; kind=kind==='eat'?'eat_low':kind==='skill'?'ghost':kind;
+    const buf=soundBuffers[kind];
+    if(buf && audioCtx && audioCtx.state==='running'){
+      const voices=bufferVoices.get(kind)||new Set();bufferVoices.set(kind,voices);if(voices.size>=3)return;
+      try { const src=audioCtx.createBufferSource(),g=audioCtx.createGain();g.gain.value=.58;src.buffer=buf;src.connect(g).connect(audioCtx.destination);voices.add(src);src.onended=()=>{voices.delete(src);src.disconnect();g.disconnect();};src.start(); } catch (_) {}
+      return;
+    }
     if(!soundFiles[kind]||failedSounds.has(kind)){oscillatorSound(kind);return;}
-    const voices=soundVoices.get(kind)||new Set();soundVoices.set(kind,voices);if(voices.size+(fallbackVoices.get(kind)?.size||0)>=3)return;
-    const voice=soundFiles[kind].cloneNode(true);voice.volume=.58;voices.add(voice);
-    const finish=()=>voices.delete(voice);voice.addEventListener('ended',finish,{once:true});
-    const fail=()=>{if(!voices.has(voice))return;finish();voice.pause();oscillatorSound(kind);};voice.addEventListener('error',fail,{once:true});
-    try { Promise.resolve(voice.play()).catch(fail); } catch (_) { fail(); }
+    const pool=soundPools[kind]||(soundPools[kind]=[]);
+    let voice=pool.find(v=>v.paused||v.ended);
+    if(!voice){ if(pool.length>=3)return; voice=soundFiles[kind].cloneNode(true); voice.volume=.58; voice.addEventListener('error',()=>{failedSounds.add(kind);}); pool.push(voice); }
+    try { voice.currentTime=0; Promise.resolve(voice.play()).catch(()=>oscillatorSound(kind)); } catch (_) { oscillatorSound(kind); }
   }
   function foodSoundKind(category){ return ['fruit','plant','farm'].includes(category)?'eat_low':['treat','worldfood','meat'].includes(category)?'eat_mid':'eat_high'; }
   document.addEventListener('pointerdown',unlockAudio,{capture:true});
@@ -1125,14 +1183,16 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   function renderSkills(force=false){
     const now=paused?pauseStartedAt:performance.now();if(!force&&now-lastSkillRenderAt<80)return;lastSkillRenderAt=now;
     if(!skillBelt.children.length)buildSkillButtons();
+    updateFeverBar(now);
     for(const s of SKILL_DEFS){const b=skillBelt.querySelector(`[data-skill="${s.id}"]`),state=cooldownState(skillCooldowns[s.id],s.cooldown,now);
-      const active=Math.max(0,(skillEnds[s.id]||0)-now); b.style.setProperty('--deg',`${(active&&s.duration?active/s.duration:state.progress)*360}deg`);b.classList.toggle('ready',state.left===0);b.querySelector('.cool-shade').classList.toggle('hidden',state.left===0);b.querySelector('.cool-seconds').textContent=state.seconds||'';
-      b.querySelector('small').textContent=s.key.toUpperCase();b.setAttribute('aria-disabled',String(!running||paused||state.left>0));b.setAttribute('aria-label',s.name+(state.seconds?`，冷却${state.seconds}秒`:'，可使用，不限次数'));
+      // 每 80ms 刷一次：只在值真的变了才写 DOM，避免 iPad 上持续样式重算
+      const active=Math.max(0,(skillEnds[s.id]||0)-now), deg=`${Math.round((active&&s.duration?active/s.duration:state.progress)*360)}deg`; if(b._deg!==deg){b._deg=deg;b.style.setProperty('--deg',deg);}b.classList.toggle('ready',state.left===0);b.querySelector('.cool-shade').classList.toggle('hidden',state.left===0);setText(b.querySelector('.cool-seconds'),state.seconds||'');
+      setText(b.querySelector('small'),s.key.toUpperCase());setAttr(b,'aria-disabled',String(!running||paused||state.left>0));setAttr(b,'aria-label',s.name+(state.seconds?`，冷却${state.seconds}秒`:'，可使用，不限次数'));
     }
   }
   function showKillFeedback(pos){ const now=performance.now(); combo=now-lastKillAt<4500?combo+1:1;lastKillAt=now;const word=['击败！','双杀！','三杀！','暴走！','糖果风暴！'][Math.min(4,combo-1)];killTexts.push({x:pos.x+.5,y:pos.y+.25,text:`${word} ×${combo}`,born:now});for(let i=0;i<26&&killParticles.length<MAX_KILL_PARTICLES;i++)killParticles.push({x:pos.x+.5,y:pos.y+.5,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,born:now,life:550+Math.random()*450,emoji:i%3?'✨':'🍬'});screenShakeUntil=now+160;playSound(combo>1?'combo':'kill'); }
   let decoy=null, mines=[], blackHole=null, weakUntil=0;
-  function burst(pos,color,emoji='✨') { addAmmoParticles(pos,{color},2,18); for(let i=0;i<10;i++)killParticles.push({x:pos.x+.5,y:pos.y+.5,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,born:performance.now(),life:700,emoji}); }
+  function burst(pos,color,emoji='✨') { addAmmoParticles(pos,{color},2,18); for(let i=0;i<10&&killParticles.length<MAX_KILL_PARTICLES;i++)killParticles.push({x:pos.x+.5,y:pos.y+.5,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,born:performance.now(),life:700,emoji}); }
   function repel(foe,center,now,duration=1000){ const h=foe.body[0],dx=Math.sign(h.x-center.x)||1,dy=Math.sign(h.y-center.y); for(const p of foe.body){p.x=Math.max(0,Math.min(COLS-1,p.x+dx*2));p.y=Math.max(0,Math.min(ROWS-1,p.y+dy*2));} foe.prevBody=foe.body.map(p=>({...p}));foe.frozenUntil=now+duration; }
   function candyRing(pos){for(let i=0;i<8;i++){if(foods.length>=foodCap())break;const x=Math.max(0,Math.min(COLS-1,pos.x+Math.round(Math.cos(i*Math.PI/4)*2))),y=Math.max(0,Math.min(ROWS-1,pos.y+Math.round(Math.sin(i*Math.PI/4)*2)));foods.push({x,y,...AVOCADO_KIND});}}
   function activateSkill(id){ const s=SKILL_DEFS.find(x=>x.id===id),now=performance.now(),p=snakes&&snakes[0]; if(!s||!p||!running||paused||(skillCooldowns[id]||0)>now)return;
@@ -1145,10 +1205,141 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     if(id==='magnet')weakUntil=now+8000;
     burst(h,s.color,s.emoji);queueNotice(s.emoji+' '+s.name,s.desc);renderSkills(true);
   }
+  // ===== 趣味玩法：糖果狂欢 / 惊喜宝箱 / 长大庆祝 / 糖果雨 =====
+  // 参考 snake.io、Wormate 这类游戏最上头的「爆发时刻」：连续吃糖攒满彩虹条进入狂欢，
+  // 定时出现只属于玩家的宝箱，长到整十节放彩纸庆祝；全部是奖励，没有任何惩罚。
+  const FEVER_NEED = 10, FEVER_MS = 8000, CHEST_FIRST_MS = 15000, CHEST_EVERY_MS = 35000, CHEST_LIFE_MS = 25000, RING_MAX = 2;
+  const MILESTONES = [10, 20, 30, 40];
+  let feverMeter = 0, feverUntil = 0, chest = null, nextChestAt = 0, nextMilestone = 0;
+  function feverActive(now = performance.now()) { return feverUntil > now; }
+  const feverBarEl = document.getElementById('feverBar'), feverRowEl = document.getElementById('feverRow');
+  function updateFeverBar(now) {
+    const on = feverActive(now), pct = Math.round(on ? (feverUntil - now) / FEVER_MS * 100 : feverMeter / FEVER_NEED * 100) + '%';
+    if (feverBarEl.style.width !== pct) feverBarEl.style.width = pct;
+    feverRowEl.classList.toggle('on', on);
+  }
+  function onPlayerEat(food) {
+    if (food.chest) { openChest(food); return; }
+    if (!feverActive()) { feverMeter++; if (feverMeter >= FEVER_NEED) startFever(); }
+  }
+  function startFever() {
+    const p = snakes[0]; feverMeter = 0; feverUntil = performance.now() + FEVER_MS;
+    queueNotice('🌈 糖果狂欢！', '分数翻倍，糖果自己飞过来！');
+    playSound('combo'); confetti(p.body[0], ['🌈', '⭐', '🍬', '✨'], 30);
+  }
+  function confetti(pos, emojis, count) {
+    const now = performance.now();
+    for (let i = 0; i < count && killParticles.length < MAX_KILL_PARTICLES; i++)
+      killParticles.push({ x: pos.x + .5, y: pos.y + .5, vx: (Math.random() - .5) * 6, vy: (Math.random() - .5) * 6, born: now, life: 800 + Math.random() * 600, emoji: emojis[i % emojis.length] });
+  }
+  // 找一个安全区内的空格；minFrom 让宝箱别刷在玩家脸上，得跑过去才有期待感
+  // 棋盘上浮着 HUD、排行榜、弹药栏和技能按钮：按它们的实际屏幕矩形避让，宝箱一定看得见
+  function hudRects() {
+    const cr = canvas.getBoundingClientRect();
+    return [...document.querySelectorAll('.hud,.leaderboard,.ammo-belt,.growth-hud,.skill-btn,.fire-btn,.game-tools,.corner-btns,.combat-controls button')]
+      .map(el => el.getBoundingClientRect()).filter(r => r.width && r.height)
+      .map(r => ({ l: r.left - cr.left, t: r.top - cr.top, r: r.right - cr.left, b: r.bottom - cr.top }));
+  }
+  function cellHidden(x, y, rects) {
+    const l = OFFX + x * CELL - CELL * .3, t = OFFY + y * CELL - CELL * .3, r = l + CELL * 1.6, b = t + CELL * 1.6;
+    return rects.some(q => l < q.r && r > q.l && t < q.b && b > q.t);
+  }
+  function randomFreeCell(minFrom, minDist) {
+    const m = Math.max(safeMargin(), 1), rects = hudRects();
+    for (let t = 0; t < 300; t++) {
+      const x = m + ((Math.random() * (COLS - 2 * m)) | 0), y = m + ((Math.random() * (ROWS - 2 * m)) | 0);
+      if (occupied(x, y) || (t < 250 && cellHidden(x, y, rects))) continue;
+      if (minFrom && manhattan({ x, y }, minFrom) < minDist && t < 150) continue;
+      return { x, y };
+    }
+    return null;
+  }
+  function spawnChest(now) {
+    const pos = randomFreeCell(snakes[0].body[0], 6); if (!pos) return;
+    chest = { ...pos, emoji: '🎁', score: 20, grow: 2, weight: 0, category: 'treat', chest: true, until: now + CHEST_LIFE_MS };
+    foods.push(chest);
+    queueNotice('🎁 宝箱出现啦！', '快去把它吃掉！'); playSound('unlock');
+  }
+  function openChest(food) {
+    const p = snakes[0];
+    chest = null;
+    queueNotice('🎉 打开宝箱！', '哇，好多糖果！');
+    playSound('level'); confetti(food, ['🎉', '🍬', '⭐', '🍭'], 36); screenShakeUntil = performance.now() + 160;
+    // 宝箱爆出一圈各式糖果（不受场上上限约束，额外多给 12 颗）
+    let n = 0;
+    for (let r = 1; r <= 2 && n < 12; r++) for (let dx = -r; dx <= r && n < 12; dx++) for (let dy = -r; dy <= r && n < 12; dy++) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+      const x = food.x + dx, y = food.y + dy;
+      if (x < 0 || y < 0 || x >= COLS || y >= ROWS || !inSafe(x, y) || occupied(x, y)) continue;
+      foods.push({ x, y, ...pickWeightedKind() }); n++;
+    }
+    if (!feverActive()) { feverMeter = Math.min(FEVER_NEED - 1, feverMeter + 4); }
+    gainExp(5, '打开宝箱');
+  }
+  // 安全区缩完一轮后恢复，并在中间下一阵糖果雨作为奖励
+  function candyRain() {
+    queueNotice('🍬 安全区恢复啦！', '天上下糖果雨啦！'); playSound('unlock');
+    const cx = COLS / 2, cy = ROWS / 2;
+    for (let i = 0; i < 14; i++) {
+      const x = Math.max(0, Math.min(COLS - 1, Math.round(cx + (Math.random() - .5) * COLS * .6))), y = Math.max(0, Math.min(ROWS - 1, Math.round(cy + (Math.random() - .5) * ROWS * .6)));
+      if (occupied(x, y)) continue;
+      foods.push({ x, y, ...pickWeightedKind() });
+    }
+    confetti({ x: cx, y: cy }, ['🍬', '🍭', '✨'], 30);
+  }
+  function updateFun(now) {
+    const p = snakes[0]; if (!p) return;
+    const h = p.body[0];
+    // 狂欢：附近 3 格内的糖果每步朝蛇头挪一格
+    if (feverActive(now)) for (const f of foods) {
+      if (f.chest) continue;
+      const d = Math.abs(f.x - h.x) + Math.abs(f.y - h.y);
+      if (d > 1 && d <= 4) { const nx = f.x + Math.sign(h.x - f.x), ny = f.y + Math.sign(h.y - f.y); if (!foods.some(o => o !== f && o.x === nx && o.y === ny)) { f.x = nx; f.y = ny; } }
+    }
+    // 长大庆祝：每局每个里程碑只庆祝一次
+    // 继续上一局时已经达到的长度不重复庆祝
+    if (nextMilestone < 0) nextMilestone = MILESTONES.filter(m => p.body.length >= m).length;
+    while (nextMilestone < MILESTONES.length && p.body.length >= MILESTONES[nextMilestone]) {
+      const len = MILESTONES[nextMilestone++];
+      queueNotice(`🎉 长到 ${len} 节啦！`, len >= 40 ? '最长的小蛇就是你！' : '真厉害，继续加油！');
+      playSound('level'); confetti(h, ['🎉', '🎈', '⭐', '✨'], 34); gainExp(5, '长大啦');
+    }
+    // 宝箱：定时出现，超时没吃到就悄悄消失，过一会儿再来
+    if (chest && now >= chest.until) { const i = foods.indexOf(chest); if (i >= 0) foods.splice(i, 1); chest = null; nextChestAt = now + 10000; }
+    else if (chest && !foods.includes(chest)) chest = null;
+    if (!chest && now >= nextChestAt) { spawnChest(now); nextChestAt = now + CHEST_EVERY_MS; }
+  }
+  function drawFun(now) {
+    const p = snakes && snakes[0]; if (!p) return;
+    ctx.save();
+    if (chest) {
+      const c = cellCenter(chest), left = chest.until - now, blink = left < 5000 && Math.floor(now / 200) % 2;
+      const r = CELL * (.8 + .12 * Math.sin(now / 160));
+      ctx.globalAlpha = blink ? .35 : .9; ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.arc(c.x, c.y, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = blink ? .4 : 1; drawEmoji('🎁', c.x, c.y - Math.abs(Math.sin(now / 220)) * 6, CELL * .8);
+      // 离得远时在蛇头旁画一个小箭头指向宝箱，小朋友一眼知道往哪走
+      const hc = cellCenter(p.body[0]), dx = c.x - hc.x, dy = c.y - hc.y, dist = Math.hypot(dx, dy);
+      if (dist > CELL * 4) {
+        const ux = dx / dist, uy = dy / dist, ax = hc.x + ux * CELL * 1.5, ay = hc.y + uy * CELL * 1.5;
+        const bob = 1 + .15 * Math.sin(now / 150), L = 24 * bob, W = 15 * bob;
+        ctx.globalAlpha = .95; ctx.fillStyle = '#ffb703'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.beginPath();
+        ctx.moveTo(ax + ux * L, ay + uy * L); ctx.lineTo(ax - uy * W, ay + ux * W); ctx.lineTo(ax + uy * W, ay - ux * W); ctx.closePath(); ctx.stroke(); ctx.fill();
+      }
+    }
+    if (feverActive(now)) {
+      const hc = cellCenter(p.body[0]), hue = (now / 4) % 360;
+      ctx.globalAlpha = .75; ctx.lineWidth = 6; ctx.strokeStyle = `hsl(${hue},95%,62%)`;
+      ctx.beginPath(); ctx.arc(hc.x, hc.y, CELL * (1 + .1 * Math.sin(now / 90)), 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = `hsl(${(hue + 120) % 360},95%,65%)`; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(hc.x, hc.y, CELL * 1.35, now / 300, now / 300 + Math.PI * 1.2); ctx.stroke();
+    }
+    ctx.restore();
+  }
   function updateSkillWorld(now){
     if(decoy){if(now>=decoy.until)decoy=null;else{const h=decoy.body[0],x=Math.max(0,Math.min(COLS-1,h.x+decoy.dir.x)),y=Math.max(0,Math.min(ROWS-1,h.y+decoy.dir.y));decoy.body.unshift({x,y});decoy.body.pop();const foe=snakes.slice(1).find(f=>f.body[0].x===x&&f.body[0].y===y);if(foe){candyRing({x,y});burst({x,y},'#b77dff','🍬');decoy=null;}}}
     for(let i=mines.length-1;i>=0;i--){const m=mines[i],foe=snakes.slice(1).find(f=>f.body[0].x===m.x&&f.body[0].y===m.y);if(foe){dropAvocados(foe);for(const f of snakes.slice(1))if(Math.hypot(f.body[0].x-m.x,f.body[0].y-m.y)<=3)repel(f,m,now,f===foe?2000:1000);burst(m,'#ff75b8','🍬');playSound('bomb');screenShakeUntil=now+200;mines.splice(i,1);}}
-    if(blackHole){const b=blackHole;if(now>=b.until)blackHole=null;else{for(let i=foods.length-1;i>=0;i--){const f=foods[i],d=Math.hypot(f.x-b.x,f.y-b.y);if(d<=6){if(d<=1){const p=snakes[0];p.score+=f.score;p.grow+=f.grow;foods.splice(i,1);}else{f.x+=Math.sign(b.x-f.x);f.y+=Math.sign(b.y-f.y);}}}for(const f of snakes.slice(1)){const h=f.body[0];if(f.body.length<snakes[0].body.length&&Math.hypot(h.x-b.x,h.y-b.y)<=6){const dx=Math.sign(b.x-h.x),dy=Math.sign(b.y-h.y);for(const p of f.body){p.x+=dx;p.y+=dy;}f.prevBody=f.body.map(p=>({...p}));if(Math.hypot(h.x-b.x,h.y-b.y)<=1&&!b.hit.has(f)){f.body.splice(Math.max(1,f.body.length-3));f.contents.length=f.body.length;b.hit.add(f);burst(h,'#8055e8','✨');}}}}}
+    if(blackHole){const b=blackHole;if(now>=b.until)blackHole=null;else{for(let i=foods.length-1;i>=0;i--){const f=foods[i],d=Math.hypot(f.x-b.x,f.y-b.y);if(d<=6&&!f.chest){if(d<=1){const p=snakes[0];p.score+=f.score;p.grow+=f.grow;foods.splice(i,1);}else{f.x+=Math.sign(b.x-f.x);f.y+=Math.sign(b.y-f.y);}}}for(const f of snakes.slice(1)){const h=f.body[0];if(f.body.length<snakes[0].body.length&&Math.hypot(h.x-b.x,h.y-b.y)<=6){const dx=Math.sign(b.x-h.x),dy=Math.sign(b.y-h.y);for(const p of f.body){p.x+=dx;p.y+=dy;}f.prevBody=f.body.map(p=>({...p}));if(Math.hypot(h.x-b.x,h.y-b.y)<=1&&!b.hit.has(f)){f.body.splice(Math.max(1,f.body.length-3));f.contents.length=f.body.length;b.hit.add(f);burst(h,'#8055e8','✨');}}}}}
   }
   function drawSkillWorld(now){ctx.save();for(const m of mines){const p=cellCenter(m);ctx.globalAlpha=.35;ctx.strokeStyle='#ff45a0';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,CELL*.5,0,Math.PI*2);ctx.stroke();ctx.fillText('🍭',p.x-8,p.y+7);}ctx.globalAlpha=1;if(decoy){ctx.globalAlpha=.48;ctx.font=`${CELL}px serif`;for(const p of decoy.body){const c=cellCenter(p);ctx.fillText('👥',c.x-CELL/2,c.y+CELL/3);}}if(blackHole){const c=cellCenter(blackHole),r=CELL*(1.1+.15*Math.sin(now/150));ctx.globalAlpha=.8;ctx.fillStyle='#502b9b';ctx.shadowColor='#be8fff';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(c.x,c.y,r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font=`${CELL}px serif`;ctx.fillText('🌌',c.x-CELL/2,c.y+CELL/3);}if(skillActive('rainbow')){const c=cellCenter(snakes[0].body[0]);ctx.globalAlpha=.7;ctx.strokeStyle='#79d9ff';ctx.lineWidth=5;ctx.shadowColor='#64aaff';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(c.x,c.y,CELL*1.1,0,Math.PI*2);ctx.stroke();}ctx.restore();}
   function updateToolIcons(){pauseBtn.innerHTML=iconMarkup(paused?'play':'pause');pauseBtn.setAttribute('aria-label',paused?'继续游戏':'暂停游戏');pauseBtn.setAttribute('aria-pressed',String(paused));muteBtn.innerHTML=iconMarkup(muted?'sound_off':'sound_on');muteBtn.setAttribute('aria-label',muted?'开启声音':'静音');muteBtn.setAttribute('aria-pressed',String(muted));}
@@ -1158,6 +1349,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
       const now=performance.now(),waited=now-pauseStartedAt;
       if(decoy)decoy.until+=waited;if(blackHole)blackHole.until+=waited;if(weakUntil>pauseStartedAt)weakUntil+=waited;
       nextRingAt+=waited; if(sporeReadyAt>pauseStartedAt)sporeReadyAt+=waited;
+      nextChestAt+=waited; if(feverUntil>pauseStartedAt)feverUntil+=waited; if(chest)chest.until+=waited;
       for(const timers of [skillCooldowns,skillEnds])for(const id of Object.keys(timers))if(timers[id]>pauseStartedAt)timers[id]+=waited;
       for(const foe of snakes)for(const key of ['frozenUntil','slowedUntil','invincibleUntil'])if(foe[key]>pauseStartedAt)foe[key]+=waited;
       lastStepTime=now;lastFrameTime=now;requestAnimationFrame(loop);
@@ -1172,7 +1364,10 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     saved.lv = Math.max(1, Math.min(5, saved.lv || 1)); saved.exp = saved.exp || 0;
     return saved;
   }
-  function saveAmmoLevels() { localStorage.setItem('snakeAmmoLv', JSON.stringify(ammoLevels)); }
+  // 命中很频繁：合并到 1 秒内写一次；切后台/关页时 flush
+  let ammoSaveTimer = 0;
+  function flushAmmoLevels() { clearTimeout(ammoSaveTimer); ammoSaveTimer = 0; try { localStorage.setItem('snakeAmmoLv', JSON.stringify(ammoLevels)); } catch (_) {} }
+  function saveAmmoLevels() { if (!ammoSaveTimer) ammoSaveTimer = setTimeout(flushAmmoLevels, 1000); }
   function playerAmmoGroups(player) {
     const groups = {};
     for (const emoji of player.ammo) { const kind = kindForEmoji(emoji); (groups[kind.category] ||= []).push(emoji); }
@@ -1326,6 +1521,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   function reset(carry=null) {
     foods = [];
     ringLevel=0; nextRingAt=performance.now()+60000; sporeReadyAt=0; lastRingToast=0;
+    feverMeter=0; feverUntil=0; chest=null; nextChestAt=performance.now()+CHEST_FIRST_MS; nextMilestone=-1;
     bullets = [];
     pendingRespawns = [];
     decoy=null;mines=[];blackHole=null;weakUntil=0; if(!carry){ skillEnds = {}; skillCooldowns = {}; } combo = 0; killTexts.length = 0; killParticles.length = 0; skillTrailParticles.length = 0;
@@ -1376,18 +1572,24 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     renderSkills(true);
     lastStepTime = performance.now();
   }
+  let lastLbHtml = '', lastAmmoHtml = '';
+  // 值没变就不碰 DOM：同值赋 textContent 在 WebKit 里也会触发重排
+  function setText(el, v) { v = String(v); if (el.textContent !== v) el.textContent = v; }
+  function setAttr(el, k, v) { if (el.getAttribute(k) !== v) el.setAttribute(k, v); }
   function updateHud() {
     const player = snakes[0];
-    scoreEl.textContent = player.score;
-    lengthEl.textContent = player.body.length;
-    document.getElementById('levelText').textContent='Lv'+save.level;
-    lbRows.innerHTML = snakes.slice().sort((a, b) => b.score - a.score).map(s =>
+    setText(scoreEl, player.score);
+    setText(lengthEl, player.body.length);
+    setText(levelTextEl, 'Lv'+save.level);
+    // 每步都会调用：内容没变就不重写 innerHTML，免得 iPad 每秒重建几十个带背景图的节点
+    const lbHtml = snakes.slice().sort((a, b) => b.score - a.score).map(s =>
       `<div class="row${s.isPlayer ? ' me' : ''}${s === leader() ? ' leader-row' : ''}">${s.isPlayer ? playerAvatarMarkup(28, spriteMarkup('snake', 'player', 28, `<span class="dot" style="background:${s.color}"></span>`)) : spriteMarkup('snake', friendKey(s), 28, `<span class="dot" style="background:${s.color}"></span>`)}<span class="name">${s.name}</span><span class="val">${s.score}</span></div>`
     ).join('');
+    if (lbHtml !== lastLbHtml) { lbRows.innerHTML = lbHtml; lastLbHtml = lbHtml; }
     renderAmmo();
     const next = save.level >= 20 ? LEVEL_EXP[19] : LEVEL_EXP[save.level];
     const prev = LEVEL_EXP[save.level-1] || 0, within = Math.max(0, save.exp-prev), need=Math.max(1,next-prev);
-    expText.textContent = `${within}/${need}`; expBar.style.width = `${Math.min(100,within/need*100)}%`;
+    setText(expText, `${within}/${need}`); const w = `${Math.min(100,within/need*100)}%`; if (expBar.style.width !== w) expBar.style.width = w;
   }
 
   // 固定糖果弹药槽：第一颗就是下一发，刚装入的一格会弹一下亮一下。
@@ -1398,15 +1600,16 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     const categories = Object.keys(groups);
     if (!groups[selectedAmmoCategory]) selectedAmmoCategory = categories[0] || null;
     const shown = categories.slice(0, 6);
-    ammoSlotsEl.innerHTML = shown.map((category, i) => {
+    const ammoHtml = shown.map((category, i) => {
       const emojis = groups[category], level = ammoLevel(category), emoji = emojis[0];
       const cls = 'ammo-slot' + (category === selectedAmmoCategory ? ' selected' : '') + (category === ammoPopCategory ? ' pop' : '');
       return `<button type="button" class="${cls}" data-ammo-category="${category}" aria-label="${CATEGORY_META[category].label}弹 ${emojis.length}颗，Lv${level.lv}">${spriteMarkup('food', emoji, 38, emoji) || emoji}<b class="ammo-num">x${emojis.length}</b><b class="ammo-lv">Lv${level.lv}</b></button>`;
     }).join('') + (categories.length > 6 ? `<button type="button" class="ammo-more" title="还有${categories.length - 6}种弹药">+${categories.length - 6}</button>` : '');
-    ammoCountEl.textContent = `${ammo.length}/${AMMO_MAX}`;
-    document.getElementById('fireCount').textContent=ammo.length;
-    fireBtn.setAttribute('aria-label',`发射糖果弹，剩余${ammo.length}颗`);
-    fireBtn.setAttribute('aria-disabled', String(!running || paused || !ammo.length));
+    if (ammoHtml !== lastAmmoHtml) { ammoSlotsEl.innerHTML = ammoHtml; lastAmmoHtml = ammoHtml; }
+    setText(ammoCountEl, `${ammo.length}/${AMMO_MAX}`);
+    setText(fireCountEl, ammo.length);
+    setAttr(fireBtn, 'aria-label', `发射糖果弹，剩余${ammo.length}颗`);
+    setAttr(fireBtn, 'aria-disabled', String(!running || paused || !ammo.length));
     ammoPopCategory = null;
   }
 
@@ -1414,9 +1617,11 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   function pickTarget(snake, head) {
     if (!snake.isPlayer && decoy) return decoy.body[0];
     if (!foods.length) return null;
+    // 宝箱只给玩家：自动吃时优先去开宝箱，AI 完全无视它
+    if (snake.isPlayer && chest && foods.includes(chest)) return chest;
     if (snake.strategy === 'biggest') {
       let best = null, bestVal = -Infinity;
-      for (const f of foods) {
+      for (const f of foods) { if (f.chest) continue;
         const val = f.score * 1000 - manhattan(f, head);
         if (val > bestVal) { bestVal = val; best = f; }
       }
@@ -1425,7 +1630,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     if (snake.strategy === 'coward') {
       const ph = snakes[0].body[0];
       let best = null, bestVal = -Infinity;
-      for (const f of foods) {
+      for (const f of foods) { if (f.chest) continue;
         const val = manhattan(f, ph) - manhattan(f, head) * 0.4;
         if (val > bestVal) { bestVal = val; best = f; }
       }
@@ -1433,7 +1638,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     }
     if (snake.strategy === 'efficient') {
       let best = null, bestVal = -Infinity;
-      for (const f of foods) {
+      for (const f of foods) { if (f.chest) continue;
         const val = f.score / (manhattan(f, head) + 1);
         if (val > bestVal) { bestVal = val; best = f; }
       }
@@ -1441,7 +1646,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     }
     // 'nearest'：谁近吃谁
     let best = null, bestVal = Infinity;
-    for (const f of foods) {
+    for (const f of foods) { if (f.chest) continue;
       const val = manhattan(f, head);
       if (val < bestVal) { bestVal = val; best = f; }
     }
@@ -1461,6 +1666,8 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   function chooseDir(snake) {
     const head = snake.body[0];
     let target = null;
+    // 宝箱一出现，自动吃立刻改去开宝箱
+    if (snake.isPlayer && chest && foods.includes(chest) && snake.targetFood !== chest) snake.targetFood = null;
     if (!snake.isPlayer && decoy) { target=decoy.body[0]; snake.targetFood=null; } else if (snake.targetFood && foods.includes(snake.targetFood)) {
       target = snake.targetFood;
     } else {
@@ -1474,7 +1681,10 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
       { x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 },
     ].filter(d => !(d.x === -snake.dir.x && d.y === -snake.dir.y));
 
-    const path=findPath(snake,target); if(path&&path.length){const n=path[0],d={x:n.x-head.x,y:n.y-head.y};if(!(d.x===-snake.dir.x&&d.y===-snake.dir.y)){snake.nextDir=d;return;}}
+    const path=findPath(snake,target);
+    // 目标被身体围住走不到时，连续 3 步找不到路就换一个目标，免得自动吃一直绕圈
+    if(!path){snake.targetMiss=(snake.targetMiss||0)+1;if(snake.targetMiss>=3){snake.targetFood=null;snake.targetMiss=0;}}else snake.targetMiss=0;
+    if(path&&path.length){const n=path[0],d={x:n.x-head.x,y:n.y-head.y};if(!(d.x===-snake.dir.x&&d.y===-snake.dir.y)){snake.nextDir=d;return;}}
     function scoreDir(d) {
       let nx = head.x + d.x, ny = head.y + d.y;
       let s = 0;
@@ -1531,10 +1741,11 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
       const head = { x: nx, y: ny };
       snake.body.unshift(head);
 
-      const idx = foods.findIndex(f => f.x === head.x && f.y === head.y);
+      const idx = foods.findIndex(f => f.x === head.x && f.y === head.y && (snake.isPlayer || !f.chest));
       if (idx >= 0) {
         const eaten = foods[idx];
         snake.score += foods[idx].score;
+        if (snake.isPlayer && feverActive()) snake.score += foods[idx].score; // 狂欢时双倍分
         snake.grow += foods[idx].grow;
         if (snake.ammo.length < AMMO_MAX) {
           if(!snake.isPlayer || isUnlocked('ammo',eaten.category)) snake.ammo.push(eaten.emoji);
@@ -1542,11 +1753,11 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
         }
         if (foods[idx] === snake.targetFood) snake.targetFood = null;
         foods.splice(idx, 1);
-        if(snake.isPlayer){ playSound(foodSoundKind(eaten.category)); gainExp(2,'吃糖果'); if(performance.now()-lastFoodSave>2000){lastFoodSave=performance.now();saveGame();} }
+        if(snake.isPlayer){ onPlayerEat(eaten); playSound(foodSoundKind(eaten.category)); gainExp(2,'吃糖果'); if(performance.now()-lastFoodSave>2000){lastFoodSave=performance.now();saveGame();} }
       }
       snake.contents.unshift(null);
 
-      if (snake.body.length >= MAX_BODY_LEN) {
+      if (snake.body.length >= maxLen(snake)) {
         snake.grow = 0;
         snake.body.pop();
         snake.contents.pop();
@@ -1572,9 +1783,9 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
         if(hit<0) continue;
         if(attacker.body.length>target.body.length) {
           const count=target.body.length-hit;
-          if(hit===0) { if(attacker.isPlayer) showKillFeedback(h); attacker.grow+=Math.min(count,Math.max(0,MAX_BODY_LEN-attacker.body.length-attacker.grow)); attacker.score+=count*2; killOpponent(snakes.indexOf(target),attacker); continue; }
+          if(hit===0) { if(attacker.isPlayer) showKillFeedback(h); attacker.grow+=Math.min(count,Math.max(0,maxLen(attacker)-attacker.body.length-attacker.grow)); attacker.score+=count*2; killOpponent(snakes.indexOf(target),attacker); continue; }
           target.body.splice(hit); target.contents.splice(hit); target.prevBody=target.body.map(p=>({...p}));
-          attacker.grow+=Math.min(count,Math.max(0,MAX_BODY_LEN-attacker.body.length-attacker.grow));
+          attacker.grow+=Math.min(count,Math.max(0,maxLen(attacker)-attacker.body.length-attacker.grow));
           attacker.score+=count*2;
           if(attacker.isPlayer) showKillFeedback(h);
           if(target.body.length<=3) killOpponent(snakes.indexOf(target),attacker);
@@ -1592,6 +1803,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
       if(skillActive('magnet')) for(let i=snakes.length-1;i>=1;i--) if(snakes[i].body.length<player.body.length && snakes[i].body.some(q=>Math.hypot(q.x-ph.x,q.y-ph.y)<=1)) killOpponent(i);
     }
 
+    updateFun(performance.now());
     refillFoods();
     updateHud();
   }
@@ -1687,7 +1899,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   let boardCache = null, boardCacheKey = '';
   function drawBoard() {
     ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
-    const key = [COLS,ROWS,OFFX,OFFY,CELL,DPR,canvas.width,canvas.height,boardImage.complete && boardImage.naturalWidth ? 1 : 0].join();
+    const key = [COLS,ROWS,OFFX,OFFY,CELL,DPR,canvas.width,canvas.height,boardImage.complete && boardImage.naturalWidth ? 1 : 0,ringLevel].join();
     if (key !== boardCacheKey) {
       boardCacheKey = key;
       boardCache = document.createElement('canvas');
@@ -1712,11 +1924,12 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
       c.strokeStyle = 'rgba(70,174,151,.35)';
       c.lineWidth = 6;
       c.strokeRect(OFFX + 3, OFFY + 3, COLS * CELL - 6, ROWS * CELL - 6);
+      // 安全区外的红色警示也烘进缓存：只在缩圈时重画一次，不再每帧逐格填色
+      if(ringLevel){c.fillStyle="rgba(235,35,35,.35)"; for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(!inSafe(x,y))c.fillRect(OFFX+x*CELL,OFFY+y*CELL,CELL,CELL);}
       c.restore();
     }
     ctx.save(); ctx.setTransform(1,0,0,1,0,0);
     ctx.drawImage(boardCache, 0, 0);
-    if(ringLevel){ctx.fillStyle="rgba(235,35,35,.35)"; for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(!inSafe(x,y))ctx.fillRect(OFFX+x*CELL,OFFY+y*CELL,CELL,CELL);}
     ctx.restore();
   }
 
@@ -1825,7 +2038,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     for (const d of ammoDamageTexts) { const t=(now-d.born)/800;ctx.globalAlpha=1-t;ctx.fillStyle=d.color;ctx.shadowColor='#fff';ctx.shadowBlur=0;ctx.fillText(d.text,OFFX+d.x*CELL,OFFY+(d.y-t*.8)*CELL); } ctx.restore();
     // 击杀彩纸和连杀大字独立限额，激烈时也不会把 Canvas 画满。
     while(killParticles.length && now-killParticles[0].born>killParticles[0].life)killParticles.shift();
-    for(const p of killParticles){const t=(now-p.born)/p.life;ctx.save();ctx.globalAlpha=1-t;ctx.font='18px serif';ctx.fillText(p.emoji,OFFX+(p.x+p.vx*t)*CELL,OFFY+(p.y+p.vy*t-p.vy*t*t)*CELL);ctx.restore();}
+    ctx.save();for(const p of killParticles){const t=(now-p.born)/p.life;ctx.globalAlpha=1-t;drawEmoji(p.emoji,OFFX+(p.x+p.vx*t)*CELL,OFFY+(p.y+p.vy*t-p.vy*t*t)*CELL,18);}ctx.restore();
     while(killTexts.length && now-killTexts[0].born>900)killTexts.shift();ctx.save();ctx.font='900 30px -apple-system,"PingFang SC",sans-serif';ctx.textAlign='center';for(const d of killTexts){const t=(now-d.born)/900;ctx.globalAlpha=1-t;ctx.fillStyle='#ff4f9a';ctx.strokeStyle='#fff7a8';ctx.lineWidth=7;const x=OFFX+d.x*CELL,y=OFFY+(d.y-t*1.4)*CELL;ctx.strokeText(d.text,x,y);ctx.fillText(d.text,x,y);}ctx.restore();
   }
 
@@ -1834,12 +2047,12 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     if(!snakes || save.trail==='none') return; const p=snakes[0], tail=p.body[p.body.length-1], now=performance.now();
     if(Math.random()<.24 && trailParticles.length<MAX_FX_PARTICLES) trailParticles.push({x:tail.x+.5,y:tail.y+.5,born:now,life:650+Math.random()*300,seed:Math.random()});
     trailParticles=trailParticles.filter(a=>now-a.born<a.life); const icon={rainbow:'🌈',star:'⭐',heart:'♥',bubble:'●'}[save.trail];
-    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='22px sans-serif';for(const a of trailParticles){const t=(now-a.born)/a.life;ctx.globalAlpha=1-t;ctx.fillStyle=save.trail==='bubble'?'#75dfff':'#fff';ctx.fillText(icon,OFFX+a.x*CELL,OFFY+(a.y-t*.8)*CELL);}ctx.restore();
+    const tc=save.trail==='bubble'?'#75dfff':'#fff';ctx.save();for(const a of trailParticles){const t=(now-a.born)/a.life;ctx.globalAlpha=1-t;drawEmoji(icon,OFFX+a.x*CELL,OFFY+(a.y-t*.8)*CELL,22,tc);}ctx.restore();
     if(false){if(Math.random()<.55&&skillTrailParticles.length<80)skillTrailParticles.push({x:tail.x+.5,y:tail.y+.5,born:now});while(skillTrailParticles.length&&now-skillTrailParticles[0].born>520)skillTrailParticles.shift();ctx.save();ctx.font='24px serif';for(const a of skillTrailParticles){const t=(now-a.born)/520;ctx.globalAlpha=1-t;ctx.fillText('🌈',OFFX+a.x*CELL,OFFY+(a.y-t*.9)*CELL);}ctx.restore();}
   }
 
   function drawNameTag(snake, headPt, color) {
-    if(snake===leader()){ctx.save();ctx.font=`${Math.max(20,CELL*.65)}px serif`;ctx.textAlign="center";ctx.fillText("👑",headPt.x,Math.max(22,headPt.y-CELL*1.1));ctx.restore();}
+    if(snake===leader()){const cs=Math.max(20,CELL*.65);drawEmoji("👑",headPt.x,Math.max(22,headPt.y-CELL*1.1)-cs*.35,cs);}
     if (snake.isPlayer && kidAvatarReady) { drawKidAvatar(headPt); return; }
     ctx.save();
     ctx.font = '600 15px -apple-system, "PingFang SC", sans-serif';
@@ -2096,7 +2309,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   function loop(now) {
     const perfStart=performance.now();
     if (!running || paused) return;
-    if(ringLevel<4 && now>=nextRingAt){ringLevel++;nextRingAt+=25000;for(const f of foods)clampSafe(f);queueNotice("⚠️ 安全区缩小了！", "快向中间走！");}
+    if(now>=nextRingAt){if(ringLevel<RING_MAX){ringLevel++;nextRingAt+=25000;for(const f of foods)clampSafe(f);queueNotice("⚠️ 安全区缩小了！", "快向中间走！");}else{ringLevel=0;nextRingAt=now+60000;candyRain();}}
     if([...combatPointers.values()].some(b=>b===fireBtn))requestFire();
     const speed = (spaceHeld ? BASE_SPEED / BOOST_DIVISOR : BASE_SPEED) / (skillActive('magnet') ? 1.4 : (now<weakUntil ? .8 : 1));
     let elapsed = now - lastStepTime;
@@ -2119,7 +2332,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     lastFrameTime = now;
     updateBullets(dt);
     processRespawns(now);
-    if (matchMedia('(pointer:coarse)').matches && now-lastPaintTime<33) { requestAnimationFrame(loop); return; }
+    if (coarsePointer.matches && now-lastPaintTime<33) { requestAnimationFrame(loop); return; }
     lastPaintTime=now;
     const t = Math.min(1, (now - lastStepTime) / speed);
     const shaking = now < screenShakeUntil;
@@ -2127,6 +2340,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     drawBoard();
     drawFoods();
     drawSkillWorld(now);
+    drawFun(now);
     drawTrail();
     for (const snake of snakes) drawSnakeBody(snake, t);
     drawBullets();
@@ -2352,7 +2566,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   updateToolIcons(); renderSkills(true); renderSkins();
   renderTrails(); refreshStart();
   trailModal.addEventListener('click',e=>{const b=e.target.closest('[data-trail]');if(!b)return;save.trail=b.dataset.trail;saveGame(true);renderTrails();});
-  window.addEventListener('beforeunload',()=>saveGame(true));window.addEventListener('pagehide',()=>{if(running&&!paused)togglePause();syncAudio();}); document.addEventListener('visibilitychange',()=>{if(document.hidden){if(running&&!paused)togglePause();saveGame(true);spaceHeld=false;directionPointer=null;for(const b of combatPointers.values())b.classList.remove('pressed');combatPointers.clear();}syncAudio();});
+  window.addEventListener('beforeunload',()=>{saveGame(true);flushAmmoLevels();});window.addEventListener('pagehide',()=>{if(running&&!paused)togglePause();syncAudio();}); document.addEventListener('visibilitychange',()=>{if(document.hidden){if(running&&!paused)togglePause();saveGame(true);flushAmmoLevels();spaceHeld=false;directionPointer=null;for(const b of combatPointers.values())b.classList.remove('pressed');combatPointers.clear();}syncAudio();});
 
   resize();
   drawBoard();
