@@ -19,7 +19,8 @@ header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:va
 nav{display:flex;gap:var(--gap);align-items:center}
 header a,header button,.bank{border:2px solid var(--line);border-radius:22px;background:var(--cream);box-shadow:0 5px 0 #dab69e77;text-decoration:none;min-height:var(--tap);display:grid;place-items:center;padding:6px 12px;text-align:center}
 header a,header button{min-width:var(--tap)}
-.bank{justify-self:end;display:flex;gap:6px;font-size:clamp(20px,3.7vmin,36px);min-width:var(--tap);justify-content:center}
+.header-actions{justify-self:end;display:flex;gap:var(--gap);align-items:center}
+.bank{display:flex;gap:6px;font-size:clamp(20px,3.7vmin,36px);min-width:var(--tap);justify-content:center}
 h1,h2,p{margin:0}
 h1{font-size:clamp(22px,4.7vmin,60px);text-align:center;text-shadow:0 2px #fff9ee;letter-spacing:.04em}
 main{min-width:0;display:grid;align-content:stretch}
@@ -84,13 +85,13 @@ main{min-width:0;display:grid;align-content:stretch}
 .gallery button{padding:8px;display:grid;justify-items:center;gap:6px}
 .gallery img:first-child{width:100%;aspect-ratio:4/3;object-fit:contain;border-radius:16px;background:#fffdf4}
 .avatar{width:58px;height:58px;object-fit:contain;border-radius:50%;background:#ffedcc}
-dialog{position:fixed;inset:0;margin:0;border:0;padding:0;max-width:none;max-height:none;width:100%;height:100%;color:var(--ink);background:#562d75bf}
-dialog[open]{display:grid;place-items:center}
+#dialog{position:fixed;inset:0;margin:0;border:0;padding:0;max-width:none;max-height:none;width:100%;height:100%;color:var(--ink);background:#562d75bf}
+#dialog[open]{display:grid;place-items:center}
 .reveal{display:grid;justify-items:center;gap:var(--gap);max-width:92vw;padding:clamp(12px,3.5vmin,44px);text-align:center;border-radius:40px;background:radial-gradient(#fff8c8,#ffd9ed);border:4px solid #fffdf2;box-shadow:0 14px 0 #763c7755}
 .reveal .award-art{width:min(44vw,34svh,300px);height:min(44vw,34svh,300px);display:grid;place-items:center;animation:reveal .72s both;font-size:clamp(65px,20vmin,200px)}
 .wall-preview{position:absolute;top:3%;right:3%;display:flex;justify-content:center;gap:2px;padding:4px;border-radius:16px;background:#ffedce;border-bottom:6px solid #d99974;width:min(58%,460px)}
 .wall-preview svg{width:8.5%;height:auto}
-dialog[data-type=medal] .award-art{border:clamp(6px,1.2vmin,14px) solid #fff0a4;border-radius:50%;background:radial-gradient(circle at 34% 24%,#fff9cc 9%,#ffd874 38%,#f5a542 91%);box-shadow:0 7px 0 #d88445,inset 0 0 0 4px #f4ad52,0 12px 28px #f1a1566e}
+#dialog[data-type=medal] .award-art{border:clamp(6px,1.2vmin,14px) solid #fff0a4;border-radius:50%;background:radial-gradient(circle at 34% 24%,#fff9cc 9%,#ffd874 38%,#f5a542 91%);box-shadow:0 7px 0 #d88445,inset 0 0 0 4px #f4ad52,0 12px 28px #f1a1566e}
 .reveal svg,.reveal img:not(.avatar){max-width:100%;max-height:56svh}
 .reveal button{min-width:var(--tap)}
 .effects{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
@@ -108,6 +109,8 @@ dialog[data-type=medal] .award-art{border:clamp(6px,1.2vmin,14px) solid #fff0a4;
   .shell{background-attachment:scroll}
   header{grid-template-columns:1fr auto}
   header h1{grid-column:1/-1;grid-row:2}
+  header a,header button,.bank{min-width:88px;min-height:88px;padding-inline:6px}
+  header #home{min-width:44px}
   .shelf{grid-template-columns:none;grid-template-rows:repeat(2,96px);grid-auto-flow:column;grid-auto-columns:96px;overflow-x:auto}
   .home-floor{grid-template-columns:1fr}
   .kid-side{grid-template-columns:1fr 1fr;grid-template-rows:auto;min-height:108px}
@@ -126,12 +129,13 @@ dialog[data-type=medal] .award-art{border:clamp(6px,1.2vmin,14px) solid #fff0a4;
 <header>
   <nav><a href="../index.html" aria-label="返回合集">‹ 合集</a><button id="home" type="button" hidden aria-label="工坊首页">🏠</button></nav>
   <h1>彩虹颜料工坊</h1>
-  <div class="bank" data-flower-counter aria-label="小红花"><span aria-hidden="true">🌺</span><output id="flowers">0</output></div>
+  <div class="header-actions"><div class="bank" data-flower-counter aria-label="小红花"><span aria-hidden="true">🌺</span><output id="flowers">0</output></div><button id="voice-settings" type="button"><span aria-hidden="true">⚙️</span>声音</button></div>
 </header>
 <main id="game"></main>
 </div>
 <dialog id="dialog"></dialog>
 <script src="../shared/rewards.js"></script>
+<script src="../shared/voice.js"></script>
 <script>
 (() => {
 'use strict';
@@ -329,7 +333,7 @@ const clipText = {
   zh_tap_mic:'点一下话筒，再大声说。', zh_mix:'把两瓶颜料放进魔法锅！', zh_find:'听一听，找颜色！',
   zh_paint:'选一瓶颜料，再给画填上颜色。', zh_not_this:'再听一次。', zh_good:'真棒！',
   zh_new_color:'新颜料！它要飞回收藏墙啦！', zh_gallery:'来看看你的作品！', zh_pick:'选一张你想画的画。',
-  zh_hear_me:'听听你刚才读的。', en_wow:'Wow!', en_great:'Great!', en_yay:'Yay!', en_tryagain:'Try again!',
+  zh_hear_me:'听听你刚才读的。', zh_read_done:'读好了，就点大星星吧！', en_wow:'Wow!', en_great:'Great!', en_yay:'Yay!', en_tryagain:'Try again!',
   en_magic:'Magic!', en_masterpiece:'What a masterpiece!'
 };
 for (const c of colors) {
@@ -342,6 +346,10 @@ for (const [key, c] of Object.entries(recipes)) {
 }
 
 const audio = new Audio();
+$('#voice-settings').onclick = () => {
+  stopAudio();
+  window.KidVoice?.openPanel({ previewBase: 'assets/voice/' });
+};
 let stopClip;
 let audioRun = 0;
 function stopAudio() { audioRun++; stopClip?.(); }
@@ -378,12 +386,33 @@ function playClip(id) {
       try { speechSynthesis.speak(utterance); } catch (_) { done(); }
     }
     stopClip = done;
-    if (id === 'zh_read_done') return fallback();
-    audio.onended = done;
-    audio.onerror = fallback;
-    audio.src = id.startsWith('blob:') ? id : 'assets/voice/' + id + '.m4a';
-    timer = setTimeout(fallback, 6500);
-    audio.play().catch(fallback);
+    // 先播所选音色，再试默认音色，最后交给系统朗读。录音直接使用 blob 地址。
+    const defaultUrl = id.startsWith('blob:') ? id :
+      'assets/voice/' + (id.startsWith('zh_') ? 'zh-xiaoxiao/' : 'en-ana/') + id + '.mp3';
+    const urls = [...new Set([window.KidVoice?.url(id) || defaultUrl, defaultUrl])];
+    let attempt = 0;
+    function tryNext() {
+      clearTimeout(timer);
+      if (attempt === urls.length) {
+        attempt++;
+        audio.onerror = audio.onended = null;
+        return fallback();
+      }
+      const src = urls[attempt++];
+      const current = attempt;
+      function retry() {
+        if (!closed && current === attempt) tryNext();
+      }
+      audio.onended = done;
+      audio.onerror = retry;
+      audio.src = src;
+      timer = setTimeout(retry, 6500);
+      audio.play().catch(error => {
+        if (closed || current !== attempt) return;
+        retry();
+      });
+    }
+    tryNext();
   });
 }
 async function say(...ids) {

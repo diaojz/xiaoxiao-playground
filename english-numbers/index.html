@@ -159,8 +159,9 @@ body{overflow-x:clip}
 }
 @media(max-width:600px){
  :root{--head:calc(104px + env(safe-area-inset-top))}
- .top{grid-template-columns:96px minmax(0,1fr) 194px;gap:3px;padding-inline:3px}
+ .top{grid-template-columns:96px minmax(0,1fr) 268px;gap:3px;padding-inline:3px}
  .top nav{gap:2px}
+ .top nav button{min-width:88px}
  .top .bank{grid-column:auto}
  #chest{top:calc(var(--head) + 7px);right:8px}.bank-line{gap:4px}
  .shell:has(#chest:not([hidden])){padding-top:calc(var(--head) + 111px)}
@@ -173,12 +174,17 @@ body{overflow-x:clip}
  .objects,.pieces,.countdown,.album,.medals,.outfits{grid-template-columns:repeat(min(var(--columns,3),3),minmax(96px,1fr))}
  .rails{display:grid;grid-template-columns:repeat(3,1fr);justify-items:center}
 }
-@media(max-width:365px){
+@media(max-width:500px){
  .top{grid-template-columns:96px minmax(0,1fr) 96px}
  .top nav{position:absolute;top:calc(var(--head) + 4px);right:4px}
  .top .bank{grid-column:2/4}
  .shell{padding-top:calc(var(--head) + 111px)}
  #chest{right:auto;left:4px}
+}
+@media(max-width:376px){
+ .top:has(#chest:not([hidden])) #chest{top:calc(var(--head) + 108px)}
+ .shell:has(#chest:not([hidden])){padding-top:calc(var(--head) + 215px)}
+ html:has(#chest:not([hidden])){scroll-padding-top:calc(var(--head) + 215px)}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
@@ -189,7 +195,7 @@ body{overflow-x:clip}
 <header class="top">
 <a class="button" href="../index.html"><span class="icon">‹</span><small>合集</small></a>
 <div class="bank"><div class="bank-line"><button id="chest" hidden aria-label="打开宝箱"></button><div class="counter" data-flower-counter aria-label="小红花"><span id="flower-icon"></span><output id="flowers">0</output></div></div><progress id="chest-progress" max="10" value="0" aria-label="宝箱进度"></progress></div>
-<nav aria-label="成就"><button id="book"> <span class="icon">📒</span><small>收藏册</small></button><button id="trophy"><span class="icon">🏆</span><small>奖杯屋</small></button></nav>
+<nav aria-label="成就与设置"><button id="book"> <span class="icon">📒</span><small>收藏册</small></button><button id="trophy"><span class="icon">🏆</span><small>奖杯屋</small></button><button id="voice-settings" type="button"><span class="icon" aria-hidden="true">⚙️</span><small>声音</small></button></nav>
 </header>
 <main id="stage"></main>
 <footer><button id="replay" class="replay" aria-label="再听一次"><span class="icon">🔊</span><small>再听一次</small></button><div id="lesson-action"></div><button id="road" hidden aria-label="回到数字岛"><span class="icon">🏝️</span><small>数字岛</small></button></footer>
@@ -197,6 +203,7 @@ body{overflow-x:clip}
 <div class="modal" id="reveal" role="dialog" aria-modal="true" aria-labelledby="reveal-title" hidden></div>
 <div class="fx" aria-hidden="true"></div>
 <script src="../shared/rewards.js"></script>
+<script src="../shared/voice.js"></script>
 <script>
 
 (() => {
@@ -311,6 +318,10 @@ animalWords.forEach((word, index) => {
 });
 // 同一播放器用于本地语音和录音。换场景时立刻结束旧队列。
 const audio = new Audio();
+$('#voice-settings').onclick = () => {
+  stopAudio();
+  window.KidVoice?.openPanel({ previewBase: 'assets/voice/' });
+};
 const synth = window.speechSynthesis;
 let audioRun = 0;
 let finishClip;
@@ -358,14 +369,34 @@ function playClip(id, showWord) {
     }
     finishClip = done;
     showWord?.classList.add('speaking');
-    audio.onended = done;
-    audio.onerror = fallback;
-    audio.src = id.startsWith('blob:') ? id : 'assets/voice/' + id + '.m4a';
-    timer = setTimeout(fallback, 6500);
-    audio.play().catch(error => {
-      if (error.name === 'NotAllowedError' && !unlocked) done();
-      else fallback();
-    });
+    // 先播所选音色，再试默认音色，最后交给系统朗读。录音直接使用 blob 地址。
+    const defaultUrl = id.startsWith('blob:') ? id :
+      'assets/voice/' + (id.startsWith('zh_') ? 'zh-xiaoxiao/' : 'en-ana/') + id + '.mp3';
+    const urls = [...new Set([window.KidVoice?.url(id) || defaultUrl, defaultUrl])];
+    let attempt = 0;
+    function tryNext() {
+      clearTimeout(timer);
+      if (attempt === urls.length) {
+        attempt++;
+        audio.onerror = audio.onended = null;
+        return fallback();
+      }
+      const src = urls[attempt++];
+      const current = attempt;
+      function retry() {
+        if (!closed && current === attempt) tryNext();
+      }
+      audio.onended = done;
+      audio.onerror = retry;
+      audio.src = src;
+      timer = setTimeout(retry, 6500);
+      audio.play().catch(error => {
+        if (closed || current !== attempt) return;
+        if (error.name === 'NotAllowedError' && !unlocked) return done();
+        retry();
+      });
+    }
+    tryNext();
   });
 }
 async function say(sequence, card) {
@@ -1256,12 +1287,15 @@ hydrate(document.body);
 updateBank();
 rewards.touchStreak();
 checkMedals();
-document.addEventListener('click', () => {
-  // 首次可信点击在事件内给 iOS 的复用播放器开启声音。
+function unlockAudio(event) {
+  if (event.target.closest('#voice-settings, .kidvoice-panel')) return;
+  // 首次游戏点击在事件内给 iOS 的复用播放器开启声音。
+  document.removeEventListener('click', unlockAudio, true);
   unlocked = true;
   void playPrompt();
   if (reveals.length) setTimeout(nextReveal, 150);
-}, { once: true, capture: true });
+}
+document.addEventListener('click', unlockAudio, true);
 replay.onclick = () => {
   if (busy || mode === 'prompt') return;
   if (mode === 'playback') return void replayRecording(epoch);
