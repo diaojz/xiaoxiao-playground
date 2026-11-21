@@ -79,6 +79,18 @@ h1{font-size:clamp(26px,5vw,48px);line-height:1.1}
  .listen-grid{grid-template-columns:minmax(150px,1fr) minmax(0,2.6fr)}
  .objects{grid-template-columns:repeat(min(var(--columns),6),88px)}
 }
+.kid{display:block;object-fit:contain;pointer-events:none}
+.station.next{display:flex;align-items:center;justify-content:center;gap:0;padding-inline:2px;animation:none}
+.station-kid{width:clamp(31px,9vw,50px);height:clamp(60px,12vw,94px);object-fit:cover;object-position:center;animation:hop 1.5s infinite}
+.follow-space{grid-auto-flow:column;align-items:center;justify-content:center;gap:12px}
+.follow-kid{width:clamp(84px,19vw,135px);height:clamp(105px,22vw,150px)}
+.follow-space:has(.mic.live) .follow-kid{animation:kid-talk .46s ease-in-out infinite alternate}
+.album-heading{display:flex;align-items:center;gap:10px}
+.album-kid{width:54px;height:54px;padding:3px;border:2px solid white;border-radius:50%;background:#ffdce9}
+.celebration{display:flex;align-items:center;justify-content:center;gap:12px}
+.cheer-kid{width:clamp(106px,24vw,160px);height:clamp(106px,24vw,160px);animation:kid-cheer .4s ease-out}
+@keyframes kid-talk{to{transform:translateY(-2px) scale(1.045,1.065)}}
+@keyframes kid-cheer{from{transform:translateY(8px) scale(.78);opacity:.2}70%{transform:translateY(-4px) scale(1.06)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><link rel="stylesheet" href="../app-compat.css"><script defer src="../app-compat.js"></script></head>
@@ -305,10 +317,16 @@ function showHome() {
   renderHome(next);
   maybeSpeak();
 }
+const kidArt = {
+  station: '<img class="kid station-kid" src="assets/kid/kid_front.png" alt="">',
+  follow: '<img class="kid follow-kid" src="assets/kid/kid_front.png" alt="小老师">',
+  cheer: '<img class="kid cheer-kid" src="assets/kid/kid_cheer.png" alt="小主角举手欢呼">',
+  album: '<img class="kid album-kid" src="assets/kid/kid_avatar.png" alt="小主角">'
+};
 function renderHome(next) {
   const stations = range(section * 10 - 9, section * 10).map((value, i) =>
     '<button class="station ' + (value === next ? 'next' : '') + '" style="' + colors(i) + '" data-n="' + value + '" aria-label="学习 ' + value + '">' +
-    (save.stickers[value] ? save.stickers[value] + '<small>' + value + '</small>' : value) + '</button>').join('');
+    (value === next ? kidArt.station : '') + '<span>' + (save.stickers[value] ? save.stickers[value] + '<small>' + value + '</small>' : value) + '</span></button>').join('');
   stage.innerHTML = '<section class="screen"><h1>数字小路</h1><p class="caption">🌈 ' + (section === 1 ? '1 – 10' : '11 – 20') + '</p>' +
     '<div class="path">' + stations + '</div><div class="home-tools">' +
     (save.learned.length >= 3 ? '<button id="review" class="review">' + icon('🎈', '气球复习') + '</button> ' : '') +
@@ -326,7 +344,7 @@ function showAlbum() {
   view('album', []);
   const slots = range(1, 20).map(value =>
     '<div class="slot">' + (save.stickers[value] || '·') + '<small>' + value + '</small></div>').join('');
-  stage.innerHTML = '<section class="screen"><h1>📒 贴纸册</h1><p class="caption">' + save.learned.length + ' / 20 张贴纸 · ⭐ ' + save.reviewStars + '</p><div class="album">' + slots + '</div></section>';
+  stage.innerHTML = '<section class="screen"><h1 class="album-heading">' + kidArt.album + '贴纸册</h1><p class="caption">' + save.learned.length + ' / 20 张贴纸 · ⭐ ' + save.reviewStars + '</p><div class="album">' + slots + '</div></section>';
   prompt = [save.learned.length ? 'zh_sticker' : 'zh_pick'];
   maybeSpeak();
 }
@@ -380,7 +398,7 @@ function showFollow() {
   const current = view('follow', ['zh_follow', en(n), 'zh_tap_mic']);
   mode = 'teaching';
   stage.innerHTML = '<section class="screen">' + heading('🎤 跟我读') + wordCard() +
-    '<div class="follow-space"><button id="mic" class="mic" aria-label="开始跟读" aria-disabled="true" hidden>🎤</button>' +
+    '<div class="follow-space">' + kidArt.follow + '<button id="mic" class="mic" aria-label="开始跟读" aria-disabled="true" hidden>🎤</button>' +
     '<button id="read-done" class="next-btn" hidden>' + icon('⭐', '我读好了') + '</button></div>' +
     (deck.length ? '<button id="skip" aria-label="跳过跟读">' + icon('⏩', '跳过') + '</button>' : '') + '</section>';
   $('#mic').onclick = startMic;
@@ -549,7 +567,7 @@ async function passFollow() {
   stopMic?.();
   const current = epoch;
   mode = 'passed';
-  $('.follow-space').innerHTML = '<span class="reward" role="img" aria-label="读得真棒">🌟</span>';
+  $('.follow-space').innerHTML = kidArt.cheer + '<span class="reward" role="img" aria-label="读得真棒">🌟</span>';
   $('#skip')?.remove();
   effect();
   prompt = [shuffle(['en_great', 'en_super', 'en_wow'])[0], 'zh_good'];
@@ -594,7 +612,7 @@ async function giveSticker() {
   const current = view('sticker', ['zh_sticker']);
   save = completeLesson(save, n);
   persist();
-  stage.innerHTML = '<section class="screen"><h2>得到一张贴纸</h2><span class="reward" role="img" aria-label="新贴纸">' + save.stickers[n] + '</span></section>';
+  stage.innerHTML = '<section class="screen"><h2>得到一张贴纸</h2><div class="celebration">' + kidArt.cheer + '<span class="reward" role="img" aria-label="新贴纸">' + save.stickers[n] + '</span></div></section>';
   const reward = $('.reward');
   const from = reward.getBoundingClientRect();
   const to = book.getBoundingClientRect();
