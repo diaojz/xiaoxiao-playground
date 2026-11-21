@@ -122,16 +122,20 @@ main{min-width:0;display:grid;align-content:stretch}
   .scene-kid{right:0;width:19%}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+.park-icon{display:inline-grid;place-items:center;width:1em;height:1em;vertical-align:middle;line-height:1}
+header a .park-icon,header button .park-icon{font-size:clamp(23px,4vmin,40px)}
+.park-icon img{width:100%;height:100%;object-fit:contain;display:block}
 </style>
+<script defer src="../shared/park-art.js"></script>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><link rel="stylesheet" href="../app-compat.css"><script defer src="../app-compat.js"></script></head>
 <body>
 <div class="shell">
 <header>
-  <nav><a href="../index.html" aria-label="返回合集">‹ 合集</a><button id="home" type="button" hidden aria-label="工坊首页">🏠</button></nav>
+  <nav><a href="../index.html" aria-label="返回合集"><span class="park-icon" data-park-art="icon_back.png" aria-hidden="true">‹</span> 合集</a><button id="home" type="button" hidden aria-label="工坊首页"><span class="park-icon" data-park-art="icon_map.png" aria-hidden="true">🏠</span></button></nav>
   <h1>彩虹颜料工坊</h1>
-  <div class="header-actions"><div class="bank" data-flower-counter aria-label="小红花"><span aria-hidden="true">🌺</span><output id="flowers">0</output></div><button id="voice-settings" type="button"><span aria-hidden="true">⚙️</span>声音</button></div>
+  <div class="header-actions"><div class="bank" data-flower-counter aria-label="小红花"><span class="park-icon" data-park-art="flower_big.png" aria-hidden="true">🌺</span><output id="flowers">0</output></div><button id="voice-settings" type="button"><span class="park-icon" data-park-art="icon_settings.png" aria-hidden="true">⚙️</span>声音</button></div>
 </header>
-<main id="game"></main>
+<main id="game" data-park-art-stage></main>
 </div>
 <dialog id="dialog"></dialog>
 <script src="../shared/rewards.js"></script>
@@ -489,7 +493,7 @@ function view(next) {
 function topLine(title, progress = '', action = '') {
   return '<div class="topline"><h2>' + title + '</h2>' +
     (progress ? '<span class="progress">' + progress + '</span>' : '') +
-    '<div class="play-actions"><button class="soft replay" id="replay" aria-label="再听一次">🔊</button>' + action + '</div></div>';
+    '<div class="play-actions"><button class="soft replay" id="replay" aria-label="再听一次"><span class="park-icon" data-park-art="icon_sound.png" aria-hidden="true">🔊</span></button>' + action + '</div></div>';
 }
 function hear(...ids) {
   prompt = ids;
