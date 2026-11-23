@@ -1,227 +1,37 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#a0da79">
-<link rel="icon" href="data:,">
-<link rel="stylesheet" href="shared/park.css">
-<title>小小游乐园 v1.34.0</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff8ec"><link rel="icon" href="data:,"><title>小小游乐园 · 今天玩什么 v1.35.0</title>
 <style>
-.park{position:relative;isolation:isolate;min-height:100dvh;overflow:hidden}
-.park-header{position:relative;z-index:3;padding-top:max(8px,env(safe-area-inset-top))}
-.controls{position:absolute;right:max(18px,env(safe-area-inset-right));top:max(17px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
-.grownups{display:flex;gap:6px}
-.grownups a,.grownups button,.flowers,.close{display:inline-flex;align-items:center;justify-content:center;color:#57395f;text-decoration:none;border:2px solid #fff;border-radius:999px;background:#fff8e9;box-shadow:0 4px 0 #96643652}
-.grownups a,.grownups button{width:44px;height:44px;font-size:22px;padding:0}
-.flowers{gap:8px;padding:5px 16px 5px 9px;font-size:clamp(28px,4vmin,45px);font-weight:1000;color:#9e3157;background:#fff3c3;font-variant-numeric:tabular-nums}
-.flowers .park-icon{font-size:1.2em}
-.games{list-style:none;margin:0;padding:0}
-.games li{position:absolute;left:var(--x);top:var(--y);transform:translateX(-50%);width:max(22vmin, min(19vw,23vmin));margin-top:max(-13vmin,-125px)}
-.facility{position:relative;display:flex;flex-direction:column;align-items:center;color:inherit;text-decoration:none;border-radius:24px}
-.facility-art{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:1;animation:bob 4.6s ease-in-out infinite;animation-delay:var(--phase)}
-.facility-art>img{position:absolute;inset:-6%;width:112%;height:112%;object-fit:contain}
-.cover-frame{position:relative;width:96%;aspect-ratio:1.2;display:block;padding:5px;border-radius:29% 29% 22% 22%;background:#fff4d4;border:4px solid var(--paint);box-shadow:0 7px 0 #63475240,0 13px 19px #456d4439;transform:rotate(var(--tilt))}
-.cover-frame img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit;background:var(--paint)}
-.cover-frame b{position:absolute;right:-10px;bottom:-10px;display:grid;place-items:center;width:1.75em;height:1.75em;font-size:clamp(25px,4.2vmin,46px);border-radius:50%;border:3px solid #fff;background:var(--paint);box-shadow:0 3px 0 #67434a3d}
-.name{z-index:1;margin-top:-.35em;padding:4px 12px;border:2px solid #fff6d6;border-radius:999px;background:#fff0c4;color:#603c50;font-size:clamp(12px,1.8vmin,19px);font-weight:900;white-space:nowrap;box-shadow:0 4px #ad754f78}
-.spark{display:none;position:absolute;z-index:2;inset:9% 4% 13%;place-items:center;color:#fff5a7;font-size:clamp(58px,14vmin,150px);text-shadow:0 3px #f5a957;pointer-events:none}
-.spark img{width:100%;height:100%;object-fit:contain}
-.facility.launching .facility-art{animation:hop .62s ease-out both}
-.facility.launching .spark{display:grid;animation:flash .82s ease-out both}
-.decoration{position:absolute;pointer-events:none}
-.decoration img{display:block;width:100%;height:100%;object-fit:contain}
-.cloud{width:15vw;height:10vw;display:grid;place-items:center;font-size:8vw;color:#fff;animation:drift 18s ease-in-out infinite alternate}
-.cloud-one{left:4%;top:-1%}.cloud-two{left:64%;top:8%;animation-delay:-9s}
-.balloons{width:6vw;height:9vw;right:3%;top:11.5%;font-size:5vw;animation:sway 6s ease-in-out infinite;transform-origin:50% 95%}
-.greeter{width:13vw;height:20vh;bottom:1%;left:1%;object-fit:contain;font-size:7vw;display:grid;place-items:end center;z-index:1}
-.greeter .pose{position:absolute;inset:0;display:grid;place-items:end center}
-.greeter .pose img{position:absolute;inset:0}
-.greeter .point{opacity:0}
-.greeter:has(.point img) .m4ae{animation:wave-pose 19s infinite}
-.greeter .point:has(img){animation:point-pose 19s infinite}
-.rewards{width:min(360px,calc(100% - 32px));max-width:none;box-sizing:border-box;margin:0;position:fixed;inset:max(91px,calc(env(safe-area-inset-top) + 73px)) max(16px,env(safe-area-inset-right)) auto auto;padding:18px;border:4px solid #fff;border-radius:25px;background:#fff6db;color:#68415a;box-shadow:0 8px #be875c,0 15px 36px #533d4548}
-.rewards::backdrop{background:#28335438}
-.rewards header{display:flex;align-items:center;justify-content:space-between}
-.rewards h2{margin:0;font-size:24px}
-.close{min-width:44px;min-height:44px;font-size:25px}
-.rewards dl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 0;text-align:center}
-.rewards dl div{padding:8px 3px;background:#fff;border-radius:14px;font-weight:800}
-.rewards dt span{display:block;font-size:31px}
-.rewards dd{margin:3px 0 0;font-size:25px;color:#a13056}
-@keyframes bob{50%{transform:translateY(-6px)}}
-@keyframes hop{30%{transform:translateY(-15px) scale(1.08)}65%{transform:translateY(3px) scale(.98)}}
-@keyframes flash{0%{opacity:0;transform:scale(.45)}28%{opacity:1;transform:scale(1.15)}100%{opacity:0;transform:scale(1.35)}}
-@keyframes drift{to{transform:translateX(7vw)}}
-@keyframes sway{50%{transform:rotate(7deg)}}
-@keyframes wave-pose{0%,74%,94%,100%{opacity:1}78%,90%{opacity:0}}
-@keyframes point-pose{0%,74%,94%,100%{opacity:0}78%,90%{opacity:1}}
-@media (orientation:portrait),(max-width:680px){
-  .park .park-scenery{position:absolute}
-  .park-header{padding-top:max(10px,env(safe-area-inset-top))}
-  .controls{position:static;justify-content:center;margin:4px 0 12px}
-  .games{position:relative;z-index:2;max-width:700px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px;row-gap:8px;padding:4px 14px max(100px,16vh)}
-  .games li{position:relative;inset:auto;transform:none;width:100%;margin:0}
-  .games li:nth-child(even){transform:translateY(26px)}
-  .greeter{width:20vw;height:15vh;font-size:12vw}
-  .cloud{width:24vw;height:19vw;font-size:13vw}
-  .balloons{inset:auto 2% 0 auto;width:13vw;height:17vw;max-height:84px;font-size:9vw}
-  .rewards{inset:158px 16px auto auto}
-}
-@media (orientation:landscape) and (max-height:480px) and (min-width:681px){
-  .park-sign{height:68px}.park-sign h1{font-size:32px}.controls{top:8px}
-}
-@media(prefers-reduced-motion:reduce){.park *{animation:none!important}.facility.launching .spark{opacity:.85}}
-</style>
-<script defer src="shared/park-art.js"></script>
-<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="./apple-touch-icon.png"><link rel="stylesheet" href="./app-compat.css"><script defer src="./app-compat.js"></script></head>
-<body>
-<main class="park">
-  <div class="park-scenery" data-park-background aria-hidden="true"></div>
-  <span class="decoration cloud cloud-one" data-park-art="cloud_1.png" aria-hidden="true">☁</span>
-  <span class="decoration cloud cloud-two" data-park-art="cloud_2.png" aria-hidden="true">☁</span>
-  <span class="decoration balloons" data-park-art="balloons.png" aria-hidden="true">🎈</span>
-  <header class="park-header">
-    <div class="park-sign"><span class="park-sign-art" data-park-art="signboard.png" aria-hidden="true"></span><h1><span>小</span><span>小</span><span>游</span><span>乐</span><span>园</span></h1></div>
-    <div class="controls">
-      <button class="flowers" id="flower-button" type="button" aria-controls="rewards" aria-expanded="false" aria-label="小红花收藏">
-        <span class="park-icon" data-park-art="flower_big.png" aria-hidden="true">🌺</span><span id="flower-count">0</span>
-      </button>
-      <nav class="grownups" aria-label="家长区">
-        <button type="button" id="voice-settings" aria-label="声音设置" title="声音设置"><span class="park-icon" data-park-art="icon_settings.png" aria-hidden="true">⚙️</span></button>
-        <a href="游戏清单.html" aria-label="游戏清单" title="游戏清单"><span class="park-icon" data-park-art="icon_list.png" aria-hidden="true">📋</span></a>
-      </nav>
-    </div>
-  </header>
-  <ul class="games" aria-label="游乐设施">
-    <li style="--x:15%;--y:34%;--paint:#eea07b;--phase:-0.00s;--tilt:-4deg">
-      <a class="facility" href="snake/index.html" data-voice="zh_game_snake" aria-label="快乐贪吃蛇">
-        <span class="facility-art" data-park-art="attr_snake.png" aria-hidden="true"><span class="cover-frame"><img src="assets/cover_snake_kid.png" alt=""><b>🐍</b></span></span>
-        <span class="name">快乐贪吃蛇</span><span class="spark" data-park-art="sparkle.png" aria-hidden="true">✦</span>
-      </a>
-    </li>
-    <li style="--x:38%;--y:38%;--paint:#7acbdc;--phase:-0.51s;--tilt:3deg">
-      <a class="facility" href="crowd-runner/index.html" data-voice="zh_game_crowd" aria-label="数字门人群跑酷">
-        <span class="facility-art" data-park-art="attr_crowd.png" aria-hidden="true"><span class="cover-frame"><img src="assets/cover_crowd_kid.png" alt=""><b>🚪</b></span></span>
-        <span class="name">数字门人群跑酷</span><span class="spark" data-park-art="sparkle.png" aria-hidden="true">✦</span>
-      </a>
-    </li>
-    <li style="--x:61%;--y:34%;--paint:#f9cb68;--phase:-1.02s;--tilt:-2deg">
-      <a class="facility" href="ball-roll/index.html" data-voice="zh_game_ball" aria-label="滚球闯关">
-        <span class="facility-art" data-park-art="attr_ball.png" aria-hidden="true"><span class="cover-frame"><img src="assets/cover_ball_kid.png" alt=""><b>⚽</b></span></span>
-        <span class="name">滚球闯关</span><span class="spark" data-park-art="sparkle.png" aria-hidden="true">✦</span>
-      </a>
-    </li>
-    <li style="--x:85%;--y:40%;--paint:#c7a3ed;--phase:-1.53s;--tilt:4deg">
-      <a class="facility" href="skill-merge/index.html" data-voice="zh_game_skill" aria-label="技能合成跑酷">
-        <span class="facility-art" data-park-art="attr_skill.png" aria-hidden="true"><span class="cover-frame"><img src="assets/cover_skill_kid.png" alt=""><b>💎</b></span></span>
-        <span class="name">技能合成跑酷</span><span class="spark" data-park-art="sparkle.png" aria-hidden="true">✦</span>
-      </a>
-    </li>
-    <li style="--x:24%;--y:68%;--paint:#bca0f4;--phase:-2.04s;--tilt:-4deg">
-      <a class="facility" href="tower-crowd/index.html" data-voice="zh_game_tower" aria-label="小人塔防">
-        <span class="facility-art" data-park-art="attr_tower.png" aria-hidden="true"><span class="cover-frame"><img src="assets/cover_tower_kid.png" alt=""><b>🏰</b></span></span>
-        <span class="name">小人塔防</span><span class="spark" data-park-art="sparkle.png" aria-hidden="true">✦</span>
-      </a>
-    </li>
-    <li style="--x:46%;--y:74%;--paint:#83cee1;--phase:-2.55s;--tilt:3deg">
-      <a class="facility" href="number-grow/index.html" data-voice="zh_game_number" aria-label="数字膨胀">
-        <span class="facility-art" data-park-art="attr_number.png" aria-hidden="true"><span class="cover-frame"><img src="assets/cover_number_kid.png" alt=""><b>🔢</b></span></span>
-        <span class="name">数字膨胀</span><span class="spark" data-park-art="sparkle.png" aria-hidden="true">✦</span>
-      </a>
-    </li>
-    <li style="--x:67%;--y:67%;--paint:#f9c472;--phase:-3.06s;--tilt:-2deg">
-      <a class="facility" href="english-numbers/index.html" data-voice="zh_game_english" aria-label="英语数字乐园">
-        <span class="facility-art" data-park-art="attr_english.png" aria-hidden="true"><span class="cover-frame"><img src="assets/cover_english_kid.png" alt=""><b>🎈</b></span></span>
-        <span class="name">英语数字乐园</span><span class="spark" data-park-art="sparkle.png" aria-hidden="true">✦</span>
-      </a>
-    </li>
-    <li style="--x:88%;--y:76%;--paint:#f3a6b7;--phase:-3.57s;--tilt:4deg">
-      <a class="facility" href="color-splash/index.html" data-voice="zh_game_color" aria-label="彩虹颜料工坊">
-        <span class="facility-art" data-park-art="attr_color.png" aria-hidden="true"><span class="cover-frame"><img src="assets/cover_color_kid.png" alt=""><b>🎨</b></span></span>
-        <span class="name">彩虹颜料工坊</span><span class="spark" data-park-art="sparkle.png" aria-hidden="true">✦</span>
-      </a>
-    </li>
-  </ul>
-  <div class="decoration greeter" aria-hidden="true">
-    <span class="pose wave" data-park-art="kid_wave.png">👋</span><span class="pose point" data-park-art="kid_point.png"></span>
-  </div>
-  <dialog class="rewards" id="rewards" aria-labelledby="rewards-title">
-    <header><h2 id="rewards-title">小红花收藏</h2><form method="dialog"><button class="close" aria-label="关闭" autofocus>×</button></form></header>
-    <dl>
-      <div><dt><span aria-hidden="true">🎁</span>可开宝箱</dt><dd id="chests">0</dd></div>
-      <div><dt><span aria-hidden="true">👑</span>装扮</dt><dd id="outfits">0</dd></div>
-      <div><dt><span aria-hidden="true">🏅</span>勋章</dt><dd id="medals">0</dd></div>
-    </dl>
-  </dialog>
-</main>
-<script src="shared/voice.js"></script>
-<script src="shared/rewards.js"></script>
-<script>
+/* 八款游戏均可直接开玩，封面统一使用本地美术。 */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:radial-gradient(ellipse at 6% 4%,#ffe7c5,transparent 45%),radial-gradient(ellipse at 100% 90%,#d6efe5,transparent 45%),#fff8ec;color:#344b64;font-family:ui-rounded,"PingFang SC","Microsoft YaHei",sans-serif;min-height:100dvh}main{max-width:1120px;margin:auto;padding:max(34px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) 27px max(24px,env(safe-area-inset-left))}header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin:9px 0 29px}.eyebrow{font-weight:1000;letter-spacing:4px;color:#cb9866;font-size:11px;margin:0 0 10px}h1{font-size:clamp(30px,5vw,48px);letter-spacing:-1px;line-height:1.15;margin:0 0 12px}header p{margin:0;color:#8a98a3;font-size:14px;font-weight:700}.catalog{white-space:nowrap;font-size:12px;font-weight:900;background:#fff9;border:2px solid white;border-radius:24px;padding:12px 17px;color:#8a9ba5;text-decoration:none}.games{display:grid;grid-template-columns:1fr 1fr;gap:25px}.card{display:block;position:relative;border-radius:29px;border:4px solid white;overflow:hidden;background:#fff;box-shadow:0 8px 0 #d5cbb530;color:inherit;text-decoration:none;transition:transform .15s,box-shadow .15s}.card:focus-visible{outline:5px solid #4db5e9;outline-offset:6px}.playable:active{transform:translateY(5px);box-shadow:0 3px 0 #a5c9c433}.art{width:100%;aspect-ratio:1.65;object-fit:cover;display:block;background:#def3f7;object-position:center 45%}.kid-cover{object-position:center top}.status{position:absolute;top:14px;left:15px;padding:7px 13px;border-radius:18px;background:#fffdf3ee;border:2px solid white;color:#8392a0;font-size:11px;font-weight:1000;letter-spacing:2px}.playable .status{background:#dcffe9;color:#278a70}.content{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:18px 20px 22px}.content small{font-size:9px;color:#b9b2aa;letter-spacing:3px;font-weight:1000}.content h2{font-size:clamp(19px,2.8vw,27px);margin:3px 0 7px}.content p{margin:0;color:#99a4ad;font-size:12px;font-weight:700;line-height:1.5}.play{flex-shrink:0;display:grid;place-items:center;width:62px;height:62px;border-radius:22px;background:linear-gradient(#ffdc6e,#ffc25a);box-shadow:0 4px 0 #e3a83d;color:#8e6228;font-size:14px;font-weight:1000;border:3px solid white}footer{display:flex;justify-content:space-between;align-items:center;color:#a6afa9;font-size:11px;font-weight:700;margin:28px 3px 0;letter-spacing:2px}footer span:last-child{letter-spacing:0}@media(max-width:580px){main{padding:24px 17px}.games{gap:17px;grid-template-columns:1fr}.art{aspect-ratio:1.9}.card{border-radius:24px}.content{padding:13px 16px 17px}.content h2{font-size:24px}.content p{font-size:12px}header{margin:3px 0 22px;align-items:flex-start}.catalog{padding:10px;font-size:10px}.play{width:58px;height:58px}header p{font-size:12px}h1 span{display:block}h1{font-size:34px}.status{top:12px;left:12px}footer{font-size:10px;letter-spacing:1px}}@media(min-width:581px) and (max-height:850px){main{max-width:930px;padding-top:24px}.games{gap:20px}.art{aspect-ratio:2}.content{padding:12px 17px}.content h2{font-size:23px}header{margin-bottom:20px}h1{font-size:36px}.play{width:53px;height:53px}footer{margin-top:22px}}
+@media(min-width:581px) and (max-width:900px){main{padding-top:24px}header{margin-bottom:22px}.art{aspect-ratio:2.15}.content{padding:14px 16px 18px}.content h2{font-size:21px}.games{gap:20px}}
+.art[src$="cover_english_kid.png"] + .status{left:auto;right:12px}
+.catalog-actions{display:grid;justify-items:end;gap:8px;align-self:flex-start}.catalog-actions button{font-family:inherit;cursor:pointer}
+</style><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="./apple-touch-icon.png"><link rel="stylesheet" href="./app-compat.css"><script defer src="./app-compat.js"></script></head>
+<body><main><header><div><p class="eyebrow">小小游乐园 / LITTLE PLAYGROUND</p><h1><span>今天，</span><span>玩点什么？</span></h1><p>一点小冒险，一大份快乐。</p><p id="shared-flowers" hidden style="margin:8px 0 0;color:#a53a54;font-weight:800"></p></div><div class="catalog-actions"><button class="catalog" id="voice-settings" type="button">⚙️ 声音设置</button><a class="catalog" href="游戏清单.html">看看游戏清单 ↗</a></div></header>
+<nav class="games" aria-label="选择游戏">
+<a class="card playable" href="snake/index.html" aria-label="开始玩快乐贪吃蛇"><img class="art kid-cover" src="assets/cover_snake_kid.png" alt="软糖小蛇在糖果乐园"><span class="status">可玩 · NO.01</span><div class="content"><div><small>CANDY SNAKE</small><h2>快乐贪吃蛇</h2><p>吃水果、发糖果弹，让小蛇长大！</p></div><span class="play">开玩 ›</span></div></a>
+<a class="card playable" href="crowd-runner/index.html" aria-label="开始玩数字门人群跑酷"><img class="art kid-cover" src="assets/cover_crowd_kid.png" alt="可爱小队奔向数字门"><span class="status">可玩 · NO.02</span><div class="content"><div><small>TOGETHER WE RUN</small><h2>数字门人群跑酷</h2><p>带着小伙伴，一起冲过终点！</p></div><span class="play">开玩 ›</span></div></a>
+<a class="card playable" href="ball-roll/index.html" aria-label="开始玩滚球闯关"><img class="art kid-cover" src="assets/cover_ball_kid.png" alt="孩子抱着彩虹球坐在糖果桥上"><span class="status">可玩 · NO.03</span><div class="content"><div><small>ROLL INTO THE CLOUDS</small><h2>滚球闯关</h2><p>左右拖小球，捡金币，滚到终点！</p></div><span class="play">开玩 ›</span></div></a>
+<a class="card playable" href="skill-merge/index.html" aria-label="开始玩技能合成跑酷"><img class="art kid-cover" src="assets/cover_skill_kid.png" alt="孩子在糖果跑道上合成魔法宝石"><span class="status">可玩 · NO.04</span><div class="content"><div><small>A LITTLE BIT OF MAGIC</small><h2>技能合成跑酷</h2><p>捡宝石，合成大魔法，打败大怪兽！</p></div><span class="play">开玩 ›</span></div></a>
+<a class="card playable" href="tower-crowd/index.html" aria-label="开始玩小人塔防"><img class="art kid-cover" src="assets/cover_tower_kid.png" alt="孩子带着小伙伴冲向糖果城堡"><span class="status">可玩 · NO.05</span><div class="content"><div><small>TINY TEAM, BIG CASTLE</small><h2>小人塔防</h2><p>按住叫伙伴，一起冲过门、攻下塔！</p></div><span class="play">开玩 ›</span></div></a>
+<a class="card playable" href="number-grow/index.html" aria-label="开始玩数字膨胀"><img class="art kid-cover" src="assets/cover_number_kid.png" alt="糖果色数字球从16膨胀到2048"><span class="status">可玩 · NO.06</span><div class="content"><div><small>NUMBER BLOB</small><h2>数字膨胀</h2><p>碰到一样大或更小的数字就能吃掉，越吃越大！</p></div><span class="play">开玩 ›</span></div></a>
+<a class="card playable" href="english-numbers/index.html" aria-label="开始玩英语数字乐园"><img class="art kid-cover" src="assets/cover_english_kid.png" alt="小朋友对着话筒读英文数字，旁边飘着 1、2、3 气球"><span class="status">可玩 · NO.07</span><div class="content"><div><small>SAY IT IN ENGLISH</small><h2>英语数字乐园</h2><p>听一听、跟着读，学会 one two three！</p></div><span class="play">开玩 ›</span></div></a>
+<a class="card playable" href="color-splash/index.html" aria-label="开始玩彩虹颜料工坊"><img class="art kid-cover" src="assets/cover_color_kid.png" alt="孩子拿着彩虹刷子在颜料工坊"><span class="status">可玩 · NO.08</span><div class="content"><div><small>SPLASH THE COLORS</small><h2>彩虹颜料工坊</h2><p>泼颜料、变魔法，学会 red blue yellow！</p></div><span class="play">开玩 ›</span></div></a>
+</nav><footer><span>无广告 · 随时重来 · 本地存档</span><span>v1.35.0 · 为小朋友留一座游乐园</span></footer></main><script src="shared/rewards.js"></script><script src="shared/voice.js"></script><script>
 (() => {
-  const audio = new Audio();
-  const flowerButton = document.querySelector('#flower-button');
-  const rewards = document.querySelector('#rewards');
-  let greeting = false;
-  let audioTimer, navigationTimer, launch;
-  function play(id) {
-    audio.src = KidVoice.url(id, 'assets/voice/');
-    audio.play().catch(() => {});
+  document.querySelector('#voice-settings').onclick = () => {
+    window.KidVoice?.openPanel({ previewBase: 'english-numbers/assets/voice/' });
+  };
+  const badge = document.querySelector('#shared-flowers');
+  function showFlowers() {
+    if (!window.KidRewards) return;
+    badge.textContent = '🌺 我的小红花 ' + window.KidRewards.getState().flowers;
+    badge.hidden = false;
   }
-  function say(id) {
-    clearTimeout(audioTimer);
-    const first = greeting;
-    greeting = false;
-    if (first) audioTimer = setTimeout(() => play(id), 430);
-    else play(id);
-  }
-  function refreshRewards() {
-    const state = KidRewards.getState();
-    document.querySelector('#flower-count').textContent = new Intl.NumberFormat('zh-CN', { notation:'compact', maximumFractionDigits:1 }).format(state.flowers);
-    flowerButton.setAttribute('aria-label', '小红花 ' + state.flowers + ' 朵，查看收藏');
-    document.querySelector('#chests').textContent = KidRewards.availableChests();
-    document.querySelector('#outfits').textContent = state.outfits.length;
-    document.querySelector('#medals').textContent = Object.keys(state.medals).length;
-  }
-  document.addEventListener('click', () => {
-    greeting = true;
-    play('zh_hub_hello');
-    // 同一次点击优先播问候，随后切到设施或小红花的短语。
-    setTimeout(() => { greeting = false; }, 0);
-  }, { capture:true, once:true });
-  document.querySelector('#voice-settings').addEventListener('click', () => {
-    KidVoice.openPanel({ previewBase:'english-numbers/assets/voice/' });
-  });
-  flowerButton.addEventListener('click', () => {
-    refreshRewards();
-    say('zh_hub_flowers');
-    rewards.showModal();
-    flowerButton.setAttribute('aria-expanded', 'true');
-  });
-  rewards.addEventListener('close', () => flowerButton.setAttribute('aria-expanded', 'false'));
-  rewards.addEventListener('click', event => { if (event.target === rewards) rewards.close(); });
-  for (const facility of document.querySelectorAll('.facility')) {
-    facility.addEventListener('click', event => {
-      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-      event.preventDefault();
-      if (launch) return;
-      launch = facility;
-      facility.classList.add('launching');
-      say(facility.dataset.voice);
-      navigationTimer = setTimeout(() => location.assign(facility.href), 950);
-    });
-  }
-  window.addEventListener('pagehide', () => {
-    clearTimeout(audioTimer);
-    clearTimeout(navigationTimer);
-    audio.pause();
-    launch?.classList.remove('launching');
-    launch = null;
-  });
-  window.addEventListener('pageshow', refreshRewards);
-  window.addEventListener('storage', refreshRewards);
-  refreshRewards();
+  window.addEventListener('pageshow', showFlowers);
+  window.addEventListener('storage', showFlowers);
+  showFlowers();
 })();
-</script>
-</body>
-</html>
+</script></body></html>
