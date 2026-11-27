@@ -1,0 +1,2475 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>小猎人大冒险</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+      }
+      body {
+        margin: 0;
+        overflow: hidden;
+        color: #264e44;
+        background: #c5e8a5;
+        font:
+          800 22px system-ui,
+          sans-serif;
+      }
+      /* 横屏侧栏底色：糖果渐变，不留白边（html 单独铺色，body 透明） */
+      html {
+        min-height: 100%;
+        background-color: #bfe8b0;
+        background-image: linear-gradient(
+          160deg,
+          #bfe8b0,
+          #a9dfd6 55%,
+          #d7c6f0
+        );
+      }
+      body {
+        background: transparent !important;
+      }
+      canvas {
+        position: absolute;
+        inset: 0;
+      }
+      button,
+      a {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        border: 2px solid #486b58;
+        border-radius: 24px;
+        background: #fff8dc;
+        box-shadow: 0 4px #486b58;
+        min-height: 64px;
+        min-width: 64px;
+        padding: 10px 17px;
+        display: inline-grid;
+        place-items: center;
+      }
+      button:active {
+        transform: translateY(3px);
+      }
+      #bar,
+      #actions,
+      #stats {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 1;
+      }
+      #bar {
+        top: max(14px, env(safe-area-inset-top));
+        left: 16px;
+      }
+      #actions {
+        right: 16px;
+        top: max(14px, env(safe-area-inset-top));
+      }
+      #stats {
+        bottom: 20px;
+        right: 18px;
+        background: #fff8dfed;
+        border: 2px solid #68876c;
+        border-radius: 30px;
+        padding: 10px 18px;
+      }
+      .meters {
+        padding: 6px 12px;
+        border-radius: 18px;
+        background: #fff8dfed;
+      }
+      .meters div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      meter {
+        width: clamp(68px, 11vw, 155px);
+        height: 20px;
+        accent-color: #eb7291;
+      }
+      #shade {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #13463333;
+        z-index: 2;
+      }
+      #shade[hidden] {
+        display: none;
+      }
+      .panel {
+        text-align: center;
+        width: min(88vw, 540px);
+        padding: 28px;
+        border: 4px solid #547954;
+        border-radius: 38px;
+        background: #fff8db;
+        box-shadow:
+          0 9px #426b5280,
+          inset 0 0 0 5px #fffdf0;
+      }
+      .panel h1 {
+        font-size: clamp(32px, 5vmin, 58px);
+        margin: 5px 0 20px;
+        letter-spacing: -2px;
+      }
+      .panel img {
+        width: 145px;
+        height: 145px;
+        object-fit: contain;
+      }
+      .choices {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .primary {
+        background: #ffd25d;
+      }
+      .panel p {
+        margin: 8px 0 18px;
+      }
+      #hint {
+        position: absolute;
+        bottom: 22px;
+        left: 20px;
+        background: #fff8dfdd;
+        border-radius: 22px;
+        padding: 10px 15px;
+        pointer-events: none;
+      }
+      #joy {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: #fff7;
+        border: 4px solid #fff9;
+        pointer-events: none;
+        translate: -50% -50%;
+      }
+      #joy i {
+        position: absolute;
+        left: 45px;
+        top: 45px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: #588f72cc;
+      }
+      @media (max-width: 600px) {
+        #stats {
+          bottom: 75px;
+        }
+        .panel {
+          padding: 16px;
+        }
+        #actions {
+          gap: 4px;
+        }
+        button,
+        a {
+          padding: 8px;
+        }
+        #hint {
+          font-size: 20px;
+        }
+      }
+      body[data-scene="home"] :is(#bar, #actions, #stats, #hint),
+      body[data-scene="settings"] :is(#bar, #actions, #stats, #hint) {
+        visibility: hidden;
+      }
+      body[data-scene="end"] #shade::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          radial-gradient(ellipse at 18% 28%, #ffca50 0 4px, transparent 5px),
+          radial-gradient(ellipse at 67% 62%, #ff8c9d 0 4px, transparent 5px),
+          radial-gradient(ellipse at 85% 9%, #6bd4cf 0 3px, transparent 4px);
+        background-size:
+          134px 161px,
+          173px 143px,
+          157px 193px;
+        animation: celebrate 4s linear infinite;
+      }
+      .panel {
+        position: relative;
+      }
+      .panel img {
+        filter: drop-shadow(0 5px 1px #9d926444);
+      }
+      .panel h1 {
+        color: #365948;
+      }
+      .choices button:hover {
+        background: #ffebb1;
+      }
+      @keyframes celebrate {
+        to {
+          background-position:
+            40px 161px,
+            -28px 143px,
+            23px 193px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #shade::before {
+          animation: none !important;
+        }
+      }
+      #mini {
+        position: absolute;
+        right: 16px;
+        top: 94px;
+        width: clamp(140px, 16vmin, 180px);
+        aspect-ratio: 1;
+        padding: 0;
+        overflow: hidden;
+        background: #fff8df70;
+        border: 5px solid var(--zone, #ffbe97);
+        box-shadow: 0 3px #795b64;
+      }
+      #mini canvas,
+      #atlas canvas {
+        position: static;
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      #badge {
+        position: absolute;
+        bottom: 2px;
+        right: 4px;
+        font-size: 21px;
+      }
+      #region {
+        position: absolute;
+        left: 50%;
+        top: 90px;
+        transform: translateX(-50%);
+        border-radius: 22px;
+        background: #fff6da;
+        padding: 8px 16px;
+        pointer-events: none;
+      }
+      body:not([data-scene="play"]) :is(#mini, #region) {
+        display: none;
+      }
+      #atlas {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        background: #23443cbd;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 12px;
+      }
+      #atlas[hidden] {
+        display: none;
+      }
+      #atlasMap {
+        padding: 0;
+        overflow: hidden;
+        width: min(88vw, 72vh, 800px);
+        background: #f7eed5;
+      }
+      @media (orientation: landscape) {
+        body[data-scene="play"] {
+          background: linear-gradient(145deg, #e1efce, #fff0cf);
+        }
+        #mini {
+          width: 150px;
+          right: 16px;
+        }
+        #stats {
+          width: 158px;
+          justify-content: center;
+          text-align: center;
+        }
+      }
+    </style>
+  <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><link rel="stylesheet" href="../app-compat.css"><script defer src="../app-compat.js"></script></head>
+  <body>
+    <canvas id="world"></canvas>
+    <div id="bar">
+      <a href="../index.html">‹ 合集</a>
+      <div class="meters">
+        <div>❤️ <meter id="health"></meter></div>
+        <div>⭐ <meter id="experience"></meter></div>
+      </div>
+    </div>
+    <div id="actions">
+      <button id="mute" aria-label="静音">🔊</button
+      ><button id="pause" aria-label="暂停">Ⅱ</button>
+    </div>
+    <button id="mini" aria-label="打开大地图">
+      <canvas width="180" height="180" id="miniCanvas"></canvas
+      ><span id="badge"></span>
+    </button>
+    <div id="region" hidden role="status"></div>
+    <div
+      id="atlas"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-label="探险地图"
+    >
+      <button id="atlasMap" aria-label="返回冒险">
+        <canvas id="atlasCanvas" width="800" height="800"></canvas>
+      </button>
+      <div id="mapLegend" style="text-align: center; color: white"></div>
+      <button id="closeAtlas">✕ 关闭地图</button>
+    </div>
+    <div id="stats"></div>
+    <div id="hint"></div>
+    <div id="joy" hidden><i></i></div>
+    <div id="shade">
+      <section class="panel">
+        <div id="portrait"></div>
+        <h1 id="title"></h1>
+        <p id="detail"></p>
+        <div class="choices" id="choices"></div>
+      </section>
+    </div>
+    <script src="motion.js"></script>
+    <script src="paint.js"></script>
+    <script src="../shared/juice.js"></script>
+    <script src="../shared/rewards.js"></script>
+    <script src="../shared/voice.js"></script>
+    <script>
+      "use strict";
+      const $ = (id) => document.getElementById(id),
+        canvas = $("world"),
+        c = canvas.getContext("2d"),
+        J = KidJuice;
+      const qa = new URLSearchParams(location.search).has("qa"),
+        key = qa ? "hunterSaveQA" : "hunterSave";
+      let saved = {};
+      try {
+        saved = JSON.parse(localStorage.getItem(key)) || {};
+      } catch {}
+      const persist = () => {
+        try {
+          localStorage.setItem(key, JSON.stringify(saved));
+        } catch {}
+      };
+      const kinds = [
+        "slime",
+        "ghost",
+        "cookie",
+        "gummy",
+        "donut",
+        "bee",
+        "pudding",
+        "snail",
+        "armorbear",
+        "boss_pudding",
+      ];
+      const icons = [
+        "🟣",
+        "👻",
+        "🍪",
+        "🧸",
+        "🍩",
+        "🐝",
+        "🍮",
+        "🐌",
+        "🐻",
+        "🍮",
+      ];
+      const A = Hunter.HERO_ANIM,
+        heroLayers = {},
+        makeCanvas = () => document.createElement("canvas");
+      let hero = Hunter.createHero(),
+        lastZone = -1,
+        regionUntil = 0,
+        nextMap = 0;
+      const sprites = {},
+        names = [
+          "hero_idle",
+          "hero_attack",
+          "hero_dizzy",
+          ...kinds.map((k) => "m_" + k),
+        ];
+      const sheets = {};
+      for (const name of ["run", "idle", "attack", "hurt", "cheer", "faint"]) {
+        const img = new Image();
+        img.onload = () => {
+          sheets[name] = img;
+        };
+        img.src = "assets/frames/" + name + ".png";
+      }
+      function loadSprite(name, path, size) {
+        const img = new Image();
+        img.onload = () => {
+          const tile = document.createElement("canvas");
+          tile.width = tile.height = size;
+          const layered = name.startsWith("hero") || name === "kid";
+          const k = size / Math.max(img.width, img.height);
+          const w = layered ? img.width * k : size,
+            h = layered ? img.height * k : size;
+          tile.getContext("2d").drawImage(img, (size - w) / 2, size - h, w, h);
+          if (layered) heroLayers[name] = sliceHero(tile, makeCanvas);
+          sprites[name] = tile;
+          const white = document.createElement("canvas");
+          white.width = white.height = size;
+          const mask = white.getContext("2d");
+          mask.drawImage(tile, 0, 0);
+          mask.globalCompositeOperation = "source-in";
+          mask.fillStyle = "white";
+          mask.fillRect(0, 0, size, size);
+          sprites[name + "_flash"] = white;
+          if (name === "hero_idle")
+            heroLayers.hero_idle_flash = sliceHero(white, makeCanvas);
+        };
+        img.src = path;
+      }
+      for (const n of names)
+        loadSprite(
+          n,
+          "assets/" + n + ".png",
+          n.startsWith("hero") ? A.size : n.includes("boss") ? 220 : 72,
+        );
+      loadSprite("kid", "../assets/kid/kid_front.png", 116);
+      const mobs = new J.Pool(80),
+        effects = new J.Pool(96),
+        shots = new J.Pool(32),
+        drops = new J.Pool(180),
+        particles = new J.Pool(300),
+        labels = new J.Pool(24),
+        grid = new J.Grid();
+      const clamp = (n, a, b) => Math.max(a, Math.min(b, n)),
+        rand = (a, b) => a + Math.random() * (b - a),
+        dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+      let W,
+        H,
+        cam = { x: 1600, y: 1600 },
+        p = {},
+        state = "home",
+        free = false,
+        t = 0,
+        dizzy = 0,
+        spawnClock = 0,
+        eliteAt = 90,
+        hitClock = 0,
+        wandClock = 0,
+        swing = 0,
+        guard = 0,
+        shake = 0,
+        freeze = 0,
+        glow = 0,
+        boss = null,
+        warning = null,
+        stress = false,
+        frames = [],
+        slow = 0,
+        limit = 300;
+      let stick = null,
+        goal = null,
+        keys = new Set(),
+        audio,
+        music = new Audio(),
+        chain = 0,
+        lastPickup = 0;
+      function sound(type) {
+        if (saved.muted || !audio) return;
+        const notes = {
+          hit: [180],
+          crit: [330, 660],
+          pickup: [440 * 1.122 ** (chain % 8)],
+          level: [392, 494, 587, 784],
+          bowHit: [920, 710],
+          bubbleHit: [540, 270, 190],
+          shieldHit: [610, 820],
+          boltHit: [420, 160],
+          combo: [330 * 1.122 ** (p.combo % 9)],
+          bow: [720, 960],
+          bubble: [360, 510],
+          shield: [460, 620],
+          bolt: [890, 290],
+          chest: [523, 659, 784],
+          boss: [160, 120, 95],
+        };
+        (notes[type] || notes.hit).forEach((freq, i) => {
+          const osc = audio.createOscillator(),
+            g = audio.createGain(),
+            at = audio.currentTime + i * 0.075;
+          osc.type = type === "boss" ? "triangle" : "sine";
+          osc.frequency.setValueAtTime(freq, at);
+          g.gain.setValueAtTime(0.0001, at);
+          g.gain.exponentialRampToValueAtTime(0.08, at + 0.012);
+          g.gain.exponentialRampToValueAtTime(0.0001, at + 0.15);
+          osc.connect(g);
+          g.connect(audio.destination);
+          osc.start(at);
+          osc.stop(at + 0.16);
+        });
+      }
+      function unlock() {
+        try {
+          audio ||= new AudioContext();
+          audio.resume().catch(() => {});
+        } catch {}
+      }
+      function voice(id) {
+        if (saved.muted) return;
+        music.pause();
+        music.src = KidVoice.url(id);
+        music.play().catch(() => {
+          if (id === "zh_good" && !saved.muted) {
+            music.src = KidVoice.url(id, "../color-splash/assets/voice/");
+            music.play().catch(() => {});
+          }
+        });
+      }
+      function clearInput() {
+        stick = null;
+        goal = null;
+        keys.clear();
+        $("joy").hidden = true;
+      }
+      function panel(mode, title, detail, buttons, face = false) {
+        state = mode;
+        document.body.dataset.scene = mode;
+        clearInput();
+        $("shade").hidden = false;
+        $("title").textContent = title;
+        $("detail").textContent = detail;
+        $("choices").replaceChildren();
+        $("portrait").replaceChildren();
+        if (face) {
+          const img = new Image();
+          img.onerror = () => {
+            img.onerror = null;
+            img.src = "../assets/kid/kid_front.png";
+          };
+          img.src = "assets/hero_idle.png";
+          $("portrait").append(img);
+        }
+        for (const [label, fn, cls] of buttons) {
+          const b = document.createElement("button");
+          b.className = cls || "";
+          b.innerHTML = label;
+          b.onclick = () => {
+            unlock();
+            fn();
+          };
+          $("choices").append(b);
+        }
+      }
+      function home() {
+        panel(
+          "home",
+          "小猎人大冒险",
+          "拖动小猎人，去糖果森林找星星！",
+          [
+            ["🍭 出发", () => start(false), "primary"],
+            ["🌿 自由探索", () => start(true)],
+            ["⚙ 设置", () => settings(home)],
+            ["‹ 合集", () => location.assign("../index.html")],
+          ],
+          true,
+        );
+      }
+      function settings(back) {
+        panel("settings", "探险设置", "", [
+          [
+            saved.tap ? "👆 点哪走哪" : "🕹 浮动摇杆",
+            () => {
+              saved.tap = !saved.tap;
+              persist();
+              settings(back);
+            },
+          ],
+          [
+            saved.soft ? "✨ 柔和特效" : "🌟 完整特效",
+            () => {
+              saved.soft = !saved.soft;
+              persist();
+              settings(back);
+            },
+          ],
+          [
+            saved.noShake ? "屏幕震动：关" : "屏幕震动：开",
+            () => {
+              saved.noShake = !saved.noShake;
+              persist();
+              settings(back);
+            },
+          ],
+          [
+            saved.lowContrast ? "高对比拾取物：关" : "高对比拾取物：开",
+            () => {
+              saved.lowContrast = !saved.lowContrast;
+              persist();
+              settings(back);
+            },
+          ],
+          ["完成", back, "primary"],
+        ]);
+      }
+      function play() {
+        state = "play";
+        document.body.dataset.scene = "play";
+        $("shade").hidden = true;
+      }
+      function pause() {
+        if (state === "play")
+          panel("pause", "营地休息", "", [
+            ["▶ 继续", play, "primary"],
+            [
+              "⚙ 设置",
+              () =>
+                settings(() => {
+                  play();
+                  pause();
+                }),
+            ],
+            [
+              free && p.count ? "🏕 回营结算" : "🏕 回营地",
+              () => (free && p.count ? finish(false) : home()),
+            ],
+          ]);
+      }
+      $("pause").onclick = pause;
+      $("mute").onclick = () => {
+        saved.muted = !saved.muted;
+        music.pause();
+        persist();
+        syncMute();
+      };
+      function syncMute() {
+        $("mute").textContent = saved.muted ? "🔇" : "🔊";
+      }
+      syncMute();
+      let landscape;
+      function resize() {
+        const w = Math.round(visualViewport?.width || innerWidth),
+          h = Math.round(visualViewport?.height || innerHeight);
+        if (landscape !== undefined && landscape !== w > h) pause();
+        landscape = w > h;
+        W = w > h ? w - 184 : w;
+        H = h;
+        canvas.width = W;
+        canvas.height = h;
+      }
+      resize();
+      window.addEventListener("resize", resize);
+      window.visualViewport?.addEventListener("resize", resize);
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          pause();
+          music.pause();
+        }
+      });
+      window.onblur = pause;
+      function loot(x, y, type) {
+        return drops.take({ x, y, type, age: 0, fly: 0, ox: x, oy: y });
+      }
+      function start(explore) {
+        free = explore;
+        eliteAt = 90;
+        hero = Hunter.createHero();
+        lastZone = -1;
+        nextMap = 0;
+        t =
+          dizzy =
+          spawnClock =
+          hitClock =
+          wandClock =
+          swing =
+          guard =
+          shake =
+          freeze =
+          glow =
+            0;
+        boss = warning = null;
+        stress = false;
+        for (const pool of [mobs, effects, shots, drops, particles, labels])
+          pool.clear();
+        p = {
+          x: 1600,
+          y: 1600,
+          px: 1600,
+          py: 1600,
+          hp: 110,
+          max: 110,
+          level: 1,
+          xp: 0,
+          count: 0,
+          kills: 0,
+          choices: 0,
+          balls: [],
+          choiceAt: 0,
+          powers: [0, 0, 0, 0],
+          cooldown: [0, 0, 0, 0],
+          combo: 0,
+          lastHit: -10,
+          hammer: 1,
+          wand: 0,
+          atk: 0,
+          speed: A.speed,
+          magnet: 120,
+        };
+        cam = { x: p.x, y: p.y };
+        for (let i = 0; i < 65; i++) {
+          const a = i * 2.4,
+            r = 65 + i * 18;
+          loot(
+            p.x + r * Math.cos(a),
+            p.y + r * Math.sin(a),
+            i % 17 === 12 ? "chest" : "star",
+          );
+        }
+        play();
+        voice("zh_start");
+        hud();
+      }
+      function spawn(kind, x, y) {
+        const angle = rand(0, Math.PI * 2);
+        if (x == null) {
+          // 从相机可见矩形以外、地图以内的边中选一条。
+          const edges = [];
+          if (cam.x - W / 2 > 60)
+            edges.push([cam.x - W / 2 - 45, cam.y + rand(-H / 2, H / 2)]);
+          if (cam.x + W / 2 < 3140)
+            edges.push([cam.x + W / 2 + 45, cam.y + rand(-H / 2, H / 2)]);
+          if (cam.y - H / 2 > 60)
+            edges.push([cam.x + rand(-W / 2, W / 2), cam.y - H / 2 - 45]);
+          if (cam.y + H / 2 < 3140)
+            edges.push([cam.x + rand(-W / 2, W / 2), cam.y + H / 2 + 45]);
+          [x, y] = edges[Math.floor(Math.random() * edges.length)] || [50, 50];
+        }
+        x = clamp(x, 25, 3175);
+        y = clamp(y, 25, 3175);
+        const strength = J.m4ae(t, kind === 9 ? 12 : 18, kind === 9 ? 40 : 1),
+          a = Math.atan2(p.y - y, p.x - x);
+        return mobs.take({
+          kind,
+          born: null,
+          weakUntil: 0,
+          x,
+          y,
+          px: x,
+          py: y,
+          hp: strength.hp,
+          max: strength.hp,
+          angle: a,
+          phase: angle,
+          speed: A.speed * (0.35 + (kind % 6) * 0.045),
+          flash: 0,
+          kx: 0,
+          ky: 0,
+          split: 3,
+          next: t + 2,
+        });
+      }
+      function enterBoss() {
+        if (boss || free) return;
+        if (mobs.count() === 80) mobs.items.find((e) => e.on).on = false;
+        boss = spawn(
+          9,
+          clamp(p.x + 180, 130, 3070),
+          clamp(p.y - 180, 130, 3070),
+        );
+        sound("boss");
+        shake = 5;
+      }
+      function burst(x, y, n) {
+        J.burst(particles, x, y, n, limit);
+      }
+      function label(x, y, msg, crit = false) {
+        labels.take({ x, y, msg, crit, life: crit ? 0.8 : 0.55 });
+      }
+      const weaponKeys = ["bow", "bubble", "shield", "bolt"];
+      function hit(e, weapon) {
+        if (!e.on) return;
+        const weak =
+          e.kind === 9 &&
+          (t < e.weakUntil || weapon === "wand" || p.y < e.y - 25);
+        const rank =
+          weapon === "hammer"
+            ? p.hammer
+            : weapon === "wand"
+              ? p.wand
+              : p.powers[weaponKeys.indexOf(weapon)];
+        const result = J.damage(
+          J.attack(Math.max(0, rank - 1) * 4, p.atk) * (weak ? 1.6 : 1),
+          0,
+          p.level,
+        );
+        e.hp -= result.value;
+        e.flash = 0.08;
+        const d = dist(e, p) || 1;
+        e.kx = ((e.x - p.x) / d) * 240;
+        e.ky = ((e.y - p.y) / d) * 240;
+        label(
+          e.x,
+          e.y - 30,
+          result.value + (result.critical ? "！" : ""),
+          result.critical,
+        );
+        sound(result.critical ? "crit" : "hit");
+        if (result.critical) freeze = 2;
+        if (weaponKeys.includes(weapon)) {
+          sound(weapon + "Hit");
+          effects.take({
+            kind: "spark",
+            icon: { bow: "✦", bubble: "🫧", shield: "🍬", bolt: "ϟ" }[weapon],
+            x: e.x,
+            y: e.y,
+            life: 0.22,
+            total: 0.22,
+          });
+        }
+        if (e.kind === 9) {
+          shake = 3;
+          if (e.hp / e.max < e.split / 4 && e.split > 0) {
+            e.split--;
+            spawn(6, e.x + 65, e.y);
+            spawn(6, e.x - 65, e.y);
+          }
+        }
+        if (e.hp > 0) return;
+        e.on = false;
+        p.kills++;
+        p.combo = t - p.lastHit < 1.1 ? p.combo + 1 : 1;
+        p.lastHit = t;
+        if (p.combo > 1) {
+          label(e.x, e.y - 58, p.combo + " 连击");
+          sound("combo");
+        }
+        effects.take({
+          kind: "death",
+          mob: e.kind,
+          x: e.x,
+          y: e.y,
+          life: 0.52,
+          total: 0.52,
+        });
+        if ([10, 25, 50, 100].includes(p.kills)) {
+          label(p.x, p.y - 95, "🎉 " + p.kills + " 连斩！", true);
+          burst(p.x, p.y, 40);
+          if (!saved.muted)
+            window.dispatchEvent(
+              new CustomEvent("hunter-milestone-voice", { detail: p.kills }),
+            );
+        }
+
+        label(e.x, e.y, "🌟🌟");
+        saved.dex ||= [];
+        if (!saved.dex.includes(kinds[e.kind])) {
+          saved.dex.push(kinds[e.kind]);
+          persist();
+        }
+        loot(e.x, e.y, "star");
+        if (Math.random() < 0.3) loot(e.x + 16, e.y, "candy");
+        if (Math.random() < 0.035 || e.kind === 9) loot(e.x - 18, e.y, "chest");
+        if (e === boss) {
+          freeze = 3;
+          shake = 6;
+          p.winAt = t + 0.55;
+        }
+      }
+      const upgrades = [
+        [
+          "🪄",
+          "星星棒",
+          () => {
+            p.wand++;
+            saved.weapons ||= ["hammer"];
+            if (!saved.weapons.includes("wand")) saved.weapons.push("wand");
+            persist();
+          },
+        ],
+        ["🍭", "大糖锤", () => p.hammer++],
+        ["💪", "更有力", () => p.atk++],
+        [
+          "❤️",
+          "更多心",
+          () => {
+            p.max += 30;
+            p.hp = p.max;
+          },
+        ],
+        ["👟", "跑得快", () => (p.speed += 24)],
+        ["🧲", "吸星星", () => (p.magnet += 35)],
+      ];
+      const powerIcons = ["🏹", "🫧", "🍬", "🍦"];
+      ["彩虹弓", "泡泡枪", "旋转糖果盾", "闪电冰淇淋"].forEach((name, i) =>
+        upgrades.push([
+          powerIcons[i],
+          name,
+          () => {
+            p.powers[i]++;
+            saved.weapons ||= ["hammer"];
+            if (!saved.weapons.includes(weaponKeys[i]))
+              saved.weapons.push(weaponKeys[i]);
+            persist();
+          },
+        ]),
+      );
+      function upgrade() {
+        if (p.xp < Hunter.xp(p.level) || state !== "play") return;
+        p.xp -= Hunter.xp(p.level);
+        p.level++;
+        p.max += 10;
+        p.hp = Math.min(p.max, p.hp + 10);
+        if (Hunter.choiceDue(p.level, p.choices, p.balls.length)) {
+          const deck = [0, 1, 6, 7, 8, 9];
+          p.choiceAt = t;
+          p.choices++;
+          p.guide = !saved.guided;
+          saved.guided = true;
+          persist();
+          // 靠近边界时朝地图中央展开，避免三球挤在墙角。
+          const heading = Math.atan2(1600 - p.y, 1600 - p.x);
+          for (let i = 0; i < 3; i++) {
+            const angle = heading + (i - 1) * 0.92;
+            p.balls.push({
+              x: clamp(p.x + 190 * Math.cos(angle), 40, 3160),
+              y: clamp(p.y + 190 * Math.sin(angle), 40, 3160),
+              id: deck.splice(Math.floor(Math.random() * deck.length), 1)[0],
+            });
+          }
+        } else {
+          const item = upgrades[2 + ((p.level - 2) % 4)];
+          item[2]();
+          label(p.x, p.y - 68, item[0] + " " + item[1]);
+        }
+        sound("level");
+      }
+      function chooseBall(ball, auto) {
+        const item = upgrades[ball.id];
+        item[2]();
+        for (const other of p.balls)
+          if (other !== ball)
+            effects.take({
+              kind: "merge",
+              x: other.x,
+              y: other.y,
+              tx: ball.x,
+              ty: ball.y,
+              life: 0.45,
+              total: 0.45,
+            });
+        p.balls.length = 0;
+        label(
+          p.x,
+          p.y - 70,
+          (auto ? "帮你选好啦 " : "") + item[0] + item[1],
+          true,
+        );
+        if (auto && !saved.muted && window.speechSynthesis)
+          speechSynthesis.speak(
+            Object.assign(new SpeechSynthesisUtterance("帮你选好啦"), {
+              lang: "zh-CN",
+            }),
+          );
+        hero.cheer = A.cheer;
+        glow = 1;
+        burst(p.x, p.y, 24);
+        sound("level");
+      }
+      function finish(win) {
+        if (state === "end") return;
+        const stars = win ? 3 : p.count >= 10 ? 2 : 1;
+        if (win) KidRewards.awardMedal("hunter-pudding");
+        saved.best = Math.max(saved.best || 0, p.kills);
+        saved.weapons ||= ["hammer"];
+        persist();
+        KidRewards.addFlowers(stars, "hunter");
+        sound("level");
+        voice("zh_good");
+        burst(p.x, p.y, 90);
+        panel(
+          "end",
+          "太棒了！",
+          "⭐".repeat(stars) +
+            "　击败 " +
+            p.kills +
+            "　收集 " +
+            p.count +
+            "　🌺 +" +
+            stars,
+          [
+            ["🏕 回营地", home, "primary"],
+            ...(KidRewards.availableChests()
+              ? [
+                  [
+                    "🎁 开宝箱",
+                    () => {
+                      const gift = KidRewards.openChest();
+                      $("detail").textContent = gift
+                        ? "🎁 得到新装扮！"
+                        : "宝箱已领取";
+                      $("choices").lastChild.remove();
+                      sound("chest");
+                    },
+                  ],
+                ]
+              : []),
+          ],
+          true,
+        );
+      }
+      function hurt(n, source = p) {
+        if (guard || dizzy || stress) return;
+        p.hp = Math.max(0, p.hp - n);
+        guard = 1;
+        shake = 3;
+        glow = 0.32;
+        hero.hurt = A.hurt;
+        hero.recoil = Math.sign(p.x - source.x) || -hero.facing;
+        if (!p.hp) hero.vx = hero.vy = 0;
+        if (!p.hp) {
+          dizzy = 1.5;
+          clearInput();
+        }
+      }
+      function movePlayer(dt) {
+        let dx =
+            Number(keys.has("ArrowRight") || keys.has("d")) -
+            Number(keys.has("ArrowLeft") || keys.has("a")),
+          dy =
+            Number(keys.has("ArrowDown") || keys.has("s")) -
+            Number(keys.has("ArrowUp") || keys.has("w"));
+        if (stick) {
+          dx = stick.dx / 48;
+          dy = stick.dy / 48;
+        }
+        let speed = p.speed;
+        if (goal) {
+          dx = goal.x - p.x;
+          dy = goal.y - p.y;
+          speed = Math.min(
+            speed,
+            Math.sqrt(2 * A.braking * Math.hypot(dx, dy)),
+          );
+          if (Math.hypot(dx, dy) < 5) {
+            goal = null;
+            dx = dy = 0;
+          }
+        }
+
+        if (Math.hypot(hero.vx, hero.vy) > 65 && t >= (p.nextFoot || 0)) {
+          p.nextFoot = t + 0.17;
+          p.footSign = -(p.footSign || 1);
+          effects.take({
+            kind: "foot",
+            x: p.x + p.footSign * 8,
+            y: p.y + 42,
+            life: 0.55,
+            total: 0.55,
+          });
+        }
+        hero.target = (Math.min(1, Math.hypot(dx, dy)) * speed) / p.speed;
+        hero.moving = hero.target > 0.005;
+        [hero.vx, hero.vy] = Hunter.velocity(
+          hero.vx,
+          hero.vy,
+          dx,
+          dy,
+          speed,
+          dt,
+        );
+
+        p.x = clamp(p.x + hero.vx * dt, 42, 3158);
+        p.y = clamp(p.y + hero.vy * dt, 42, 3158);
+      }
+      function updateMobs(dt) {
+        for (const e of mobs.items)
+          if (e.on) {
+            if (
+              e.born === null &&
+              Math.abs(e.x - cam.x) < W / 2 + 22 &&
+              Math.abs(e.y - cam.y) < H / 2 + 22
+            )
+              e.born = t;
+            e.px = e.x;
+            e.py = e.y;
+            e.flash = Math.max(0, e.flash - dt);
+            if (e.flash > 0.045) continue;
+            let a = Math.atan2(p.y - e.y, p.x - e.x),
+              speed = e.speed;
+            if (e.kind === 0) speed *= 0.7 + 0.5 * Math.sin(t * 7 + e.phase);
+            if (e.kind === 1) a += 0.55 * Math.sin(t * 2 + e.phase);
+            if (e.kind === 4) {
+              a = e.angle;
+              if (e.x < 30 || e.x > 3170 || e.y < 30 || e.y > 3170)
+                e.angle = Math.atan2(p.y - e.y, p.x - e.x);
+            }
+            if (e.kind === 5)
+              a += Math.min(1.65, 160 / Math.max(1, dist(e, p)));
+            if (e === boss) {
+              speed = t < e.weakUntil ? 0 : 42;
+              if (!warning && t >= e.next)
+                warning = { x: p.x, y: p.y, ox: e.x, oy: e.y, left: 1.3 };
+              if (warning) {
+                speed = 0;
+                warning.left -= dt;
+                if (warning.left < Hunter.enemyAnim.leap) {
+                  const u = Hunter.blend(
+                    1 - warning.left / Hunter.enemyAnim.leap,
+                    1,
+                  );
+                  e.x = warning.ox + (warning.x - warning.ox) * u;
+                  e.y = warning.oy + (warning.y - warning.oy) * u;
+                  e.kx = e.ky = 0;
+                }
+                if (warning.left <= 0) {
+                  e.x = warning.x;
+                  e.y = warning.y;
+                  if (dist(e, p) < 110) hurt(16, e);
+                  warning = null;
+                  e.weakUntil = t + 0.8;
+                  e.next = t + 3.4;
+                  shake = 6;
+                  burst(e.x, e.y, 18);
+                }
+              }
+            }
+            e.x = clamp(e.x + (Math.cos(a) * speed + e.kx) * dt, 24, 3176);
+            e.y = clamp(e.y + (Math.sin(a) * speed + e.ky) * dt, 24, 3176);
+            e.kx *= 0.87;
+            e.ky *= 0.87;
+          }
+        grid.rebuild(mobs.items);
+        for (const e of grid.near(p.x, p.y, 68))
+          if (dist(p, e) < (e === boss ? 68 : 38)) hurt(J.m4ae(t).hit, e);
+      }
+      function weapons(dt) {
+        hitClock -= dt;
+        wandClock -= dt;
+        if (hitClock <= 0) {
+          const targets = grid.near(p.x, p.y, 110 + 6 * p.hammer);
+          if (targets.length) {
+            const first = targets[0];
+            p.swingAngle = Math.atan2(first.y - p.y, first.x - p.x);
+            p.hammerPending = true;
+            swing = A.attack;
+            hitClock = 0.73;
+          }
+        }
+        if (p.hammerPending && swing <= A.attack * 0.52) {
+          p.hammerPending = false;
+          const targets = grid.near(p.x, p.y, 110 + 6 * p.hammer);
+          if (targets.length) {
+            effects.take({
+              kind: "impact",
+              x: targets[0].x,
+              y: targets[0].y + 16,
+              life: 0.32,
+              total: 0.32,
+            });
+            for (const enemy of targets) hit(enemy, "hammer");
+            freeze = Math.max(freeze, 1);
+            shake = Math.max(shake, 1.5);
+          }
+        }
+        if (p.wand && wandClock <= 0) {
+          const near = grid
+            .near(p.x, p.y, 490)
+            .sort((a, b) => dist(a, p) - dist(b, p));
+          if (near.length) {
+            shots.take({ kind: -1, x: p.x, y: p.y, life: 2 });
+            wandClock = 0.65;
+          }
+        }
+        // 四种武器独立计时，共用有限的弹道和效果槽。
+        for (let i = 0; i < 4; i++) {
+          if (!p.powers[i] || (p.cooldown[i] -= dt) > 0) continue;
+          const center =
+            i === 2
+              ? { x: p.x + Math.cos(t * 4) * 87, y: p.y + Math.sin(t * 4) * 57 }
+              : p;
+          const targets = grid
+            .near(center.x, center.y, i === 2 ? 52 : 460)
+            .filter((e) => e.on)
+            .sort((a, b) => dist(p, a) - dist(p, b));
+          if (!targets.length) continue;
+          const target = targets[0],
+            angle = Math.atan2(target.y - p.y, target.x - p.x);
+          p.cooldown[i] = Math.max(
+            0.36,
+            [1.1, 1.4, 0.8, 1.7][i] - 0.08 * p.powers[i],
+          );
+          sound(["bow", "bubble", "shield", "bolt"][i]);
+          if (i < 2)
+            shots.take({
+              kind: i,
+              x: p.x,
+              y: p.y,
+              vx: Math.cos(angle) * 460,
+              vy: Math.sin(angle) * 460,
+              life: 1.15,
+              seen: new Set(),
+            });
+          else if (i === 2) {
+            for (const enemy of targets) hit(enemy, "shield");
+            burst(target.x, target.y, 6);
+          } else {
+            let from = p,
+              to = target;
+            const visited = new Set();
+            for (let j = 0; to && j < 3; j++) {
+              effects.take({
+                kind: "bolt",
+                x: from.x,
+                y: from.y,
+                tx: to.x,
+                ty: to.y,
+                life: 0.18,
+                total: 0.18,
+              });
+              visited.add(to);
+              hit(to, "bolt");
+              burst(to.x, to.y, 5);
+              from = to;
+              to = grid
+                .near(from.x, from.y, 145)
+                .find((e) => e.on && !visited.has(e));
+            }
+          }
+        }
+        for (const s of shots.items)
+          if (s.on) {
+            if (s.kind >= 0) {
+              s.x += s.vx * dt;
+              s.y += s.vy * dt;
+              s.life -= dt;
+              for (const target of grid.near(s.x, s.y, 32)) {
+                if (!target.on || s.seen.has(target)) continue;
+                if (s.kind === 0) {
+                  s.seen.add(target);
+                  hit(target, "bow");
+                  burst(target.x, target.y, 4);
+                } else {
+                  effects.take({
+                    kind: "pop",
+                    x: target.x,
+                    y: target.y,
+                    life: 0.32,
+                    total: 0.32,
+                  });
+                  for (const e of grid.near(target.x, target.y, 90))
+                    hit(e, "bubble");
+                  burst(target.x, target.y, 16);
+                  s.on = false;
+                  break;
+                }
+              }
+              if (s.life <= 0) s.on = false;
+              continue;
+            }
+            const e = grid
+              .near(s.x, s.y, 500)
+              .sort((a, b) => dist(a, s) - dist(b, s))[0];
+            s.life -= dt;
+            if (state !== "play") return;
+            if (!e || s.life < 0) {
+              s.on = false;
+              continue;
+            }
+            const target = { x: e.x, y: e.y - (e === boss ? 65 : 0) },
+              d = dist(s, target);
+            if (d < 16) {
+              s.on = false;
+              hit(e, "wand");
+            } else {
+              s.dx = (target.x - s.x) / d;
+              s.dy = (target.y - s.y) / d;
+              s.x += ((target.x - s.x) / d) * 390 * dt;
+              s.y += ((target.y - s.y) / d) * 390 * dt;
+            }
+          }
+      }
+      function pickups(dt) {
+        for (const d of drops.items)
+          if (d.on) {
+            d.age += dt;
+            if (d.age < 0.24) continue;
+            if (!d.fly && dist(d, p) < p.magnet) {
+              d.fly = 0.001;
+              d.ox = d.x;
+              d.oy = d.y;
+            }
+            if (d.fly) {
+              d.fly += dt;
+              const u = Math.min(1, (d.fly / 0.3) ** 2);
+              d.x = d.ox + (p.x - d.ox) * u;
+              d.y = d.oy + (p.y - d.oy) * u;
+              if (u === 1) {
+                d.on = false;
+                p.count++;
+                chain = t - lastPickup < 0.65 ? chain + 1 : 0;
+                lastPickup = t;
+                if (d.type === "candy") {
+                  p.hp = Math.min(p.max, p.hp + 18);
+                  label(p.x, p.y - 50, "💚 +18");
+                } else if (d.type === "chest") {
+                  p.xp += 4;
+                  label(p.x, p.y - 50, "🎁 +4 ⭐", true);
+                  burst(p.x, p.y, 22);
+                } else p.xp++;
+                sound(d.type === "chest" ? "chest" : "pickup");
+                if (free) loot(rand(80, 3120), rand(80, 3120), "star");
+              }
+            }
+          }
+        upgrade();
+      }
+      function updateChoice() {
+        if (p.balls.length) {
+          const touched = !dizzy && p.balls.find((ball) => dist(ball, p) < 50);
+          const auto = Hunter.choiceExpired(t, p.choiceAt);
+          if (touched || auto) chooseBall(touched || p.balls[0], !touched);
+        }
+      }
+      function step(dt) {
+        if (state !== "play") return;
+        t += dt;
+        if (p.winAt && t >= p.winAt) {
+          finish(true);
+          return;
+        }
+        for (const fx of effects.items)
+          if (fx.on && (fx.life -= dt) <= 0) {
+            if (fx.kind === "death") burst(fx.x, fx.y, 10);
+            fx.on = false;
+          }
+        p.px = p.x;
+        p.py = p.y;
+        guard = Math.max(0, guard - dt);
+        swing = Math.max(0, swing - dt);
+        if (!free && !p.winAt && t >= 240) {
+          finish(false);
+          return;
+        }
+        if (dizzy) {
+          dizzy = Math.max(0, dizzy - dt);
+          if (!dizzy) {
+            p.x = p.px = p.y = p.py = 1600;
+            p.hp = p.max;
+            cam.x = cam.y = 1600;
+            guard = 2;
+            warning = null;
+            for (const e of mobs.items)
+              if (e.on && dist(e, p) < 350) {
+                if (e === boss) {
+                  e.x += 400;
+                  e.next = t + 3;
+                } else e.on = false;
+              }
+          }
+        } else movePlayer(dt);
+        cam.x +=
+          (clamp(p.x + hero.vx * 0.16, W / 2, 3200 - W / 2) - cam.x) * 0.11;
+        cam.y +=
+          (clamp(p.y + hero.vy * 0.16, H / 2, 3200 - H / 2) - cam.y) * 0.11;
+        if (!free) {
+          if (t >= 210 && !boss && !p.winAt) enterBoss();
+          spawnClock -= dt;
+          if (spawnClock <= 0) {
+            const kind = Math.floor(
+              rand(0, Math.min(6, 1 + Math.floor(t / 22))),
+            );
+            const elite = t >= eliteAt && !boss;
+            const e = spawn(elite ? (eliteAt % 2 ? 8 : 7) : kind);
+            if (elite && e) {
+              e.hp *= 2;
+              e.max = e.hp;
+              eliteAt += 35;
+            }
+            if (e && e.kind === 3) {
+              spawn(kind, e.x + 25, e.y);
+              spawn(kind, e.x, e.y + 25);
+            }
+            spawnClock = 1 / J.m4ae(t).rate;
+          }
+          updateMobs(dt);
+          if (!dizzy) weapons(dt);
+        }
+        Hunter.animate(hero, p.speed, swing, dizzy, dt);
+        const zone = Hunter.zone(p.y);
+        if (zone !== lastZone) {
+          const area = Hunter.MAP.zones[zone];
+          $("mini").style.setProperty("--zone", area.color);
+          $("badge").textContent = area.icon;
+          $("region").textContent = area.icon + " " + area.name;
+          $("region").hidden = false;
+          regionUntil = t + 2;
+          // 给区域名称配音预留独立点位，静音时不派发。
+          if (!saved.muted)
+            window.dispatchEvent(
+              new CustomEvent("hunter-region-voice", { detail: area }),
+            );
+          lastZone = zone;
+        }
+        if (t >= regionUntil) $("region").hidden = true;
+        if (!stress && state === "play") updateChoice();
+        if (!dizzy && !stress && state === "play") pickups(dt);
+        if (Math.floor(t * 10) !== Math.floor((t - dt) * 10)) hud();
+      }
+      function hud() {
+        const left = Math.ceil(Math.max(0, (boss ? 240 : 210) - t));
+        $("stats").textContent =
+          (free
+            ? "🌿"
+            : (boss ? "🍮 " : "⏱ ") +
+              Math.floor(left / 60) +
+              ":" +
+              String(left % 60).padStart(2, "0")) +
+          "　🍭 " +
+          p.hammer +
+          (p.wand ? " 🪄 " + p.wand : "") +
+          "　✦ " +
+          p.kills;
+        $("health").max = p.max;
+        $("health").value = p.hp;
+        $("experience").max = Hunter.xp(p.level);
+        $("experience").value = p.xp;
+        $("hint").textContent =
+          t < 10
+            ? saved.tap
+              ? "👆 点地面出发"
+              : "👆 拖动左边出发"
+            : "⭐ " + p.count + "　Lv." + p.level;
+      }
+      canvas.onpointerdown = (e) => {
+        if (state !== "play" || dizzy || stick) return;
+        unlock();
+        if (saved.tap) {
+          goal = { x: cam.x + e.clientX - W / 2, y: cam.y + e.clientY - H / 2 };
+          return;
+        }
+        if (e.clientX > W / 2) return;
+        stick = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, dy: 0 };
+        canvas.setPointerCapture(e.pointerId);
+        $("joy").hidden = false;
+        $("joy").style.left = e.clientX + "px";
+        $("joy").style.top = e.clientY + "px";
+        $("joy").firstChild.style.transform = "none";
+      };
+      canvas.onpointermove = (e) => {
+        if (stick?.id !== e.pointerId) return;
+        let dx = e.clientX - stick.x,
+          dy = e.clientY - stick.y,
+          k = 48 / Math.max(48, Math.hypot(dx, dy));
+        stick.dx = dx * k;
+        stick.dy = dy * k;
+        $("joy").firstChild.style.transform =
+          "translate(" + stick.dx + "px," + stick.dy + "px)";
+      };
+      canvas.onpointerup =
+        canvas.onpointercancel =
+        canvas.onlostpointercapture =
+          (e) => {
+            if (stick?.id === e.pointerId) clearInput();
+          };
+      onkeydown = (e) => {
+        if (state === "play") {
+          if (e.key === "Escape") pause();
+          else keys.add(e.key);
+        }
+      };
+      onkeyup = (e) => keys.delete(e.key);
+      // 地表先烘焙到画布，重复的草纹、石板和树影无需每帧重画。
+      function ellipse(g, x, y, rx, ry, color) {
+        g.fillStyle = color;
+        g.beginPath();
+        g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+        g.fill();
+      }
+      function line(g, points, color, width) {
+        g.beginPath();
+        g.moveTo(...points[0]);
+        for (const pt of points.slice(1)) g.lineTo(...pt);
+        g.lineWidth = width;
+        g.strokeStyle = color;
+        g.lineCap = "round";
+        g.lineJoin = "round";
+        g.stroke();
+      }
+      function symbol(g, s, x, y, size) {
+        g.font = "900 " + size + "px system-ui";
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.fillText(s, x, y);
+      }
+      function star(g, x, y, r, color) {
+        g.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const a = (i * Math.PI) / 5 - Math.PI / 2,
+            l = i % 2 ? r * 0.49 : r;
+          g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
+        }
+        g.closePath();
+        g.fillStyle = color;
+        g.fill();
+      }
+      // 在满载时复用五种星屑贴图，避免每帧重复构建三百条星形路径。
+      const flakes = Object.fromEntries(
+        J.colors.map((color) => {
+          const tile = document.createElement("canvas");
+          tile.width = tile.height = 20;
+          star(tile.getContext("2d"), 10, 10, 9, color);
+          return [color, tile];
+        }),
+      );
+      const land = document.createElement("canvas");
+      land.width = land.height = 1600;
+      const scenery = [];
+      function paintLand() {
+        const g = land.getContext("2d");
+        g.scale(0.5, 0.5);
+        const grad = g.createLinearGradient(0, 0, 3200, 500);
+        ["#f1d9ad", "#d0dfcd", "#bdd7c9", "#b9e4da", "#e5d0ec"].forEach(
+          (s, i) => grad.addColorStop(i / 4, s),
+        );
+        g.fillStyle = grad;
+        g.fillRect(0, 0, 3200, 3200);
+        for (let y = 0; y < 3200; y += 72)
+          for (let x = 0; x < 3200; x += 72)
+            if ((x + y) % 144 === 0) {
+              g.fillStyle = "#ffffff10";
+              g.fillRect(x, y, 72, 72);
+            }
+        for (let i = 0; i < 2200; i++) {
+          const x = rand(0, 3200),
+            y = rand(0, 3200);
+          line(
+            g,
+            [
+              [x - 4, y - 4],
+              [x, y],
+              [x + 4, y - 7],
+            ],
+            "#78a86e50",
+            2,
+          );
+        }
+        const river = [],
+          path = [];
+        for (let x = 0; x <= 3220; x += 20) {
+          river.push([x, 1000 + 225 * Math.sin(x / 360)]);
+          path.push([x, 1630 + 95 * Math.sin((x - 1600) / 260)]);
+        }
+        line(g, river, "#8ec6b3", 112);
+        line(g, river, "#faefce", 100);
+        line(g, river, "#81d5d6", 90);
+        line(g, river, "#a2e4df", 74);
+        line(g, path, "#aac58f", 167);
+        line(g, path, "#ead6a6", 160);
+        line(g, path, "#f5e4bb", 150);
+        for (let i = 0; i < 210; i++) {
+          const x = rand(30, 3170),
+            y = 1630 + 95 * Math.sin((x - 1600) / 260) + rand(-62, 62);
+          ellipse(g, x, y, rand(4, 10), 3, "#ddc79d");
+        }
+        for (let i = 0; i < 290; i++) {
+          const x = rand(50, 3150),
+            y = rand(50, 3150);
+          if (
+            Math.abs(y - 1630 - 95 * Math.sin((x - 1600) / 260)) < 100 ||
+            Math.abs(y - 1000 - 225 * Math.sin(x / 360)) < 70
+          )
+            continue;
+          scenery.push({
+            x,
+            y,
+            kind: i % 5 === 0 ? 0 : i % 3 === 0 ? 1 : 2,
+            phase: i * 2.4,
+          });
+        }
+        // 高地的林荫带用冷色渐变，和明亮河谷形成明确的地形差异。
+        const shade = g.createLinearGradient(0, 2220, 0, 2900);
+        shade.addColorStop(0, "#607d8700");
+        shade.addColorStop(1, "#637f98aa");
+        g.fillStyle = shade;
+        g.fillRect(0, 2220, 3200, 980);
+        // 边界两根糖霜横杆，间隔的糖杖是围栏立柱。
+        g.strokeStyle = "#e8ac99";
+        g.lineWidth = 11;
+        g.strokeRect(14, 14, 3172, 3172);
+        for (let v = 22; v < 3200; v += 68)
+          for (const [x, y] of [
+            [v, 20],
+            [20, v],
+            [v, 3180],
+            [3180, v],
+          ]) {
+            line(
+              g,
+              [
+                [x, y - 13],
+                [x, y + 13],
+              ],
+              "#fff3cd",
+              12,
+            );
+            line(
+              g,
+              [
+                [x - 3, y - 4],
+                [x + 3, y - 1],
+              ],
+              "#e18492",
+              6,
+            );
+          }
+        // 营帐留在小径一侧，入口朝向出发点。
+        const x = 1460,
+          y = 1550;
+        ellipse(g, x, y + 5, 76, 16, "#75956955");
+        g.beginPath();
+        g.moveTo(x - 70, y);
+        g.lineTo(x - 8, y - 94);
+        g.lineTo(x + 72, y);
+        g.closePath();
+        g.fillStyle = "#ed9865";
+        g.fill();
+        g.strokeStyle = "#956446";
+        g.lineWidth = 5;
+        g.stroke();
+        g.beginPath();
+        g.moveTo(x - 52, y);
+        g.lineTo(x - 8, y - 80);
+        g.lineTo(x + 23, y);
+        g.fillStyle = "#ffdb8b";
+        g.fill();
+        g.beginPath();
+        g.moveTo(x - 35, y);
+        g.lineTo(x - 8, y - 51);
+        g.lineTo(x + 8, y);
+        g.fillStyle = "#986e51";
+        g.fill();
+      }
+      paintLand();
+      const mapBase = bakeMap(land, makeCanvas);
+      function drawMap(full) {
+        paintMap(
+          $(full ? "atlasCanvas" : "miniCanvas"),
+          mapBase,
+          {
+            p,
+            hero,
+            cam,
+            width: W,
+            height: H,
+            free,
+            boss,
+            time: t,
+            drops: drops.items,
+            mobs: mobs.items,
+          },
+          full,
+        );
+      }
+      function closeMap() {
+        $("atlas").hidden = true;
+        $("bar").inert = $("actions").inert = false;
+        play();
+        $("mini").focus();
+      }
+      $("mini").onclick = () => {
+        if (state !== "play") return;
+        clearInput();
+        $("bar").inert = $("actions").inert = true;
+        state = "map";
+        document.body.dataset.scene = state;
+        $("mapLegend").textContent = free ? "🏠　🎁　⭐" : "🏠　🎁　⭐　🟣　👑";
+        $("atlas").hidden = false;
+        drawMap(true);
+        $("closeAtlas").focus();
+      };
+      $("atlasMap").onclick = $("closeAtlas").onclick = closeMap;
+      $("atlas").onkeydown = (e) => {
+        if (e.key === "Escape") {
+          e.stopPropagation();
+          closeMap();
+        }
+      };
+
+      function actor(name, x, y, size, icon, flash = 0) {
+        const tile =
+          sprites[name] ||
+          (name.startsWith("hero") && (sprites.hero_idle || sprites.kid));
+        c.save();
+        c.translate(x, y);
+        if (flash) c.scale(1 + flash * 2, 1 - flash * 2);
+        if (tile) {
+          c.drawImage(tile, -size / 2, -size / 2, size, size);
+          if (flash && !saved.soft) {
+            c.globalAlpha = 0.85;
+            c.drawImage(
+              sprites[name + "_flash"] || tile,
+              -size / 2,
+              -size / 2,
+              size,
+              size,
+            );
+          }
+        } else {
+          ellipse(c, 0, 2, size * 0.39, size * 0.38, "#a86b64");
+          ellipse(c, 0, -1, size * 0.37, size * 0.36, "#ffce92");
+          symbol(c, icon, 0, -1, size * 0.61);
+        }
+        c.restore();
+      }
+      const pickupHalo = makeCanvas();
+      pickupHalo.width = pickupHalo.height = 96;
+      {
+        const g = pickupHalo.getContext("2d"),
+          halo = g.createRadialGradient(48, 48, 12, 48, 48, 48);
+        halo.addColorStop(0, "#fff1a1df");
+        halo.addColorStop(0.65, "#fff0ac77");
+        halo.addColorStop(1, "#fff2bb00");
+        g.fillStyle = halo;
+        g.fillRect(0, 0, 96, 96);
+      }
+      // 实心白边与深色细边保证在草地、河面和阴影上都有轮廓。
+      function paintPickup(x, y, type, icon) {
+        const ball = type === "ball",
+          r = ball ? 35 : 24;
+        ellipse(c, x, y + r, r * 0.7, 5, "#42617450");
+        c.save();
+        c.translate(x, y);
+        if (type === "chest") {
+          const beam = c.createLinearGradient(0, -95, 0, 15);
+          beam.addColorStop(0, "#ffda2000");
+          beam.addColorStop(
+            1,
+            dist(p, { x, y }) < 210 ? "#ffcf27df" : "#ffe16788",
+          );
+          c.fillStyle = beam;
+          c.fillRect(-16, -95, 32, 110);
+        }
+        const color = ball
+          ? "hsl(" + Math.floor((t * 55) % 360) + " 88% 54%)"
+          : "#ffbc19";
+        if (type === "star") c.rotate(0.22 * Math.sin(t * 1.6 + x));
+        const shape = (rad, tint) =>
+          type === "star"
+            ? star(c, 0, 0, rad, tint)
+            : ellipse(c, 0, 0, rad, rad, tint);
+        if (!saved.lowContrast) {
+          c.drawImage(pickupHalo, -r - 12, -r - 12, r * 2 + 24, r * 2 + 24);
+        }
+        shape(r + 4, "#835d5899");
+        shape(r + 2, "white");
+        shape(r - (saved.lowContrast ? 0 : 4), color);
+        if (ball) {
+          for (let i = 0; i < 6; i++) {
+            c.beginPath();
+            c.arc(
+              0,
+              0,
+              r + 5 + 2 * Math.sin(t * 4),
+              (i * Math.PI) / 3,
+              ((i + 1) * Math.PI) / 3,
+            );
+            c.strokeStyle = "hsl(" + i * 60 + " 80% 66%)";
+            c.lineWidth = 4;
+            c.stroke();
+          }
+        }
+        if (type === "star" && !saved.soft) {
+          const sweep = (t * 0.5 + x * 0.017) % 1;
+          if (sweep < 0.24) {
+            c.save();
+            c.clip();
+            c.rotate(-0.35);
+            c.fillStyle = "#fff9c787";
+            c.fillRect(-34 + sweep * 260, -32, 6, 64);
+            c.restore();
+          }
+        }
+        if (type === "star")
+          star(c, -5 + 4 * Math.sin(t * 2 + x), -5, 5, "#fff6ce");
+        else if (type === "chest") {
+          c.fillStyle = "#9b4532";
+          c.beginPath();
+          c.roundRect(-17, -13, 34, 27, 6);
+          c.fill();
+          c.fillStyle = "#e48b38";
+          c.beginPath();
+          c.roundRect(-16, -13, 32, 14, 5);
+          c.fill();
+          c.fillStyle = "#ffe193";
+          c.fillRect(-13, -12, 4, 25);
+          c.fillRect(9, -12, 4, 25);
+          c.fillRect(-17, -1, 34, 3);
+          c.fillRect(-3, -3, 7, 8);
+          c.fillStyle = "#935c37";
+          c.fillRect(-1, 0, 2, 3);
+        } else symbol(c, icon, 0, 0, ball ? 45 : 36);
+        if (!saved.lowContrast)
+          star(c, r * 0.72, -r * 0.66, 3 + 2 * Math.sin(t * 3 + x), "white");
+        c.restore();
+      }
+      // 地景只绘制视口内的小物，水波、花瓣与萤火都有固定数量。
+      function paintWorld(visible) {
+        for (const plant of scenery) {
+          if (!visible(plant.x, plant.y, 72)) continue;
+          const wave = Math.sin(t * 1.7 + plant.phase);
+          c.save();
+          c.translate(plant.x, plant.y);
+          c.rotate(wave * 0.065);
+          if (plant.kind === 0) {
+            line(
+              c,
+              [
+                [0, 0],
+                [0, -34],
+              ],
+              "#acaaa0",
+              5,
+            );
+            ellipse(c, 0, -42, 17, 17, "#b7b6cb");
+            c.beginPath();
+            c.arc(0, -42, 10, 0.4, 5.5);
+            c.strokeStyle = "#d8cfde";
+            c.lineWidth = 3;
+            c.stroke();
+          } else if (plant.kind === 1) {
+            ellipse(c, 0, -5, 4, 7, "#d3cfc5");
+            ellipse(c, 0, -12, 13, 7 + wave, "#bca6b8");
+          } else {
+            line(
+              c,
+              [
+                [-7, -6],
+                [0, 0],
+                [5, -10],
+              ],
+              "#98bba6",
+              2,
+            );
+            ellipse(c, 6, -10, 5, 4, "#d1bdd5");
+          }
+          c.restore();
+        }
+        for (
+          let x = Math.max(70, Math.floor((cam.x - W / 2) / 140) * 140);
+          x < cam.x + W / 2;
+          x += 140
+        ) {
+          const y = 1000 + 225 * Math.sin(x / 360);
+          if (!visible(x, y, 30)) continue;
+          c.beginPath();
+          c.ellipse(x, y, 13 + 3 * Math.sin(t * 2 + x), 4, 0, 0.1, 2.9);
+          c.strokeStyle = "#d0e9e4";
+          c.lineWidth = 2;
+          c.stroke();
+        }
+        if (saved.soft) return;
+        for (let i = 0; i < 16; i++) {
+          const x = cam.x - W / 2 + ((i * 197 + t * (4 + (i % 3))) % W);
+          const y =
+            cam.y -
+            H / 2 +
+            ((i * 137 + t * (3 + (i % 5))) % H) +
+            Math.sin(t + i) * 9;
+          if (i % 7 === 0) {
+            const wing = 2 + Math.abs(Math.sin(t * 9 + i)) * 3;
+            ellipse(c, x - wing, y, wing, 3, "#c3abcb");
+            ellipse(c, x + wing, y, wing, 3, "#d9c1cf");
+            continue;
+          }
+          ellipse(c, x, y, i % 3 ? 2 : 4, 2, i % 3 ? "#e7efd8aa" : "#d8b5cc99");
+        }
+      }
+      function render(alpha, dt) {
+        const px = (p.px ?? 1600) + ((p.x ?? 1600) - (p.px ?? 1600)) * alpha,
+          py = (p.py ?? 1600) + ((p.y ?? 1600) - (p.py ?? 1600)) * alpha;
+        c.save();
+        c.translate(W / 2, H / 2);
+        if (!saved.soft) {
+          if (!saved.noShake && shake > 0.1)
+            c.translate(rand(-shake, shake), rand(-shake, shake));
+          c.scale(1 + glow * 0.035, 1 + glow * 0.035);
+        }
+        c.translate(-cam.x, -cam.y);
+        // 仅采样视口地面，边缘多留屏震余量。
+        const left = Math.max(0, cam.x - W / 2 - 10),
+          top = Math.max(0, cam.y - H / 2 - 10);
+        const width = Math.min(3200 - left, W + 20),
+          height = Math.min(3200 - top, H + 20);
+        c.drawImage(
+          land,
+          left / 2,
+          top / 2,
+          width / 2,
+          height / 2,
+          left,
+          top,
+          width,
+          height,
+        );
+        const visible = (x, y, r = 90) =>
+          Math.abs(x - cam.x) < W / 2 + r && Math.abs(y - cam.y) < H / 2 + r;
+        paintWorld(visible);
+        for (const d of drops.items)
+          if (d.on && visible(d.x, d.y)) {
+            const y = d.y + Math.sin(t * 3 + d.x) * 3;
+            if (d.fly)
+              line(
+                c,
+                [
+                  [d.x, d.y],
+                  [d.x + (d.ox - d.x) * 0.2, d.y + (d.oy - d.y) * 0.2],
+                ],
+                "#fff4ba",
+                5,
+              );
+            paintPickup(d.x, y, d.type, d.type === "candy" ? "🍬" : "🎁");
+          }
+        for (const ball of p.balls || []) {
+          paintPickup(
+            ball.x,
+            ball.y + 4 * Math.sin(t * 3),
+            "ball",
+            upgrades[ball.id][0],
+          );
+          if (p.guide && ball === p.balls[0])
+            symbol(c, "👇", ball.x, ball.y - 54 + 6 * Math.sin(t * 4), 32);
+        }
+        for (const d of [...drops.items, ...(p.balls || [])]) {
+          if (
+            !(d.id != null || (d.on && d.type === "chest")) ||
+            dist(d, p) > 1100 ||
+            visible(d.x, d.y, -24)
+          )
+            continue;
+          const dx = d.x - cam.x,
+            dy = d.y - cam.y,
+            k = Math.min(
+              (W / 2 - 35) / Math.abs(dx),
+              (H / 2 - 38) / Math.abs(dy),
+            );
+          c.save();
+          c.translate(cam.x + dx * k, cam.y + dy * k);
+          c.rotate(Math.atan2(dy, dx));
+          c.fillStyle = d.id != null ? "#a143cf" : "#d38b12";
+          c.beginPath();
+          c.moveTo(14, 0);
+          c.lineTo(-10, -10);
+          c.lineTo(-10, 10);
+          c.closePath();
+          c.fill();
+          c.restore();
+        }
+        if (warning) {
+          ellipse(c, warning.x, warning.y, 110, 100, "#ed527e55");
+          c.strokeStyle = "#d55667";
+          c.lineWidth = 5;
+          c.stroke();
+          ellipse(
+            c,
+            warning.x,
+            warning.y,
+            110 * (1 - warning.left / 1.3),
+            95 * (1 - warning.left / 1.3),
+            "#f8758244",
+          );
+        }
+        for (const e of mobs.items)
+          if (e.on && visible(e.x, e.y, 130)) {
+            const x = e.px + (e.x - e.px) * alpha,
+              y = e.py + (e.y - e.py) * alpha,
+              size = e === boss ? 220 : 65;
+            ellipse(
+              c,
+              x,
+              y + size * 0.33,
+              size * 0.32,
+              size * 0.09,
+              "#557e6150",
+            );
+            c.save();
+            c.translate(x, y);
+            if (e === boss && warning && warning.left < Hunter.enemyAnim.leap)
+              c.translate(
+                0,
+                -Hunter.enemyAnim.leapHeight *
+                  Math.sin((Math.PI * warning.left) / Hunter.enemyAnim.leap),
+              );
+            const beat = Math.sin(t * Hunter.enemyAnim.rate[e.kind] + e.phase);
+            const enter = Math.max(
+              0,
+              1 - (t - (e.born ?? t)) / Hunter.enemyAnim.entrance,
+            );
+            c.translate(0, (e.kind % 2 ? -42 : 22) * enter * enter);
+            const squash =
+              beat * Hunter.enemyAnim.squash[e.kind] +
+              (e === boss && warning?.left > 0.3 ? 0.12 : 0);
+            c.scale(1 + squash, 1 - squash);
+            c.rotate(
+              e.kind === 4 ? t * 2 : beat * (e.kind === 2 ? 0.12 : 0.035),
+            );
+            actor(
+              "m_" + kinds[e.kind],
+              0,
+              -Math.abs(beat) * (e.kind === 3 ? 14 : 4),
+              size,
+              icons[e.kind],
+              e.flash,
+            );
+            if (e.flash > 0.02) symbol(c, "﹥﹤", 0, -6, size * 0.25);
+            if (e.kind === 5) {
+              const wing = 3 + Math.abs(beat) * 6;
+              ellipse(c, -13, -15, 9, wing, "#f1fdffad");
+              ellipse(c, 13, -15, 9, wing, "#f1fdffad");
+            }
+            if (e.kind === 1) ellipse(c, beat * 5, 22, 9, 8, "#d7c6f499");
+            if (e.kind % 3 === 2 && enter > 0)
+              star(c, 17, -16, enter * 12, "#fff8da");
+            c.restore();
+            if (e === boss) {
+              symbol(c, e.weakUntil > t ? "💫" : "🍒", x, y - 69, 32);
+              line(
+                c,
+                [
+                  [x - 59, y - 111],
+                  [x + 59, y - 111],
+                ],
+                "#71575f",
+                10,
+              );
+              line(
+                c,
+                [
+                  [x - 59, y - 111],
+                  [x - 59 + 118 * Math.max(0, e.hp / e.max), y - 111],
+                ],
+                "#fa95ad",
+                7,
+              );
+            }
+          }
+        for (const s of shots.items)
+          if (s.on) {
+            if (s.kind === 0) {
+              c.save();
+              c.translate(s.x, s.y);
+              c.rotate(Math.atan2(s.vy, s.vx));
+              for (let i = 0; i < 4; i++)
+                line(
+                  c,
+                  [
+                    [-31, i * 2 - 3],
+                    [3, i * 1.5 - 2],
+                  ],
+                  J.colors[i],
+                  3,
+                );
+              line(
+                c,
+                [
+                  [-2, -7],
+                  [8, 0],
+                  [-2, 7],
+                ],
+                "#fff9db",
+                4,
+              );
+              c.restore();
+            } else if (s.kind === 1) symbol(c, "🫧", s.x, s.y, 42);
+            else {
+              for (let i = 3; i >= 0; i--)
+                star(
+                  c,
+                  s.x - i * ((s.dx || 0) * 6),
+                  s.y - i * ((s.dy || 0) * 6),
+                  12 - i * 2,
+                  J.colors[i],
+                );
+            }
+          }
+        if (p.powers?.[2]) {
+          const angle = t * 4;
+          c.beginPath();
+          c.ellipse(px, py, 87, 57, 0, angle - 0.8, angle);
+          c.lineWidth = 6;
+          c.strokeStyle = "#ffb6d3aa";
+          c.stroke();
+          symbol(
+            c,
+            "🍬",
+            px + Math.cos(angle) * 87,
+            py + Math.sin(angle) * 57,
+            38,
+          );
+        }
+        for (const fx of effects.items)
+          if (fx.on) {
+            const u = 1 - fx.life / fx.total;
+            if (fx.kind === "spark") {
+              c.save();
+              c.globalAlpha = 1 - u;
+              c.fillStyle = "#f3e5ff";
+              for (let i = 0; i < 3; i++)
+                symbol(
+                  c,
+                  fx.icon,
+                  fx.x + Math.cos(i * 2.1) * 26 * u,
+                  fx.y + Math.sin(i * 2.1) * 26 * u,
+                  16 + 5 * u,
+                );
+              c.restore();
+            }
+            if (fx.kind === "foot") {
+              ellipse(
+                c,
+                fx.x,
+                fx.y,
+                4,
+                2,
+                "rgba(109,113,108," + 0.28 * (1 - u) + ")",
+              );
+              ellipse(
+                c,
+                fx.x + 5 * u,
+                fx.y - 11 * u,
+                3 - 2 * u,
+                2 - u,
+                "rgba(240,221,181," + (1 - u) + ")",
+              );
+            }
+            if (fx.kind === "impact" || fx.kind === "pop") {
+              c.save();
+              c.globalAlpha = 1 - u;
+              c.beginPath();
+              c.ellipse(fx.x, fx.y, 8 + u * 58, 6 + u * 27, 0, 0, Math.PI * 2);
+              c.lineWidth = 4 * (1 - u) + 1;
+              c.strokeStyle = fx.kind === "pop" ? "#85dfff" : "#ffcb77";
+              c.stroke();
+              for (let i = 0; i < 4; i++) {
+                const a = i * 1.57 + 0.5;
+                if (fx.kind === "impact")
+                  line(
+                    c,
+                    [
+                      [fx.x + Math.cos(a) * 10, fx.y + Math.sin(a) * 5],
+                      [
+                        fx.x + Math.cos(a + 0.25) * 28,
+                        fx.y + Math.sin(a + 0.25) * 13,
+                      ],
+                      [fx.x + Math.cos(a) * 40, fx.y + Math.sin(a) * 20],
+                    ],
+                    "#bd9a81",
+                    2,
+                  );
+                star(
+                  c,
+                  fx.x + Math.cos(a) * u * 48,
+                  fx.y + Math.sin(a) * u * 22,
+                  5 * (1 - u),
+                  "white",
+                );
+              }
+              c.restore();
+            }
+            if (fx.kind === "bolt")
+              line(
+                c,
+                [
+                  [fx.x, fx.y],
+                  [(fx.x + fx.tx) / 2 + 8, (fx.y + fx.ty) / 2 - 12],
+                  [fx.tx, fx.ty],
+                ],
+                "#8969ff",
+                5,
+              );
+            if (fx.kind === "merge")
+              star(
+                c,
+                fx.x + (fx.tx - fx.x) * u,
+                fx.y + (fx.ty - fx.y) * u,
+                10,
+                "#fff3a1",
+              );
+            if (fx.kind === "death") {
+              c.save();
+              c.translate(fx.x, fx.y - 18 * Math.sin(u * Math.PI));
+              c.rotate(u * u * 3);
+              c.scale(1 - u * 0.8, 1 - u * 0.8);
+              actor(
+                "m_" + kinds[fx.mob],
+                0,
+                0,
+                fx.mob === 9 ? 220 : 65,
+                icons[fx.mob],
+              );
+              symbol(c, "🌟🌟", 0, -6, 18);
+              c.restore();
+            }
+          }
+        const [action, frame] = Hunter.frame(hero.state, hero.age, hero.phase);
+        const sheet = sheets[action];
+        if (sheet) {
+          const cols = sheet.width / 160;
+          ellipse(c, px, py + 42, 31, 7, "#52675d44");
+          c.save();
+          c.translate(px, py + 48 - hero.pose[1]);
+          c.scale(hero.flip, 1);
+          c.rotate(hero.lean);
+          c.drawImage(
+            sheet,
+            (frame % cols) * 160,
+            Math.floor(frame / cols) * 160,
+            160,
+            160,
+            -A.size / 2,
+            -A.size,
+            A.size,
+            A.size,
+          );
+          c.restore();
+        } else if (heroLayers.hero_idle || heroLayers.kid)
+          paintHero(c, hero, heroLayers, px, py, saved.soft);
+        else actor("hero_idle", px, py, A.size, "🧢");
+        if (swing) {
+          const u = 1 - swing / A.attack;
+          const a = (p.swingAngle || 0) - 1.5 + Hunter.blend(u, 1) * 2.6;
+          c.beginPath();
+          c.moveTo(px, py);
+          c.arc(px, py, 94, a - 1.2, a);
+          c.closePath();
+          c.fillStyle = "#ffd79339";
+          c.fill();
+          c.beginPath();
+          c.arc(px, py, 94, a - 2, a);
+          c.strokeStyle = "#fff8cbcc";
+          c.lineWidth = 12;
+          c.stroke();
+          symbol(c, "🍭", px + 92 * Math.cos(a), py + 92 * Math.sin(a), 48);
+        }
+        if (glow > 0.01) {
+          c.globalAlpha = glow;
+          for (let i = 0; i < 4; i++) {
+            ellipse(c, px, py + 38, 50 + i * 8, 12 + i * 3, J.colors[i] + "55");
+          }
+          const g = c.createLinearGradient(0, py - 160, 0, py + 30);
+          g.addColorStop(0, "#fffbe000");
+          g.addColorStop(1, "#fff9b8bb");
+          c.fillStyle = g;
+          c.fillRect(px - 42, py - 160, 84, 190);
+          c.globalAlpha = 1;
+        }
+        if (dizzy) {
+          for (let i = 0; i < 3; i++) {
+            const a = t * 5 + i * 2.1;
+            star(
+              c,
+              px + 32 * Math.cos(a),
+              py - 48 + 8 * Math.sin(a),
+              8,
+              "#ffe775",
+            );
+          }
+        }
+        for (const v of particles.items)
+          if (v.on) {
+            v.life -= dt;
+            if (v.life <= 0 && !stress) {
+              v.on = false;
+              continue;
+            }
+            v.x += v.vx * dt;
+            v.y += v.vy * dt;
+            v.vy += 130 * dt;
+            c.drawImage(
+              flakes[v.color],
+              v.x - v.r,
+              v.y - v.r,
+              v.r * 2,
+              v.r * 2,
+            );
+          }
+        for (const v of labels.items)
+          if (v.on) {
+            v.life -= dt;
+            if (v.life <= 0) {
+              v.on = false;
+              continue;
+            }
+            c.save();
+            c.globalAlpha = Math.min(1, v.life * 5);
+            v.y -= 55 * dt;
+            const age = (v.crit ? 0.8 : 0.55) - v.life;
+            const bounce = 1 + 0.28 * Math.sin(age * 18) * Math.exp(-age * 7);
+            c.font =
+              "1000 " +
+              Math.round((v.crit ? 45 : 30) * bounce) +
+              "px system-ui";
+            c.textAlign = "center";
+            c.lineWidth = 5;
+            c.strokeStyle = "#765347";
+            c.strokeText(v.msg, v.x, v.y);
+            c.fillStyle = v.crit ? "#ffdf54" : "white";
+            c.fillText(v.msg, v.x, v.y);
+            if (v.crit)
+              for (let i = 0; i < 5; i++)
+                star(
+                  c,
+                  v.x + 38 * Math.cos(i * 1.26),
+                  v.y + 27 * Math.sin(i * 1.26),
+                  4,
+                  "#ffe479",
+                );
+            c.restore();
+          }
+        c.restore();
+        if (dizzy) {
+          c.fillStyle = "#34315330";
+          c.fillRect(0, 0, W, H);
+        }
+      }
+      function stressFill() {
+        for (const v of particles.items) if (v.on && v.life <= 0) v.on = false;
+        // 压测时滚出视口的甜甜圈也要补回，否则实体数会高于实际绘制数。
+        for (const e of mobs.items) {
+          if (
+            e.on &&
+            (Math.abs(e.x - cam.x) > W / 2 - 40 ||
+              Math.abs(e.y - cam.y) > H / 2 - 40)
+          )
+            e.on = false;
+        }
+        while (mobs.count() < J.maxEnemies)
+          spawn(
+            Math.floor(rand(0, 6)),
+            cam.x + rand(-W * 0.39, W * 0.39),
+            cam.y + rand(-H * 0.37, H * 0.37),
+          );
+        J.burst(particles, p.x, p.y, 300 - particles.count(), 300);
+      }
+      let qaHold = false;
+      let last = 0,
+        acc = 0;
+      function loop(now) {
+        const ms = last ? now - last : 16.67;
+        last = now;
+        if (qaHold) {
+          requestAnimationFrame(loop);
+          return;
+        }
+        const dt = Math.min(ms / 1000, 0.08);
+        if (state === "play") {
+          frames.push(ms);
+          if (frames.length > 600) frames.shift();
+          slow = ms > 20 ? slow + 1 : Math.max(0, slow - 1);
+          limit = slow >= 30 ? 110 : 300;
+        }
+        if (freeze > 0) {
+          freeze--;
+          acc = 0;
+        } else {
+          acc += dt;
+          while (acc >= 1 / 60) {
+            step(1 / 60);
+            acc -= 1 / 60;
+          }
+        }
+        if (stress && state === "play") stressFill();
+        render(
+          state === "play" ? acc * 60 : 1,
+          state === "map" || state === "pause" ? 0 : dt,
+        );
+        if (state === "play" && now >= nextMap) {
+          drawMap(false);
+          nextMap = now + 1000 / Hunter.MAP.hz;
+        }
+        shake = Math.max(0, shake - dt * 16);
+        glow = Math.max(0, glow - dt * 1.5);
+        requestAnimationFrame(loop);
+      }
+      if (qa)
+        window.__hunterQA = {
+          hold(name) {
+            if (state !== "play" || hero.state !== name || hero.age < 0.05)
+              return false;
+            qaHold = true;
+            return true;
+          },
+          release() {
+            qaHold = false;
+          },
+          attack() {
+            spawn(0, p.x + 76, p.y);
+            hitClock = 0;
+          },
+          boss() {
+            t = 210;
+            enterBoss();
+          },
+          xp(n = Hunter.xp(p.level)) {
+            p.xp += n;
+            upgrade();
+          },
+          stress() {
+            start(false);
+            stress = true;
+            p.powers.fill(1);
+            p.wand = 1;
+            drops.clear();
+            stressFill();
+            frames = [];
+          },
+          dizzy() {
+            guard = 0;
+            hurt(999);
+          },
+          setTime(seconds) {
+            t = seconds;
+          },
+          stats() {
+            return {
+              state,
+              animation: hero.state,
+              t,
+              x: p.x,
+              y: p.y,
+              hp: p.hp,
+              dizzy,
+              kills: p.kills,
+              count: p.count,
+              level: p.level,
+              balls: p.balls.length,
+              free,
+              mobs: mobs.count(),
+              particles: particles.count(),
+              frames: frames.length,
+              averageMs:
+                frames.reduce((a, b) => a + b, 0) / Math.max(1, frames.length),
+              sprites: Object.keys(sprites),
+            };
+          },
+        };
+      home();
+      requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>

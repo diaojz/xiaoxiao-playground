@@ -6,12 +6,15 @@
   <title>快乐贪吃蛇 · 糖果乐园 v1.12.0</title>
 <link rel="icon" href="data:,">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * {
+    box-sizing: border-box; margin: 0; padding: 0;
+    user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;
+  }
   html, body { width: 100%; height: 100%; overflow: hidden; }
   body {
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
     background: #d7f0d0;
-    user-select: none;
   }
   #board, #game {
     display: block;
@@ -347,7 +350,7 @@
 
   .atlas-icon { display:inline-block; flex-shrink:0; vertical-align:middle; background-repeat:no-repeat; }
   /* 头像只加在玩家身上，圆边与浅色底衬保证小尺寸也能认出脸。 */
-  .kid-avatar { display:inline-block; flex-shrink:0; vertical-align:middle; border:2px solid #fff; border-radius:50%; background:#fff5e7 url('assets/ui/kid_avatar.png') center / 124% 106% no-repeat; box-shadow:0 1px 3px #965c7933; }
+  .kid-avatar { display:inline-block; flex-shrink:0; vertical-align:middle; border:2px solid #fff; border-radius:50%; background:#fff5e7 url('assets/ui/kid_avatar.png') center / 100% 100% no-repeat; box-shadow:0 1px 3px #965c7933; }
   .welcome-player { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:9px; color:#a34378; }
   .player-avatar-slot { display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; flex-shrink:0; }
   .cat-emojis { display:flex; flex-wrap:wrap; align-items:center; gap:4px; }
@@ -413,7 +416,7 @@
   .growth-hud{top:112px}
   @media(max-width:700px){.hud{left:8px;right:8px;top:70px;max-width:none;justify-content:center}.growth-hud{top:134px}.leaderboard{top:134px}}
   /* 触屏/窄屏精简布局：所有浮层缩小、半透明、只留关键信息，把视野还给棋盘 */
-  @media (max-width:900px), (pointer:coarse) {
+  @media (max-width:700px) {
     .collection-back { top:calc(6px + var(--safe-top)) !important; left:calc(6px + var(--safe-left)) !important; padding:3px 8px !important; font-size:12px !important; border-width:2px !important; opacity:.7; }
     .hud { top:calc(6px + var(--safe-top)) !important; left:calc(64px + var(--safe-left)) !important; font-size:13px !important; gap:6px !important; padding:3px 8px !important; border-width:2px !important; border-radius:18px !important; box-shadow:none !important; opacity:.78; }
     .hud .ui-icon { width:18px !important; height:18px !important; }
@@ -447,6 +450,67 @@
   .info-emoji { display:inline-block; font-size:26px; animation:skill-ready 1s ease-in-out infinite alternate; }
   @media (min-width:901px) and (pointer:fine) { .skill-overflow.hidden,.skill-overflow { display:flex; right:220px; bottom:85px; background:transparent; box-shadow:none; } .skill-more { display:none; } }
   @media (max-width:900px), (pointer:coarse) { .skill-btn { opacity:.82; } .skill-name { font-size:8px; } }
+  /* 平板保留全屏糖果背景，横屏将状态与操作放在棋盘两侧。 */
+  body { background:#c7e8bd url('assets/bg_board.png') center/cover fixed; }
+  #board,#game { left:var(--field-left,0px); right:auto; }
+  .rotation-pause { position:fixed; inset:0; z-index:80; border:0; width:100%; height:100%; margin:0; max-width:none; max-height:none; background:#402b55b8; }
+  .rotation-pause[open] { display:grid; place-items:center; }
+  .rotation-pause button { min-height:76px; padding:12px 30px; background:#fff1a8; color:#64365c; border:3px solid #fff; border-radius:24px; font:900 28px system-ui,sans-serif; }
+  @media(min-width:701px) {
+    :root { --left:calc(12px + var(--safe-left)); --right:calc(12px + var(--safe-right)); --top:calc(12px + var(--safe-top)); --bottom:calc(12px + var(--safe-bottom)); }
+    .overlay { padding:max(88px,var(--top)) var(--right) var(--bottom) var(--left); gap:12px 24px; grid-template-rows:auto auto auto auto; align-items:center; overflow:auto; }
+    .overlay .hero-art { height:min(72dvh,800px); }
+    .overlay h1 { min-height:92px; font-size:clamp(36px,5vmin,58px); }
+    .overlay p,.skin-picker-label,.skin-name { font-size:20px; }
+    .overlay p { line-height:1.4; }
+    .skin { width:88px; min-height:88px; }
+    .skin .swatch { width:38px; height:38px; }
+    .collection-back,.corner-btn,.game-tools button,.hud button,.ammo-slot,.ammo-more,.turn-btn,.skill-more,.dex-panel button { min-width:64px; min-height:64px; }
+    .collection-back,.corner-btn,.hud,.hud button,.growth-hud,.leaderboard h3,.leaderboard .row,.ammo-label,.ammo-more,.trail { font-size:20px; }
+    .collection-back { left:var(--left); top:var(--top); }
+    .game-tools { top:var(--top); right:var(--right); }
+    .hud { left:var(--left); top:calc(var(--top) + 76px); right:auto; max-width:none; gap:8px; }
+    .growth-hud { left:var(--left); top:calc(var(--top) + 174px); }
+    .leaderboard { right:var(--right); top:calc(var(--top) + 76px); min-width:170px; max-width:205px; }
+    .corner-btns { left:var(--left); bottom:var(--bottom); }
+    .ammo-belt { left:var(--left); bottom:calc(var(--bottom) + 78px); right:401px; }
+    .ammo-slot .ammo-num,.ammo-slot .ammo-lv,.fire-count { font-size:16px; }
+    .combat-controls { transform:none; right:var(--right); bottom:var(--bottom); }
+    .turn-btn { right:308px; }
+    .spore-btn { right:308px !important; bottom:86px !important; }
+    .skill-more { right:230px; }
+    .skill-overflow { right:227px; bottom:90px; }
+    .skill-name { font-size:20px; }
+    .dex-panel { padding-bottom:max(20px,var(--safe-bottom)); }
+    .dex-panel :is(button,.cat-name,.cat-score),.candy-toast,.candy-toast small { font-size:20px; }
+    .dex-panel .trail { min-width:64px; min-height:64px; }
+    .skill-more { display:grid; }
+    .skill-overflow.hidden { display:none; }
+    .skill-overflow { background:#ecf5ffee; max-height:min(58dvh,500px); overflow:auto; padding-bottom:20px; }
+    .combat-controls .skill-btn small { pointer-events:none; }
+    .wide { --rail-content:calc(var(--rail) - 24px - max(var(--safe-left),var(--safe-right))); }
+    .wide .hud { width:var(--rail-content); display:grid; }
+    .wide .growth-hud { top:calc(var(--top) + 250px); width:var(--rail-content); min-width:0; }
+    .wide .leaderboard { width:var(--rail-content); min-width:0; max-width:none; }
+    .wide .corner-btns { width:var(--rail-content); display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .wide .corner-btn { justify-content:center; gap:2px; padding-inline:4px; }
+    .wide .corner-btn .ui-icon { width:24px; }
+    .wide .candy-toast { left:50%; translate:-50% 0; bottom:var(--bottom); max-width:calc(100% - 2 * var(--rail)); text-align:center; white-space:normal; }
+    .wide .ammo-belt { width:var(--rail-content); right:auto; bottom:calc(var(--bottom) + 146px); }
+    .wide .combat-controls { display:grid; width:var(--rail-content); height:auto; grid-template-columns:repeat(2,minmax(64px,1fr)); gap:17px 6px; justify-items:center; align-items:center; }
+    .wide .combat-controls button { position:relative; inset:auto !important; }
+    .wide .skill-overflow { right:0; bottom:100%; }
+    .wide .skill-more { grid-column:1/-1; }
+    .wide .fire-btn { grid-column:2; grid-row:4/6; width:80px; height:80px; }
+    .wide .fire-btn .ui-icon { width:64px; height:64px; }
+  }
+  @media(min-width:701px) and (orientation:portrait) {
+    .overlay { grid-template-columns:1fr; grid-template-rows:auto minmax(260px,1fr) auto auto auto; }
+    .overlay :is(h1,.hero-art,p,.skin-picker,#startBtn) { grid-column:1; grid-row:auto; }
+    .overlay h1 { grid-row:1; width:min(100%,590px); justify-self:center; }
+    .overlay .hero-art { grid-row:2; justify-self:center; width:min(100%,670px); height:100%; min-height:0; object-position:center 42%; }
+    .overlay p { grid-row:3; }
+  }
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><link rel="stylesheet" href="../app-compat.css"><script defer src="../app-compat.js"></script></head>
 <body>
@@ -511,6 +575,8 @@
     <button id="startBtn">开始游戏</button>
   </div>
 
+<dialog class="rotation-pause" id="rotationPause" aria-label="转屏后继续游戏"><button id="rotationResume">▶ 继续游戏</button></dialog>
+<script src="../shared/avatar.js"></script>
 <script>
 (function () {
   const canvas = document.getElementById('game');
@@ -522,7 +588,7 @@ let perfCount=0,perfSum=0,perfLast=0,perfPanel=null;
 if(perfParams.get('perf')==='1'){perfPanel=document.createElement('div');perfPanel.style.cssText='position:fixed;left:0;top:0;z-index:9999;background:#000b;color:white;font:12px monospace;padding:4px;pointer-events:none';document.body.appendChild(perfPanel);}
 function perfFrame(start, count){const cost=performance.now()-start;perfSum+=cost;perfCount++;if(perfCount>=60){const avg=perfSum/perfCount;if(!forcedQuality && true && avg>14){quality=quality==='high'?'mid':'low';}if(perfPanel)perfPanel.textContent=(perfLast?Math.round(1000*perfCount/(start-perfLast)):0)+' FPS · '+avg.toFixed(1)+' ms · 粒子 '+count+' · '+quality;perfLast=start;perfCount=0;perfSum=0;}}
 function perfDpr(width, height) {
-  const cap = quality === 'low' ? 1 : 1.5;
+  const cap = quality === 'low' ? 1 : 2;
   // 大屏的移动层按像素预算绘制，棋盘仍使用原有分辨率。
   const budget = quality === 'mid' ? Math.max(1, Math.sqrt(786432 / (width * height))) : cap;
   return Math.min(devicePixelRatio || 1, cap, budget);
@@ -568,9 +634,10 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   let kidAvatarReady = false;
   kidAvatar.onload = () => { kidAvatarReady = true; refreshStartAvatar(); if (snakes) updateHud(); };
   kidAvatar.onerror = () => { kidAvatarReady = false; refreshStartAvatar(); if (snakes) updateHud(); };
-  kidAvatar.src = 'assets/ui/kid_avatar.png';
+  const customAvatar = window.KidAvatar?.url();
+  kidAvatar.src = customAvatar || 'assets/ui/kid_avatar.png';
   function playerAvatarMarkup(size, fallback) {
-    return kidAvatarReady ? `<span class="kid-avatar" role="img" aria-label="你的头像" style="width:${size}px;height:${size}px"></span>` : fallback;
+    return kidAvatarReady ? `<span class="kid-avatar" role="img" aria-label="你的头像" style="width:${size}px;height:${size}px${customAvatar ? `;background-image:url('${customAvatar}');background-size:cover` : ''}"></span>` : fallback;
   }
   function refreshStartAvatar() {
     document.getElementById('startAvatar').innerHTML = playerAvatarMarkup(48, spriteMarkup('snake', 'player', 48, '你'));
@@ -586,6 +653,14 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   let avatarBitmap, avatarBitmapSize, avatarBitmapDpr;
   function drawKidAvatar(head) {
     if (!kidAvatarReady) return;
+    // 默认头像是「戴小蛇帽的 Q 版小脑袋」：直接盖在蛇头位置当蛇头，始终直立不旋转，不画名牌小三角。
+    if (!customAvatar) {
+      const size = CELL * (skillActive('magnet') ? 3.2 : 2.5);
+      ctx.save(); ctx.globalAlpha = 1; ctx.shadowColor = '#00000040'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+      ctx.drawImage(kidAvatar, head.x - size / 2, head.y - size * .56, size, size);
+      ctx.restore();
+      return;
+    }
     const tag = avatarPlacement(head, CELL, canvas.clientHeight, performance.now(), skillActive('magnet'));
     const {x,y,radius,below} = tag, size = radius * 2;
     ctx.save();ctx.globalAlpha = 1;ctx.shadowBlur=0;
@@ -607,7 +682,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
       g.fill();
       g.save();
       g.clip();
-      g.drawImage(kidAvatar, 50, 10, 412, 482, center - radius, center - radius, size, size);
+      g.drawImage(kidAvatar, center - radius, center - radius, size, size);
       g.restore();
       g.lineWidth = 3;
       g.strokeStyle = '#fff';
@@ -1423,15 +1498,33 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     addAmmoParticles(snakes[0].body[0], AMMO_FX[category], lv, 28);
   }
 
+  let landscape, fieldWidth, fieldHeight;
   function resize() {
-    paintedRing = -1;
     // visualViewport 比 innerWidth/innerHeight 更准：地址栏收起展开、
     // 浏览器动态 UI 变化时不会让画布比实际可见区域大，避免底部/顶部露出装不下的空白
     const vv = window.visualViewport;
-    const w = vv ? vv.width : window.innerWidth;
-    const h = vv ? vv.height : window.innerHeight;
-    DPR = perfDpr(w, h);
-    boardDpr = Math.min(devicePixelRatio || 1, quality === 'low' ? 1 : 1.5);
+    const width = Math.round(vv?.width || innerWidth);
+    const h = Math.round(vv?.height || innerHeight);
+    const next = width > h;
+    if (landscape !== undefined && next !== landscape && running && !paused) {
+      togglePause();
+      directionPointer = null;
+      for (const button of combatPointers.values()) button.classList.remove('pressed');
+      combatPointers.clear();
+      rotationPause.showModal();
+    }
+    landscape = next;
+    const wide = next && width >= 900;
+    const rail = wide ? Math.max(205, Math.round(width * .17)) : 0;
+    const w = width - 2 * rail;
+    document.body.classList.toggle('wide',wide);
+    document.body.style.setProperty('--rail',rail+'px');
+    document.body.style.setProperty('--field-left',rail+'px');
+    const nextDpr = perfDpr(w,h);
+    if (w === fieldWidth && h === fieldHeight && nextDpr === DPR) return;
+    fieldWidth = w; fieldHeight = h; paintedRing = -1;
+    DPR = nextDpr;
+    boardDpr = Math.min(devicePixelRatio || 1, quality === 'low' ? 1 : 2);
     boardWidth = Math.floor(w * boardDpr);
     boardHeight = Math.floor(h * boardDpr);
     canvas.width = w * DPR;
@@ -1439,8 +1532,8 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     canvas.style.width = board.style.width = w + 'px';
     canvas.style.height = board.style.height = h + 'px';
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    // 棋盘铺满整个视口：分数、排行榜、技能栏、弹药仓、操控按钮都是浮在上面的半透明层，被遮挡没关系。
-    CELL=Math.max(24,Math.min(52,Math.floor(Math.min(h/12,w/18))));
+    // 根据当前场地尺寸计算原有格子坐标。
+    CELL=Math.max(24,Math.min(52,Math.floor(Math.min(h/12,width/18))));
     FOOD_FONT_SIZE=(CELL-8)*1.5;
     COLS=Math.max(8,Math.floor(w/CELL));
     ROWS=Math.max(8,Math.floor(h/CELL));
@@ -1449,6 +1542,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     if(snakes)for(const snake of snakes)for(const key of ['body','prevBody'])if(snake[key])snake[key]=snake[key].map(p=>({x:Math.max(0,Math.min(COLS-1,p.x)),y:Math.max(0,Math.min(ROWS-1,p.y))}));
     if(foods)for(const food of foods){food.x=Math.max(0,Math.min(COLS-1,food.x));food.y=Math.max(0,Math.min(ROWS-1,food.y));}
     drawBoard();
+    if (running && paused) paintGame(pauseStartedAt,1,false);
   }
 
   function manhattan(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }
@@ -1943,7 +2037,9 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     board.height = boardHeight;
     const c = boardCtx;
     c.setTransform(boardDpr, 0, 0, boardDpr, 0, 0);
-    c.save();c.beginPath();c.rect(OFFX,OFFY,COLS*CELL,ROWS*CELL);c.clip();
+    c.fillStyle = '#c7e8bd';
+    c.fillRect(0,0,fieldWidth,fieldHeight);
+    c.save();
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
         c.fillStyle = (x + y) % 2 === 0 ? '#c7e8bd' : '#d2eec9';
@@ -1952,11 +2048,11 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     }
     // 用 cover 裁切铺满画布；逻辑格坐标与碰撞边界保持不变。
     if (imageReady) {
-      const w = COLS*CELL, h = ROWS*CELL;
+      const w = fieldWidth, h = fieldHeight;
       const scale = Math.max(w / boardImage.naturalWidth, h / boardImage.naturalHeight);
       const sw = w / scale, sh = h / scale;
       c.drawImage(boardImage, (boardImage.naturalWidth - sw) / 2,
-        (boardImage.naturalHeight - sh) / 2, sw, sh, OFFX, OFFY, w, h);
+        (boardImage.naturalHeight - sh) / 2, sw, sh, 0, 0, w, h);
     }
     c.strokeStyle = 'rgba(70,174,151,.35)';
     c.lineWidth = 6;
@@ -2434,7 +2530,10 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     if (coarsePointer.matches && now-lastPaintTime<33) { requestAnimationFrame(loop); return; }
     lastPaintTime=now;
     const t = Math.min(1, (now - lastStepTime) / speed);
-    const shaking = now < screenShakeUntil;
+    paintGame(now,t,now < screenShakeUntil);
+    perfFrame(perfStart,ammoFxParticles.length+trailParticles.length);requestAnimationFrame(loop);
+  }
+  function paintGame(now,t,shaking) {
     drawBoard();
     ctx.clearRect(0, 0, canvas.width / DPR, canvas.height / DPR);
     if (shaking) { ctx.save(); ctx.translate((Math.random()-.5)*7, (Math.random()-.5)*7); }
@@ -2448,7 +2547,6 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
     drawAmmoFx();
     renderSkills();
     if (shaking) ctx.restore();
-    perfFrame(perfStart,ammoFxParticles.length+trailParticles.length);requestAnimationFrame(loop);
   }
 
   // 原地掉头：整条蛇首尾互换，原尾巴变成新蛇头，方向沿尾巴朝向外延伸。
@@ -2497,6 +2595,7 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   function refreshStart(){ startBtn.textContent=save.run ? '继续游戏' : '开始游戏'; }
 
   document.addEventListener('keydown', (e) => {
+    if (rotationPause.open) return;
     const k = e.key.toLowerCase();
     if (k === 'p') { togglePause(); e.preventDefault(); return; }
     if (k === 'm') { toggleMute(); e.preventDefault(); return; }
@@ -2570,9 +2669,15 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   const cancelDirection=e=>{if(directionPointer&&directionPointer.id===e.pointerId)directionPointer=null;};
   canvas.addEventListener('pointercancel',cancelDirection);canvas.addEventListener('lostpointercapture',cancelDirection);
 
+  const rotationPause = document.getElementById('rotationPause');
+  document.getElementById('rotationResume').onclick = () => {
+    rotationPause.close();
+    if (running && paused) togglePause();
+  };
+  rotationPause.oncancel = event => event.preventDefault();
   window.addEventListener('resize', debouncedResize);
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', resize);
+    window.visualViewport.addEventListener('resize', debouncedResize);
   }
 
   // 切走标签页/切到别的窗口时松不到 keyup，别让加速卡死在开启状态
@@ -2582,8 +2687,9 @@ let resizeTimer;function debouncedResize(){clearTimeout(resizeTimer);resizeTimer
   function pickFoodAt(clientX, clientY) {
     if (!running || paused || !foods) return;
     const player = snakes[0];
-    const gx = (clientX - OFFX) / CELL;
-    const gy = (clientY - OFFY) / CELL;
+    const rect = canvas.getBoundingClientRect();
+    const gx = (clientX - rect.left - OFFX) / CELL;
+    const gy = (clientY - rect.top - OFFY) / CELL;
     let best = Infinity, pick = null;
     for (const f of foods) {
       const cx = f.x + 0.5, cy = f.y + 0.5;

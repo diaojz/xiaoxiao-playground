@@ -7,7 +7,7 @@
 <link rel="icon" href="data:,">
 <title>英语数字乐园</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 [hidden]{display:none!important}
 :root{--ink:#193e42;--paper:#fff9e9;--gap:clamp(8px,1.5vmin,18px);--head:calc(106px + env(safe-area-inset-top));color:var(--ink);font:750 clamp(16px,2.2vmin,24px)/1.25 ui-rounded,"PingFang SC",system-ui,sans-serif}
 html{scroll-padding-top:calc(var(--head) + 12px)}
@@ -189,6 +189,63 @@ body{overflow-x:clip}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important}}
 .park-icon{display:inline-grid;place-items:center;width:1em;height:1em;vertical-align:middle;line-height:1}
 .park-icon img{width:100%;height:100%;object-fit:contain;display:block}
+#rotation-pause{position:fixed;inset:0;margin:0;border:0;width:100%;height:var(--view-height,100dvh);max-width:none;max-height:none;background:#332a50bb}
+#rotation-pause[open]{display:grid;place-items:center}
+#rotation-resume{min-height:76px;min-width:64px;padding:12px 28px;border:3px solid white;border-radius:24px;background:#fff2b6;color:#432d53;font:900 28px system-ui,sans-serif}
+/* 数字岛按横竖屏分配空间，授课时把花朵和回放键移出练习区。 */
+.shell{min-height:var(--view-height,100dvh)}
+.modal{padding:max(var(--gap),env(safe-area-inset-top)) max(var(--gap),env(safe-area-inset-right)) max(var(--gap),env(safe-area-inset-bottom)) max(var(--gap),env(safe-area-inset-left))}
+@media(min-width:700px){
+ :root{font-size:clamp(20px,2.35vmin,27px)}
+ small,.panel li{font-size:clamp(20px,2.25vmin,26px)}
+ .top button,.top .button{min-width:80px;min-height:80px}
+ .panel{background:#fff9e9f5;padding:clamp(16px,2.5vmin,30px)}
+ .panel:has(.home-tools:empty){grid-template-rows:auto auto auto auto}
+ .home-tools:empty{display:none}
+ .map-title{margin:0}
+ .station .kid-wrap{pointer-events:none}
+ .station{min-height:64px;min-width:64px}
+ .word{font-size:clamp(20px,4.5vmin,54px)}
+}
+@media(min-width:700px) and (orientation:portrait){
+ .map{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+ .island{grid-template-rows:auto minmax(0,1fr)}
+ .map-title{justify-self:center;text-align:center;rotate:0}
+ .path{height:100%;padding:64px 8px 22px;row-gap:clamp(18px,4vh,65px)}
+ .station{width:100%;max-width:175px}
+ .map .panel{align-self:end;min-height:29dvh}
+ .map .panel h2{font-size:clamp(28px,3.8vmin,44px)}
+ .map .panel li{font-size:clamp(22px,3.05vmin,34px);align-items:center}
+ .map .panel ul{gap:clamp(10px,1.35dvh,20px)}
+ .map #daily,.map .home-tools button{font-size:clamp(22px,2.8vmin,32px)}
+ .map #daily{width:100%}
+ .listen-grid,.play-grid{grid-template-columns:1fr;align-content:space-evenly}
+}
+@media(min-width:950px) and (orientation:landscape){
+ .shell{--rail:clamp(132px,13vw,180px);--left:max(var(--gap),env(safe-area-inset-left));--right:max(var(--gap),env(safe-area-inset-right));--top:max(var(--gap),env(safe-area-inset-top));--bottom:max(var(--gap),env(safe-area-inset-bottom));padding:var(--top) var(--right) var(--bottom) calc(var(--left) + var(--rail) + var(--gap))}
+ .top{inset:var(--top) auto var(--bottom) var(--left);width:var(--rail);min-height:0;display:flex;flex-direction:column;justify-content:space-between;gap:10px;padding:12px 6px;border-radius:28px;background:#17494ef0}
+ .top nav{display:grid;justify-content:center}
+ .bank{width:100%}.bank progress{width:88%}
+ .bank-line{flex-direction:column}
+ #chest{position:static}
+ .map{grid-template-columns:minmax(0,1fr) minmax(280px,31%);align-items:stretch}
+ .path{padding:clamp(48px,9dvh,110px) 6px 24px;gap:clamp(8px,1.5vmin,18px)}
+ .home-tools button{min-width:74px}
+ .map .panel{align-self:center}
+ .map .panel h2{font-size:clamp(24px,2.4vw,32px);white-space:nowrap}
+ .shell:has(#road:not([hidden])){padding-right:calc(var(--right) + var(--rail) + var(--gap))}
+ main:has(~footer #road:not([hidden])){padding-bottom:0}
+ footer{inset:var(--top) var(--right) var(--bottom) auto;width:var(--rail);display:flex;flex-direction:column;justify-content:center;gap:16px}
+ footer button{width:100%;min-width:64px}
+ .listen-grid,.play-grid{grid-template-columns:minmax(0,28%) minmax(0,1fr)}
+ .objects,.pieces,.countdown{grid-template-columns:repeat(var(--columns,5),minmax(64px,1fr))}
+ .object,.piece,.countdown button{min-width:64px}
+ .object{font-size:clamp(40px,7vmin,82px)}
+ .word-card{min-width:64px}.number{font-size:clamp(70px,14vmin,160px)}
+ .rails>.art{width:9vmin;height:9vmin}.rail{min-width:64px;width:min(13vmin,28%)}
+ .balloon{width:min(25vmin,29%);min-width:64px}
+ .trophy-layout{grid-template-columns:minmax(0,1fr) minmax(220px,32%)}
+}
 </style>
 <script defer src="../shared/park-art.js"></script>
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="小小游乐园"><link rel="apple-touch-icon" href="../apple-touch-icon.png"><link rel="stylesheet" href="../app-compat.css"><script defer src="../app-compat.js"></script></head>
@@ -204,6 +261,7 @@ body{overflow-x:clip}
 <footer><button id="replay" class="replay" aria-label="再听一次"><span class="icon park-icon" data-park-art="icon_sound.png" aria-hidden="true">🔊</span><small>再听一次</small></button><div id="lesson-action" data-park-art-stage></div><button id="road" hidden aria-label="回到数字岛"><span class="icon park-icon" data-park-art="icon_map.png" aria-hidden="true">🏝️</span><small>数字岛</small></button></footer>
 </div>
 <div class="modal" id="reveal" role="dialog" aria-modal="true" aria-labelledby="reveal-title" hidden></div>
+<dialog id="rotation-pause" aria-label="转屏后继续"><button id="rotation-resume">▶ 继续玩</button></dialog>
 <div class="fx" aria-hidden="true"></div>
 <script src="../shared/rewards.js"></script>
 <script src="../shared/voice.js"></script>
@@ -411,6 +469,7 @@ async function say(sequence, card) {
   }
 }
 let screen = 'home';
+let cancelPieceDrag, rotationWait;
 let n = 1;
 let step = 1;
 let hits = 0;
@@ -449,6 +508,7 @@ function effect(symbols = ['⭐','✨','🎉']) {
 }
 function view(name, voice, sceneName = name) {
   epoch++;
+  cancelPieceDrag?.();
   stopMic?.();
   stopMic = null;
   stopAudio();
@@ -521,7 +581,7 @@ function draw(markup) {
   stage.innerHTML = markup;
   hydrate(stage);
 }
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms)).then(() => rotationWait);
 const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let counterFrame = 0;
 let shownFlowers = 0;
@@ -596,6 +656,7 @@ dialog.addEventListener('keydown', event => {
   if (event.key === 'Escape') $('#close-reveal')?.click();
 });
 function nextReveal() {
+  if (rotationWait) { void rotationWait.then(nextReveal); return; }
   if (!modalOpen && reveals.length) reveals.shift()();
 }
 function grantMedal(id, automatic = false) {
@@ -777,6 +838,7 @@ function showCount() {
     countTail = countTail.then(async () => {
       if (epoch !== current) return;
       await say([en(count)], $('.word-card'));
+      if (rotationWait) await rotationWait;
       if (epoch !== current) return;
       countPending--;
       if (count === n) {
@@ -786,6 +848,7 @@ function showCount() {
         prompt = [phrase(n)];
         // 至少播完本课短语，让孩子在进入下一步前听清动物和数量。
         await say(prompt, $('.word-card'));
+        if (rotationWait) await rotationWait;
         if (epoch !== current) return;
         $('#next').hidden = false;
         await say([flower]);
@@ -987,6 +1050,7 @@ async function passFollow(recognized = false, automatic = false, from = $('#mic'
   effect();
   prompt = [phrase(n), 'zh_good', flower];
   if (!automatic) await playPrompt();
+  if (rotationWait) await rotationWait;
   if (epoch !== current) return;
   showMini();
   nextReveal();
@@ -1012,6 +1076,7 @@ async function finishMini(from, sequence = [], automatic = false) {
   const flower = awardStep(from);
   effect();
   if (!automatic) await Promise.all([say([...sequence, flower]), wait(mini === 'train' ? 1200 : 420)]);
+  if (rotationWait) await rotationWait;
   if (epoch === current) showFinal();
 }
 
@@ -1044,6 +1109,7 @@ function wirePieces(accept) {
       pointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
       moved = false;
       piece.setPointerCapture(event.pointerId);
+      cancelPieceDrag = () => end(event, true);
     };
     piece.onpointermove = event => {
       if (pointer?.id !== event.pointerId) return;
@@ -1061,6 +1127,7 @@ function wirePieces(accept) {
       piece.style.cssText = '';
       targets.forEach(item => item.classList.remove('drop-ready'));
       pointer = null;
+      cancelPieceDrag = null;
       if (target) place(piece, target);
       else if (!cancelled && !moved) select(piece);
       else if (!cancelled) wrong(piece);
@@ -1209,6 +1276,7 @@ async function completeFinal(from, sequence = [], automatic = false, standalone 
   }
   effect(['🎉', '✨', '🎊']);
   if (!automatic) await Promise.all([say([...sequence, flower]), wait(mini === 'rocket' ? 1080 : 420)]);
+  if (rotationWait) await rotationWait;
   if (current !== epoch) return;
   if (standalone) {
     showHome(true);
@@ -1228,7 +1296,7 @@ function giveFriend(isNew, automatic) {
       '<span class="reward">' + save.stickers[n] + '</span>') + '</div></section>');
   const home = () => { if (epoch === current) { showHome(true); nextReveal(); } };
   if (automatic) {
-    setTimeout(home, 450);
+    void wait(450).then(home);
     return;
   }
   $('#lesson-action').innerHTML = '<button id="friend-home" class="next-btn">' + icon('🏝️', '继续玩') + '</button>';
@@ -1334,6 +1402,35 @@ window.addEventListener('storage', event => {
   updateBank();
   redrawRewards();
 });
+
+// 转屏时保留本轮 DOM 和状态，等待孩子点继续再提交异步步骤。
+const rotationPause = $('#rotation-pause');
+let landscape, resumeRotation;
+function fitViewport() {
+  const vv = window.visualViewport;
+  const width = Math.round(vv?.width || innerWidth);
+  const height = Math.round(vv?.height || innerHeight);
+  const next = width > height;
+  document.documentElement.style.setProperty('--view-height',height + 'px');
+  if (landscape !== undefined && next !== landscape && (screen !== 'home' || !$('#reveal').hidden) && !rotationPause.open) {
+    rotationWait = new Promise(resolve => { resumeRotation = resolve; });
+    cancelPieceDrag?.();
+    if (screen === 'follow' && mode === 'teaching') followCue++;
+    suspendAudio();
+    rotationPause.showModal();
+  }
+  landscape = next;
+}
+rotationPause.oncancel = event => event.preventDefault();
+$('#rotation-resume').onclick = () => {
+  rotationPause.close();
+  rotationWait = null;
+  resumeRotation();
+  if (screen === 'follow' && mode === 'teaching') void teach(epoch);
+};
+window.addEventListener('resize',fitViewport);
+window.visualViewport?.addEventListener('resize',fitViewport);
+fitViewport();
 
 showHome(true);
 if (qa) $('header a').search = '?qa';
